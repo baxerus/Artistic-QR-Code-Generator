@@ -107,44 +107,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INPUT-01 | TBD | Pending |
-| INPUT-02 | TBD | Pending |
-| INPUT-03 | TBD | Pending |
-| INPUT-04 | TBD | Pending |
-| CANVAS-01 | TBD | Pending |
-| CANVAS-02 | TBD | Pending |
-| CANVAS-03 | TBD | Pending |
-| CANVAS-04 | TBD | Pending |
-| CANVAS-05 | TBD | Pending |
-| OPT-01 | TBD | Pending |
-| OPT-02 | TBD | Pending |
-| OPT-03 | TBD | Pending |
-| OPT-04 | TBD | Pending |
-| OPT-05 | TBD | Pending |
-| OPT-06 | TBD | Pending |
-| OPT-07 | TBD | Pending |
-| OPT-08 | TBD | Pending |
-| QR-01 | TBD | Pending |
-| QR-02 | TBD | Pending |
-| QR-03 | TBD | Pending |
-| QR-04 | TBD | Pending |
-| RESULT-01 | TBD | Pending |
-| RESULT-02 | TBD | Pending |
-| RESULT-03 | TBD | Pending |
-| RESULT-04 | TBD | Pending |
-| OUTPUT-01 | TBD | Pending |
-| OUTPUT-02 | TBD | Pending |
-| OUTPUT-03 | TBD | Pending |
-| TECH-01 | TBD | Pending |
-| TECH-02 | TBD | Pending |
-| TECH-03 | TBD | Pending |
-| TECH-04 | TBD | Pending |
+| INPUT-01 | Phase 1 | Pending |
+| INPUT-02 | Phase 1 | Pending |
+| INPUT-03 | Phase 1 | Pending |
+| INPUT-04 | Phase 1 | Pending |
+| CANVAS-01 | Phase 2 | Pending |
+| CANVAS-02 | Phase 2 | Pending |
+| CANVAS-03 | Phase 2 | Pending |
+| CANVAS-04 | Phase 2 | Pending |
+| CANVAS-05 | Phase 2 | Pending |
+| OPT-01 | Phase 3 | Pending |
+| OPT-02 | Phase 3 | Pending |
+| OPT-03 | Phase 3 | Pending |
+| OPT-04 | Phase 3 | Pending |
+| OPT-05 | Phase 3 | Pending |
+| OPT-06 | Phase 3 | Pending |
+| OPT-07 | Phase 3 | Pending |
+| OPT-08 | Phase 3 | Pending |
+| QR-01 | Phase 1 | Pending |
+| QR-02 | Phase 2 | Pending |
+| QR-03 | Phase 2 | Pending |
+| QR-04 | Phase 2 | Pending |
+| RESULT-01 | Phase 4 | Pending |
+| RESULT-02 | Phase 4 | Pending |
+| RESULT-03 | Phase 4 | Pending |
+| RESULT-04 | Phase 4 | Pending |
+| OUTPUT-01 | Phase 4 | Pending |
+| OUTPUT-02 | Phase 4 | Pending |
+| OUTPUT-03 | Phase 4 | Pending |
+| TECH-01 | Phase 1 | Pending |
+| TECH-02 | Phase 1 | Pending |
+| TECH-03 | Phase 1 | Pending |
+| TECH-04 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total
-- Mapped to phases: 0 (awaiting roadmap creation)
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31/31 ✓
+- Unmapped: 0
+
+**Phase Distribution:**
+- Phase 1: 9 requirements (INPUT + QR-01 + TECH)
+- Phase 2: 9 requirements (CANVAS + QR-02/03/04)
+- Phase 3: 8 requirements (OPT)
+- Phase 4: 5 requirements (RESULT + OUTPUT)
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-06 after initial definition*
+*Last updated: 2026-02-06 after roadmap creation*
