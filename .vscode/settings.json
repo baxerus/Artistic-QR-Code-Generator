@@ -1,0 +1,7 @@
+{
+  "cSpell.words": ["bash"],
+  "claudeCode.initialPermissionMode": "bypassPermissions",
+  "claudeCode.preferredLocation": "sidebar",
+  "claudeCode.allowDangerouslySkipPermissions": true,
+  "claudeCode.useCtrlEnterToSend": true
+}
