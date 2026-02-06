@@ -29,10 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can select QR version from dropdown showing only valid range for entered URL
   4. Generated QR code displays on canvas with correct dimensions for selected version
   5. Single HTML file works when opened via file:// protocol (no external dependencies)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 01-01-PLAN.md — HTML skeleton with inlined CSS and QR library
+- [ ] 01-02-PLAN.md — Application logic: validation, version calculation, QR generation
 
 ### Phase 2: Pixel Painting & Corruption
 **Goal**: User can paint three-state patterns that lock onto QR codes and see decoder error counts
@@ -88,7 +89,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & QR Generation | 0/TBD | Not started | - |
+| 1. Foundation & QR Generation | 0/2 | Planned | - |
 | 2. Pixel Painting & Corruption | 0/TBD | Not started | - |
 | 3. Hash Optimization Loop | 0/TBD | Not started | - |
 | 4. Results & Export | 0/TBD | Not started | - |
