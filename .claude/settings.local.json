@@ -17,7 +17,13 @@
       "Bash(git status:*)",
       "Bash(git log:*)",
       "Bash(git diff:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "WebFetch(domain:www.nayuki.io)",
+      "WebFetch(domain:davidshimjs.github.io)",
+      "WebFetch(domain:paulmillr.com)",
+      "WebFetch(domain:nuintun.github.io)",
+      "Bash(git check-ignore:*)",
+      "Read(//home/node/.claude/get-shit-done/templates/**)"
     ]
   }
 }
