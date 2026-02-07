@@ -162,6 +162,96 @@
       cursor: not-allowed;
     }
 
+    .paint-section {
+      display: none;
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .paint-section h2 {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .paint-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fff;
+      border: 2px solid #d0d0d0;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: crosshair;
+    }
+
+    #paint-canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .paint-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .paint-legend {
+      display: flex;
+      gap: 20px;
+      font-size: 0.875rem;
+      color: #666;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+    }
+
+    .legend-box.unset {
+      background-color: #e8e8e8;
+    }
+
+    .legend-box.white {
+      background-color: #ffffff;
+    }
+
+    .legend-box.black {
+      background-color: #000000;
+    }
+
+    #clear-btn {
+      width: auto;
+      padding: 10px 24px;
+      background-color: transparent;
+      color: #3b82f6;
+      border: 2px solid #3b82f6;
+      font-size: 0.875rem;
+    }
+
+    #clear-btn:hover:not(:disabled) {
+      background-color: #3b82f6;
+      color: #fff;
+    }
+
     .canvas-container {
       width: 100%;
       max-width: 400px;
@@ -248,7 +338,32 @@
         </div>
       </form>
 
-      <!-- Canvas area -->
+      <!-- Paint Pattern Section -->
+      <div class="paint-section" id="paint-section">
+        <h2>Paint Pattern</h2>
+        <div class="paint-container">
+          <canvas id="paint-canvas"></canvas>
+        </div>
+        <div class="paint-controls">
+          <div class="paint-legend">
+            <div class="legend-item">
+              <div class="legend-box unset"></div>
+              <span>Unset</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-box white"></div>
+              <span>White</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-box black"></div>
+              <span>Black</span>
+            </div>
+          </div>
+          <button type="button" id="clear-btn">Clear Pattern</button>
+        </div>
+      </div>
+
+      <!-- QR Code Display -->
       <div class="canvas-container" id="canvas-container"></div>
     </main>
 
@@ -266,6 +381,38 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
   <script>
     // Verify QR library is loaded
     console.log('QRCode library loaded:', typeof QRCode !== 'undefined');
+
+    // ===== PIXEL GRID DATA MODEL =====
+
+    /**
+     * PixelGrid: Manages three-state pixel data (0=unset, 1=white, 2=black)
+     */
+    class PixelGrid {
+      constructor(size) {
+        this.size = size;
+        this.cells = new Array(size * size).fill(0); // 0=unset, 1=white, 2=black
+      }
+
+      get(x, y) {
+        return this.cells[y * this.size + x];
+      }
+
+      set(x, y, state) {
+        this.cells[y * this.size + x] = state;
+      }
+
+      cycle(x, y) {
+        this.set(x, y, (this.get(x, y) + 1) % 3);
+      }
+
+      clear() {
+        this.cells.fill(0);
+      }
+    }
+
+    // Module-level paint canvas state
+    let paintGrid = null;
+    let paintCellSize = 0;
 
     // QR capacity table for error correction level H, byte mode (versions 1-8)
     const CAPACITIES_H_BYTE = [
@@ -321,6 +468,85 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
     }
 
     /**
+     * Render paint grid to canvas with crisp pixel-perfect rendering
+     */
+    function renderPaintGrid(canvas, grid) {
+      const ctx = canvas.getContext('2d');
+      const cellSize = Math.floor(canvas.width / grid.size);
+
+      // Disable anti-aliasing for crisp pixels
+      ctx.imageSmoothingEnabled = false;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw cells
+      for (let y = 0; y < grid.size; y++) {
+        for (let x = 0; x < grid.size; x++) {
+          const state = grid.get(x, y);
+          const px = x * cellSize;
+          const py = y * cellSize;
+
+          // Fill cell based on state
+          if (state === 0) {
+            ctx.fillStyle = '#e8e8e8'; // unset - light gray
+          } else if (state === 1) {
+            ctx.fillStyle = '#ffffff'; // white locked
+          } else {
+            ctx.fillStyle = '#000000'; // black locked
+          }
+          ctx.fillRect(px, py, cellSize, cellSize);
+
+          // Draw subtle border for white cells to distinguish from background
+          if (state === 1) {
+            ctx.fillStyle = '#d0d0d0';
+            ctx.fillRect(px, py, cellSize, 1); // top
+            ctx.fillRect(px, py, 1, cellSize); // left
+            ctx.fillRect(px + cellSize - 1, py, 1, cellSize); // right
+            ctx.fillRect(px, py + cellSize - 1, cellSize, 1); // bottom
+          }
+        }
+      }
+
+      // Draw grid lines using fillRect for crisp rendering
+      ctx.fillStyle = '#cccccc';
+      for (let i = 0; i <= grid.size; i++) {
+        const pos = i * cellSize;
+        // Vertical lines
+        ctx.fillRect(pos, 0, 1, canvas.height);
+        // Horizontal lines
+        ctx.fillRect(0, pos, canvas.width, 1);
+      }
+    }
+
+    /**
+     * Initialize paint canvas for given QR version
+     */
+    function initPaintCanvas(version) {
+      const gridSize = getModuleSize(version);
+      const canvas = document.getElementById('paint-canvas');
+      const paintSection = document.getElementById('paint-section');
+
+      // Calculate canvas size - fit within 400px max, use integer cell sizes
+      const maxSize = 400;
+      paintCellSize = Math.floor(maxSize / gridSize);
+      const canvasSize = gridSize * paintCellSize;
+
+      // Set canvas dimensions
+      canvas.width = canvasSize;
+      canvas.height = canvasSize;
+
+      // Create new grid
+      paintGrid = new PixelGrid(gridSize);
+
+      // Render initial grid
+      renderPaintGrid(canvas, paintGrid);
+
+      // Show paint section
+      paintSection.style.display = 'block';
+    }
+
+    /**
      * Update version dropdown with valid versions for current URL
      * Only shows versions >= minimum required version
      */
@@ -369,6 +595,9 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         colorLight: '#FFFFFF',
         correctLevel: QRCode.CorrectLevel.H
       });
+
+      // Initialize paint canvas for this version
+      initPaintCanvas(version);
     }
 
     /**
@@ -426,6 +655,8 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
       const urlInput = document.getElementById('url-input');
       const versionSelect = document.getElementById('version-select');
       const generateBtn = document.getElementById('generate-btn');
+      const paintCanvas = document.getElementById('paint-canvas');
+      const clearBtn = document.getElementById('clear-btn');
 
       // URL input event - validate as user types
       urlInput.addEventListener('input', function() {
@@ -450,6 +681,38 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         const url = urlInput.value.trim();
         if (isValidURL(url) && !generateBtn.disabled) {
           generateQR();
+        }
+      });
+
+      // Paint canvas click - cycle pixel states
+      paintCanvas.addEventListener('pointerdown', function(e) {
+        if (!paintGrid) return;
+
+        const rect = paintCanvas.getBoundingClientRect();
+
+        // Calculate pointer position relative to canvas
+        // Account for CSS scaling vs actual canvas size
+        const scaleX = paintCanvas.width / rect.width;
+        const scaleY = paintCanvas.height / rect.height;
+        const canvasX = (e.clientX - rect.left) * scaleX;
+        const canvasY = (e.clientY - rect.top) * scaleY;
+
+        // Convert to grid coordinates
+        const gridX = Math.floor(canvasX / paintCellSize);
+        const gridY = Math.floor(canvasY / paintCellSize);
+
+        // Bounds check
+        if (gridX >= 0 && gridX < paintGrid.size && gridY >= 0 && gridY < paintGrid.size) {
+          paintGrid.cycle(gridX, gridY);
+          renderPaintGrid(paintCanvas, paintGrid);
+        }
+      });
+
+      // Clear button - reset all pixels to unset
+      clearBtn.addEventListener('click', function() {
+        if (paintGrid) {
+          paintGrid.clear();
+          renderPaintGrid(paintCanvas, paintGrid);
         }
       });
     });
