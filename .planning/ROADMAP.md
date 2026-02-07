@@ -12,7 +12,7 @@ Build a single-file HTML tool that lets users paint pixel patterns into QR codes
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & QR Generation** - Single-file architecture with URL input and basic QR code generation
+- [x] **Phase 1: Foundation & QR Generation** - Single-file architecture with URL input and basic QR code generation
 - [ ] **Phase 2: Pixel Painting & Corruption** - Three-state canvas editor with pattern locking and error measurement
 - [ ] **Phase 3: Hash Optimization Loop** - Web Worker search algorithm with live progress and top 5 tracking
 - [ ] **Phase 4: Results & Export** - Results display with PNG download, URL copy, and error visualization
@@ -32,8 +32,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — HTML skeleton with inlined CSS and QR library
-- [ ] 01-02-PLAN.md — Application logic: validation, version calculation, QR generation
+- [x] 01-01-PLAN.md — HTML skeleton with inlined CSS and QR library
+- [x] 01-02-PLAN.md — Application logic: validation, version calculation, QR generation
 
 ### Phase 2: Pixel Painting & Corruption
 **Goal**: User can paint three-state patterns that lock onto QR codes and see decoder error counts
@@ -89,11 +89,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & QR Generation | 0/2 | Planned | - |
+| 1. Foundation & QR Generation | 2/2 | Complete | 2026-02-07 |
 | 2. Pixel Painting & Corruption | 0/TBD | Not started | - |
 | 3. Hash Optimization Loop | 0/TBD | Not started | - |
 | 4. Results & Export | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-06*
-*Last updated: 2026-02-06*
+*Last updated: 2026-02-07*
