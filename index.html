@@ -249,7 +249,7 @@
       </form>
 
       <!-- Canvas area -->
-      <div class="canvas-container">
+      <div class="canvas-container" id="canvas-container">
         <canvas id="qr-canvas"></canvas>
       </div>
     </main>
@@ -351,13 +351,12 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
       const version = parseInt(document.getElementById('version-select').value);
       const container = document.getElementById('canvas-container');
 
-      // Clear previous QR code
+      // Clear previous QR code / placeholder
       if (qrCodeInstance) {
         qrCodeInstance.clear();
-        // For qrcodejs, we need to recreate instance to change version
-        container.innerHTML = '';
-        qrCodeInstance = null;
       }
+      container.innerHTML = '';
+      qrCodeInstance = null;
 
       // Create new QR code instance
       qrCodeInstance = new QRCode(container, {
@@ -435,6 +434,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
       urlInput.addEventListener('blur', function() {
         const url = this.value.trim();
         if (url && !isValidURL(url)) {
+          this.classList.add('invalid');
           const icon = document.getElementById('validation-icon');
           icon.classList.add('invalid');
         }
