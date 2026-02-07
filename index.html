@@ -266,8 +266,200 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 
   <!-- Application logic -->
   <script>
-    // Placeholder - will be implemented in Plan 02
+    // Verify QR library is loaded
     console.log('QRCode library loaded:', typeof QRCode !== 'undefined');
+
+    // QR capacity table for error correction level H, byte mode (versions 1-8)
+    const CAPACITIES_H_BYTE = [
+      { version: 1, capacity: 7 },
+      { version: 2, capacity: 14 },
+      { version: 3, capacity: 24 },
+      { version: 4, capacity: 34 },
+      { version: 5, capacity: 44 },
+      { version: 6, capacity: 58 },
+      { version: 7, capacity: 64 },
+      { version: 8, capacity: 84 }
+    ];
+
+    // Global QR code instance
+    let qrCodeInstance = null;
+
+    /**
+     * Validate URL using native URL constructor
+     * Only accept http: and https: protocols
+     */
+    function isValidURL(string) {
+      try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch (err) {
+        return false;
+      }
+    }
+
+    /**
+     * Calculate minimum QR version needed for URL
+     * Returns version number (1-8) or -1 if too long
+     */
+    function calculateMinimumVersion(url) {
+      const byteLength = new Blob([url]).size;
+      for (const entry of CAPACITIES_H_BYTE) {
+        if (byteLength <= entry.capacity) {
+          return entry.version;
+        }
+      }
+      return -1; // URL too long for version 8
+    }
+
+    /**
+     * Get module size (grid dimensions) for a QR version
+     * QR spec: modules = 17 + 4*version
+     */
+    function getModuleSize(version) {
+      return 17 + (version * 4);
+    }
+
+    /**
+     * Update version dropdown with valid versions for current URL
+     * Only shows versions >= minimum required version
+     */
+    function updateVersionDropdown(minVersion) {
+      const dropdown = document.getElementById('version-select');
+      dropdown.innerHTML = '';
+
+      for (let v = minVersion; v <= 8; v++) {
+        const option = document.createElement('option');
+        option.value = v;
+        option.textContent = 'Version ' + v + ' (' + getModuleSize(v) + '\u00D7' + getModuleSize(v) + ')';
+        dropdown.appendChild(option);
+      }
+
+      // Auto-select minimum version
+      dropdown.value = minVersion;
+    }
+
+    /**
+     * Generate QR code for current URL and version
+     */
+    function generateQR() {
+      const url = document.getElementById('url-input').value.trim();
+      if (!isValidURL(url)) {
+        console.error('Invalid URL, cannot generate QR');
+        return;
+      }
+
+      const version = parseInt(document.getElementById('version-select').value);
+      const container = document.getElementById('canvas-container');
+
+      // Clear previous QR code
+      if (qrCodeInstance) {
+        qrCodeInstance.clear();
+        // For qrcodejs, we need to recreate instance to change version
+        container.innerHTML = '';
+        qrCodeInstance = null;
+      }
+
+      // Create new QR code instance
+      qrCodeInstance = new QRCode(container, {
+        text: url,
+        width: 400,
+        height: 400,
+        typeNumber: version,
+        colorDark: '#000000',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    /**
+     * Update validation UI state
+     */
+    function updateValidationUI(url) {
+      const input = document.getElementById('url-input');
+      const icon = document.getElementById('validation-icon');
+      const button = document.getElementById('generate-btn');
+
+      // Empty input - neutral state
+      if (!url) {
+        input.classList.remove('valid', 'invalid');
+        icon.classList.remove('valid', 'invalid');
+        button.disabled = true;
+        return;
+      }
+
+      // Valid URL
+      if (isValidURL(url)) {
+        const minVersion = calculateMinimumVersion(url);
+
+        // URL too long for version 8
+        if (minVersion === -1) {
+          input.classList.remove('valid');
+          input.classList.add('invalid');
+          icon.classList.remove('valid');
+          icon.classList.add('invalid');
+          button.disabled = true;
+          console.error('URL too long for QR version 8');
+          return;
+        }
+
+        // Valid and fits
+        input.classList.remove('invalid');
+        input.classList.add('valid');
+        icon.classList.remove('invalid');
+        icon.classList.add('valid');
+        button.disabled = false;
+        updateVersionDropdown(minVersion);
+      } else {
+        // Invalid URL
+        input.classList.remove('valid');
+        icon.classList.remove('valid');
+        button.disabled = true;
+      }
+    }
+
+    /**
+     * Initialize application when DOM is ready
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlInput = document.getElementById('url-input');
+      const versionSelect = document.getElementById('version-select');
+      const generateBtn = document.getElementById('generate-btn');
+
+      // URL input event - validate as user types
+      urlInput.addEventListener('input', function() {
+        const url = this.value.trim();
+        updateValidationUI(url);
+      });
+
+      // URL blur event - show invalid indicator if non-empty and invalid
+      urlInput.addEventListener('blur', function() {
+        const url = this.value.trim();
+        if (url && !isValidURL(url)) {
+          const icon = document.getElementById('validation-icon');
+          icon.classList.add('invalid');
+        }
+      });
+
+      // Generate button click
+      generateBtn.addEventListener('click', function() {
+        generateQR();
+      });
+
+      // Enter key triggers generation
+      urlInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !generateBtn.disabled) {
+          generateQR();
+        }
+      });
+
+      // Version change - regenerate QR if URL is valid
+      versionSelect.addEventListener('change', function() {
+        const url = urlInput.value.trim();
+        if (isValidURL(url) && !generateBtn.disabled) {
+          generateQR();
+        }
+      });
+    });
   </script>
 </body>
 </html>
