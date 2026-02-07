@@ -36,7 +36,7 @@ Plans:
 - [x] 01-02-PLAN.md — Application logic: validation, version calculation, QR generation
 
 ### Phase 2: Pixel Painting & Corruption
-**Goal**: User can paint three-state patterns that lock onto QR codes and see decoder error counts
+**Goal**: User can paint three-state patterns that lock onto QR codes and see decode status
 **Depends on**: Phase 1
 **Requirements**: CANVAS-01, CANVAS-02, CANVAS-03, CANVAS-04, CANVAS-05, QR-02, QR-03, QR-04
 **Success Criteria** (what must be TRUE):
@@ -44,11 +44,12 @@ Plans:
   2. All three pixel states are visually distinguishable (different colors or patterns)
   3. User can clear/reset entire canvas to unset state with one button click
   4. Locked pattern pixels overlay onto generated QR code without changing during operations
-  5. System decodes pattern-corrupted QR code and displays decoder error count
-**Plans**: TBD
+  5. System decodes pattern-corrupted QR code and displays decode status (success/fail; granular error counting deferred to Phase 3)
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 02-01-PLAN.md — Three-state painting canvas with click-to-cycle and clear button
+- [ ] 02-02-PLAN.md — QR corruption overlay, function pattern masking, jsQR decode, and status display
 
 ### Phase 3: Hash Optimization Loop
 **Goal**: User can run automated hash search that finds URL variants minimizing decoder errors
@@ -90,7 +91,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & QR Generation | 2/2 | Complete | 2026-02-07 |
-| 2. Pixel Painting & Corruption | 0/TBD | Not started | - |
+| 2. Pixel Painting & Corruption | 0/2 | In progress | - |
 | 3. Hash Optimization Loop | 0/TBD | Not started | - |
 | 4. Results & Export | 0/TBD | Not started | - |
 
