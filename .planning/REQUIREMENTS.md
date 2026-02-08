@@ -9,18 +9,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Input & Configuration
 
-- [ ] **INPUT-01**: User can enter URL in input field with format validation
-- [ ] **INPUT-02**: System calculates minimum QR version based on URL length + error correction level H
-- [ ] **INPUT-03**: User can select QR version from valid range (minimum to Version 8)
-- [ ] **INPUT-04**: QR version selector shows only valid versions for entered URL
+- [x] **INPUT-01**: User can enter URL in input field with format validation
+- [x] **INPUT-02**: System calculates minimum QR version based on URL length + error correction level H
+- [x] **INPUT-03**: User can select QR version from valid range (minimum to Version 8)
+- [x] **INPUT-04**: QR version selector shows only valid versions for entered URL
 
 ### Canvas & Painting
 
-- [ ] **CANVAS-01**: Painting canvas displays grid matching selected QR version dimensions (Version 2 = 25×25, Version 8 = 49×49)
-- [ ] **CANVAS-02**: Each pixel has three states: white (locked), black (locked), unset (QR decides)
-- [ ] **CANVAS-03**: User can click pixels to cycle states: unset → white → black → unset
-- [ ] **CANVAS-04**: All three pixel states are visually distinguishable on canvas
-- [ ] **CANVAS-05**: User can clear/reset all painted pixels to unset state
+- [x] **CANVAS-01**: Painting canvas displays grid matching selected QR version dimensions (Version 2 = 25×25, Version 8 = 49×49)
+- [x] **CANVAS-02**: Each pixel has three states: white (locked), black (locked), unset (QR decides)
+- [x] **CANVAS-03**: User can click pixels to cycle states: unset → white → black → unset
+- [x] **CANVAS-04**: All three pixel states are visually distinguishable on canvas
+- [x] **CANVAS-05**: User can clear/reset all painted pixels to unset state
 
 ### Optimization Algorithm
 
@@ -35,10 +35,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### QR Generation & Decoding
 
-- [ ] **QR-01**: System generates QR codes with error correction level H
-- [ ] **QR-02**: System overlays locked pattern pixels onto generated QR code (corrupting it)
-- [ ] **QR-03**: System decodes pattern-corrupted QR codes
-- [ ] **QR-04**: System counts decoder errors (Reed-Solomon errors, not binary success/fail)
+- [x] **QR-01**: System generates QR codes with error correction level H
+- [x] **QR-02**: System overlays locked pattern pixels onto generated QR code (corrupting it)
+- [x] **QR-03**: System decodes pattern-corrupted QR codes
+- [x] **QR-04**: System counts decoder errors (Reed-Solomon errors, not binary success/fail)
 
 ### Results Display
 
@@ -55,10 +55,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Technical Infrastructure
 
-- [ ] **TECH-01**: All JavaScript libraries are inlined in single HTML file
-- [ ] **TECH-02**: All CSS is inlined in single HTML file
-- [ ] **TECH-03**: HTML file works when served by web server (http://)
-- [ ] **TECH-04**: HTML file works when opened locally (file:// protocol)
+- [x] **TECH-01**: All JavaScript libraries are inlined in single HTML file
+- [x] **TECH-02**: All CSS is inlined in single HTML file
+- [x] **TECH-03**: HTML file works when served by web server (http://)
+- [x] **TECH-04**: HTML file works when opened locally (file:// protocol)
 
 ## v2 Requirements
 
@@ -107,15 +107,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INPUT-01 | Phase 1 | Pending |
-| INPUT-02 | Phase 1 | Pending |
-| INPUT-03 | Phase 1 | Pending |
-| INPUT-04 | Phase 1 | Pending |
-| CANVAS-01 | Phase 2 | Pending |
-| CANVAS-02 | Phase 2 | Pending |
-| CANVAS-03 | Phase 2 | Pending |
-| CANVAS-04 | Phase 2 | Pending |
-| CANVAS-05 | Phase 2 | Pending |
+| INPUT-01 | Phase 1 | Complete |
+| INPUT-02 | Phase 1 | Complete |
+| INPUT-03 | Phase 1 | Complete |
+| INPUT-04 | Phase 1 | Complete |
+| CANVAS-01 | Phase 2 | Complete |
+| CANVAS-02 | Phase 2 | Complete |
+| CANVAS-03 | Phase 2 | Complete |
+| CANVAS-04 | Phase 2 | Complete |
+| CANVAS-05 | Phase 2 | Complete |
 | OPT-01 | Phase 3 | Pending |
 | OPT-02 | Phase 3 | Pending |
 | OPT-03 | Phase 3 | Pending |
@@ -124,10 +124,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPT-06 | Phase 3 | Pending |
 | OPT-07 | Phase 3 | Pending |
 | OPT-08 | Phase 3 | Pending |
-| QR-01 | Phase 1 | Pending |
-| QR-02 | Phase 2 | Pending |
-| QR-03 | Phase 2 | Pending |
-| QR-04 | Phase 2 | Pending |
+| QR-01 | Phase 1 | Complete |
+| QR-02 | Phase 2 | Complete |
+| QR-03 | Phase 2 | Complete |
+| QR-04 | Phase 2 | Complete |
 | RESULT-01 | Phase 4 | Pending |
 | RESULT-02 | Phase 4 | Pending |
 | RESULT-03 | Phase 4 | Pending |
@@ -135,10 +135,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OUTPUT-01 | Phase 4 | Pending |
 | OUTPUT-02 | Phase 4 | Pending |
 | OUTPUT-03 | Phase 4 | Pending |
-| TECH-01 | Phase 1 | Pending |
-| TECH-02 | Phase 1 | Pending |
-| TECH-03 | Phase 1 | Pending |
-| TECH-04 | Phase 1 | Pending |
+| TECH-01 | Phase 1 | Complete |
+| TECH-02 | Phase 1 | Complete |
+| TECH-03 | Phase 1 | Complete |
+| TECH-04 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 31 total
