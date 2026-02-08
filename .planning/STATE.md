@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 2 of 4 (Pixel Painting & Corruption)
-Plan: 1 of 3 in phase
+Plan: 2 of 3 in phase
 Status: In progress
-Last activity: 2026-02-07 — Completed 02-01-PLAN.md (Interactive Pixel Painting Canvas)
+Last activity: 2026-02-08 — Completed 02-02-PLAN.md (QR Corruption Overlay & Decode Pipeline)
 
-Progress: [████░░░░░░] 33% (1/3 plans complete in current phase)
+Progress: [████████░░] 67% (2/3 plans complete in current phase)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 7.3 minutes
-- Total execution time: 0.37 hours
+- Total plans completed: 4
+- Average duration: 143 minutes
+- Total execution time: 9.52 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 2/2 | 20min | 10min |
-| 2 | 1/3 | 2min | 2min |
+| 2 | 2/3 | 545min | 272min |
 
 **Recent Trend:**
-- Last plan: 02-01 (2 minutes)
-- Trend: Phase 2 started, very fast execution
+- Last plan: 02-02 (543 minutes / 9h 3min)
+- Trend: Phase 2 plan 02-02 took significantly longer due to complex decoder integration
 
 *Updated after each plan completion*
 
@@ -58,6 +58,11 @@ Recent decisions affecting current work:
 - fillRect for grid lines instead of strokeRect — Avoids sub-pixel anti-aliasing blur (02-01)
 - Subtle border on white pixels — Distinguishes white from canvas background (02-01)
 - pointerdown event for pixel cycling — Better responsiveness than click event (02-01)
+- Inlined jsQR library for zero external dependencies — Maintains single-file architecture (02-02)
+- Forced Canvas rendering mode for pixel-level control — ImageData access needed for overlay (02-02)
+- Protected all function patterns from corruption — Finders, timing, alignment cannot be modified (02-02)
+- Binary decode status instead of granular error counts — jsQR limitation, sufficient for Phase 2 (02-02)
+- Real-time re-decode on every paint click for instant feedback — Core user experience (02-02)
 
 ### Pending Todos
 
@@ -66,9 +71,9 @@ None.
 ### Blockers/Concerns
 
 **Phase 2 Planning:**
-- Decoder error measurement needs precise definition (most decoders expose binary success/failure, not error counts)
-- Canvas-to-module mapping requires careful pixel-to-QR-grid alignment to avoid corrupting function patterns
-- May need research phase for QR code function pattern locations by version
+- ✓ RESOLVED: Binary decode (success/fail) implemented, granular error counts deferred to Phase 3 enhancement
+- ✓ RESOLVED: Canvas-to-module mapping implemented with function pattern masking
+- ✓ RESOLVED: Function pattern locations implemented using version-specific coordinate tables
 
 **Phase 3 Planning:**
 - Hash search performance ceiling unknown (iterations/second affects realistic timeout recommendations)
@@ -77,9 +82,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-07T22:55:13Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-02-08T19:18:48Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
 
 ---
-*Next step: Execute 02-02-PLAN.md (QR Code Overlay & Corruption Logic)*
+*Next step: Execute 02-03-PLAN.md (Phase 2 remaining plan) or begin Phase 3 planning*
