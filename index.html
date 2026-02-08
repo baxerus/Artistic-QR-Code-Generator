@@ -10657,7 +10657,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
       canvas.width = actualSize;
       canvas.height = actualSize;
 
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.imageSmoothingEnabled = false;
 
       // Render QR modules
@@ -10678,7 +10678,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     function overlayPaintedPixels(canvas, paintGrid, functionMask) {
       if (!paintGrid || !canvas) return;
 
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
 
@@ -10742,7 +10742,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
         return { success: false, data: null };
       }
 
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
       try {
