@@ -48,8 +48,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Three-state painting canvas with click-to-cycle and clear button
-- [ ] 02-02-PLAN.md — QR corruption overlay, function pattern masking, jsQR decode, and status display
+- [x] 02-01-PLAN.md — Three-state painting canvas with click-to-cycle and clear button
+- [x] 02-02-PLAN.md — QR corruption overlay, function pattern masking, jsQR decode, and status display
 
 ### Phase 3: Hash Optimization Loop
 **Goal**: User can run automated hash search that finds URL variants minimizing decoder errors
@@ -63,10 +63,11 @@ Plans:
   5. User can manually stop search at any time before timeout expires
   6. User can configure maximum search time in seconds before starting
   7. Pattern pixels remain unchanged throughout entire optimization process
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 03-01-PLAN.md — Web Worker search engine with extracted QR encoding and hash evaluation pipeline
+- [ ] 03-02-PLAN.md — Optimization UI controls, live progress display, top 5 previews, and button state machine
 
 ### Phase 4: Results & Export
 **Goal**: User can review ranked results and export chosen QR codes with their URLs
@@ -92,9 +93,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & QR Generation | 2/2 | Complete | 2026-02-07 |
 | 2. Pixel Painting & Corruption | 2/2 | Complete | 2026-02-07 |
-| 3. Hash Optimization Loop | 0/TBD | Not started | - |
+| 3. Hash Optimization Loop | 0/2 | Not started | - |
 | 4. Results & Export | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-06*
-*Last updated: 2026-02-07*
+*Last updated: 2026-02-08*
