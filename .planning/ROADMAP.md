@@ -79,10 +79,11 @@ Plans:
   3. User can download any result as PNG image
   4. User can copy final URL (with hash fragment) to clipboard for any result
   5. Error visualization overlay clearly shows locked pattern pixels, QR data pixels, and conflict pixels
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 04-01-PLAN.md — Enhanced results display with Download PNG and Copy URL actions
+- [ ] 04-02-PLAN.md — Error visualization overlay with toggle and color legend
 
 ## Progress
 
@@ -94,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & QR Generation | 2/2 | Complete | 2026-02-07 |
 | 2. Pixel Painting & Corruption | 2/2 | Complete | 2026-02-07 |
 | 3. Hash Optimization Loop | 2/2 | Complete | 2026-02-09 |
-| 4. Results & Export | 0/TBD | Not started | - |
+| 4. Results & Export | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-06*
