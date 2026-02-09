@@ -497,7 +497,11 @@
         border-radius: 6px;
         background-color: #fafafa;
         border: 1px solid #e0e0e0;
-        transition: flex 0.4s ease, max-width 0.4s ease, padding 0.4s ease, box-shadow 0.3s ease;
+        transition:
+          flex 0.4s ease,
+          max-width 0.4s ease,
+          padding 0.4s ease,
+          box-shadow 0.3s ease;
         flex: 1 1 0;
         min-width: 0;
         max-width: 160px;
@@ -506,7 +510,9 @@
 
       .result-slot-canvas {
         border-radius: 4px;
-        transition: width 0.4s ease, height 0.4s ease;
+        transition:
+          width 0.4s ease,
+          height 0.4s ease;
       }
 
       .result-label {
@@ -586,9 +592,11 @@
       }
 
       .result-actions button:disabled {
-        opacity: 0.7;
+        opacity: 0.5;
         cursor: default;
         background: #f0f0f0;
+        color: #999;
+        border-color: #e0e0e0;
       }
 
       .result-canvas-container {
@@ -599,9 +607,17 @@
         transition: width 0.4s ease;
       }
 
+      .results-disabled .result-canvas-container {
+        cursor: default;
+      }
+
       .result-canvas-container:hover {
         outline: 2px solid #3b82f6;
         border-radius: 2px;
+      }
+
+      .results-disabled .result-canvas-container:hover {
+        outline: none;
       }
 
       .result-slot-canvas,
@@ -14588,6 +14604,8 @@ self.onmessage = function(e) {
         optimizeBtn.textContent = "Stop";
         searchProgress.style.display = "block";
         searchSummary.style.display = "none";
+        const topResultsEl = document.getElementById("top-results");
+        if (topResultsEl) topResultsEl.classList.add("results-disabled");
         document.getElementById("attempts-counter").textContent =
           `${totalAttempts.toLocaleString()} attempts`;
         document.getElementById("elapsed-counter").textContent =
@@ -14902,8 +14920,10 @@ self.onmessage = function(e) {
           actions.className = "result-actions";
 
           // Download PNG button
+          const isRunning = searchState === "running";
           const downloadBtn = document.createElement("button");
           downloadBtn.textContent = "Download PNG";
+          downloadBtn.disabled = isRunning;
           downloadBtn.onclick = () => {
             const exportCanvas = renderResultToCanvas(
               result.moduleData,
@@ -14915,16 +14935,20 @@ self.onmessage = function(e) {
           // Copy URL button
           const copyBtn = document.createElement("button");
           copyBtn.textContent = "Copy URL";
+          copyBtn.disabled = isRunning;
           copyBtn.onclick = () => {
             copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
           };
 
-          // Click to expand/collapse with error overlay
+          // Click to expand/collapse with error overlay (disabled during search)
           canvasContainer.addEventListener("click", function () {
+            if (searchState === "running") return;
             const isExpanded = slot.classList.contains("expanded");
 
             // Collapse any currently expanded slot
-            const currentlyExpanded = topResultsContainer.querySelector(".result-slot.expanded");
+            const currentlyExpanded = topResultsContainer.querySelector(
+              ".result-slot.expanded",
+            );
             if (currentlyExpanded && currentlyExpanded !== slot) {
               currentlyExpanded.classList.remove("expanded");
             }
@@ -14957,9 +14981,12 @@ self.onmessage = function(e) {
             ["rgba(0, 200, 0, 0.3)", "Match"],
             ["rgba(255, 0, 0, 0.45)", "Conflict"],
             ["rgba(0, 100, 255, 0.35)", "Function"],
-          ].map(([bg, text]) =>
-            `<div class="overlay-legend-item"><div class="overlay-legend-swatch" style="background:${bg}"></div><span>${text}</span></div>`
-          ).join("");
+          ]
+            .map(
+              ([bg, text]) =>
+                `<div class="overlay-legend-item"><div class="overlay-legend-swatch" style="background:${bg}"></div><span>${text}</span></div>`,
+            )
+            .join("");
 
           // Assemble slot
           slot.appendChild(rank);
@@ -14973,7 +15000,6 @@ self.onmessage = function(e) {
         // Update previous hashes for next comparison
         previousTopHashes = currentHashes;
       }
-
 
       /**
        * Handle search completion
@@ -14993,6 +15019,8 @@ self.onmessage = function(e) {
         searchState = "completed";
         optimizeBtn.textContent = "Run again";
         searchProgress.style.display = "none";
+        const topResultsEl = document.getElementById("top-results");
+        if (topResultsEl) topResultsEl.classList.remove("results-disabled");
 
         // Store results for accumulation
         currentTopResults = data.topResults;
