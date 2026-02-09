@@ -11096,6 +11096,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
      * Calculate minimum QR version needed for URL
      * Returns version number (1-8) or -1 if too long
      */
+    const HASH_CHARSET = 'abcdefghijklmnopqrstuvwxyz0123456789';
     const HASH_LENGTH = 6;
     const HASH_OVERHEAD = 1 + HASH_LENGTH; // '#' + hash chars
 
@@ -12125,9 +12126,9 @@ let decodableCount = 0;
 let startTime = 0;
 let lastProgressTime = 0;
 
-// Random hash generator (URL-safe charset)
-const HASH_CHARSET = 'abcdefghijklmnopqrstuvwxyz0123456789';
-const HASH_LENGTH = 6;
+// Random hash generator (injected from main thread)
+const HASH_CHARSET = '${HASH_CHARSET}';
+const HASH_LENGTH = ${HASH_LENGTH};
 
 function generateRandomHash(length) {
   const values = new Uint8Array(length);
