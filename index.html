@@ -504,8 +504,8 @@
       }
 
       .result-slot canvas {
-        width: 80px;
-        height: 80px;
+        width: 120px;
+        height: 120px;
         image-rendering: pixelated;
         border-radius: 4px;
       }
@@ -600,8 +600,8 @@
 
       .result-canvas-container {
         position: relative;
-        width: 80px;
-        height: 80px;
+        width: 120px;
+        height: 120px;
       }
 
       .result-overlay {
@@ -768,19 +768,31 @@
           <!-- Error overlay legend -->
           <div id="overlay-legend" class="overlay-legend">
             <div class="overlay-legend-item">
-              <div class="overlay-legend-swatch" style="background: rgba(0, 200, 0, 0.3);"></div>
+              <div
+                class="overlay-legend-swatch"
+                style="background: rgba(0, 200, 0, 0.3)"
+              ></div>
               <span>Match</span>
             </div>
             <div class="overlay-legend-item">
-              <div class="overlay-legend-swatch" style="background: rgba(255, 0, 0, 0.45);"></div>
+              <div
+                class="overlay-legend-swatch"
+                style="background: rgba(255, 0, 0, 0.45)"
+              ></div>
               <span>Conflict</span>
             </div>
             <div class="overlay-legend-item">
-              <div class="overlay-legend-swatch" style="background: rgba(0, 100, 255, 0.35);"></div>
+              <div
+                class="overlay-legend-swatch"
+                style="background: rgba(0, 100, 255, 0.35)"
+              ></div>
               <span>Function</span>
             </div>
             <div class="overlay-legend-item">
-              <div class="overlay-legend-swatch" style="background: transparent;"></div>
+              <div
+                class="overlay-legend-swatch"
+                style="background: transparent"
+              ></div>
               <span>Data</span>
             </div>
           </div>
@@ -14291,24 +14303,28 @@ function evaluateCandidate(hash) {
 
   // Create compact module data for display
   const moduleData = new Uint8Array(moduleCount * moduleCount);
+  const qrModuleData = new Uint8Array(moduleCount * moduleCount);
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
       const idx = row * moduleCount + col;
       const paintedState = searchConfig.paintedPixels[idx];
       const isFunctionPattern = searchConfig.functionMask[idx];
+      const qrDark = qr.isDark(row, col);
+
+      qrModuleData[idx] = qrDark ? 1 : 0;
 
       let dark;
       if (!isFunctionPattern && paintedState !== 0) {
         dark = (paintedState === 2);
       } else {
-        dark = qr.isDark(row, col);
+        dark = qrDark;
       }
 
       moduleData[idx] = dark ? 1 : 0;
     }
   }
 
-  return { hash, pixelDiff, decodable, moduleData, moduleCount };
+  return { hash, pixelDiff, decodable, moduleData, qrModuleData, moduleCount };
 }
 
 // Update top results
@@ -14341,6 +14357,7 @@ function sendProgress() {
       pixelDiff: r.pixelDiff,
       decodable: r.decodable,
       moduleData: Array.from(r.moduleData),
+      qrModuleData: Array.from(r.qrModuleData),
       moduleCount: r.moduleCount
     })),
     decodableCount: decodableCount
@@ -14390,6 +14407,7 @@ function sendComplete() {
       pixelDiff: r.pixelDiff,
       decodable: r.decodable,
       moduleData: Array.from(r.moduleData),
+      qrModuleData: Array.from(r.qrModuleData),
       moduleCount: r.moduleCount
     })),
     decodableCount: decodableCount
@@ -14652,14 +14670,14 @@ self.onmessage = function(e) {
       /**
        * Render error visualization overlay
        * @param {HTMLCanvasElement} overlayCanvas - Canvas to render overlay on
-       * @param {Array<number>} moduleData - QR module data (0=white, 1=black)
+       * @param {Array<number>} qrModuleData - Original QR module data before paint overlay (0=white, 1=black)
        * @param {number} moduleCount - Size of QR code
        * @param {Array<number>} paintedPixels - Paint grid cells (0=unset, 1=white, 2=black)
        * @param {Array<boolean>} functionMask - Function pattern mask (true=function pattern)
        */
       function renderErrorOverlay(
         overlayCanvas,
-        moduleData,
+        qrModuleData,
         moduleCount,
         paintedPixels,
         functionMask,
@@ -14681,9 +14699,9 @@ self.onmessage = function(e) {
               ctx.fillStyle = "rgba(0, 100, 255, 0.35)";
               ctx.fillRect(col, row, 1, 1);
             } else if (paintedPixels[idx] !== 0) {
-              // Locked painted pixel - check if it matches QR data
+              // Locked painted pixel - compare against original QR data
               const paintedIsDark = paintedPixels[idx] === 2;
-              const qrIsDark = moduleData[idx] === 1;
+              const qrIsDark = qrModuleData[idx] === 1;
 
               if (paintedIsDark === qrIsDark) {
                 // Match - green
@@ -14909,7 +14927,8 @@ self.onmessage = function(e) {
           const errorsBtn = document.createElement("button");
           errorsBtn.textContent = "Errors";
           errorsBtn.onclick = function () {
-            const overlayCanvas = canvasContainer.querySelector(".result-overlay");
+            const overlayCanvas =
+              canvasContainer.querySelector(".result-overlay");
             const isVisible = overlayCanvas.classList.contains("visible");
 
             if (!isVisible) {
@@ -14918,7 +14937,7 @@ self.onmessage = function(e) {
               const functionMask = createFunctionPatternMask(currentVersion);
               renderErrorOverlay(
                 overlayCanvas,
-                resultData.moduleData,
+                resultData.qrModuleData,
                 resultData.moduleCount,
                 paintGrid.cells,
                 functionMask,
