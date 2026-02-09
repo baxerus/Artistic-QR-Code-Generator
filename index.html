@@ -484,7 +484,7 @@
         display: flex;
         justify-content: center;
         gap: 10px;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         margin-top: 20px;
       }
 
@@ -497,17 +497,16 @@
         border-radius: 6px;
         background-color: #fafafa;
         border: 1px solid #e0e0e0;
-        transition: box-shadow 0.3s ease;
+        transition: flex 0.4s ease, max-width 0.4s ease, padding 0.4s ease, box-shadow 0.3s ease;
         flex: 1 1 0;
         min-width: 0;
         max-width: 160px;
+        overflow: hidden;
       }
 
-      .result-slot canvas {
-        width: 120px;
-        height: 120px;
-        image-rendering: pixelated;
+      .result-slot-canvas {
         border-radius: 4px;
+        transition: width 0.4s ease, height 0.4s ease;
       }
 
       .result-label {
@@ -592,44 +591,72 @@
         background: #f0f0f0;
       }
 
-      .result-actions button.overlay-active {
-        background: #e3f2fd;
-        border-color: #90caf9;
-        color: #1976d2;
-      }
-
       .result-canvas-container {
         position: relative;
         width: 120px;
-        height: 120px;
+        aspect-ratio: 1 / 1;
+        cursor: pointer;
+        transition: width 0.4s ease;
       }
 
+      .result-canvas-container:hover {
+        outline: 2px solid #3b82f6;
+        border-radius: 2px;
+      }
+
+      .result-slot-canvas,
       .result-overlay {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        pointer-events: none;
         image-rendering: pixelated;
-        display: none;
       }
 
-      .result-overlay.visible {
-        display: block;
+      .result-overlay {
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease 0.3s;
+      }
+
+      .result-slot.expanded .result-overlay {
+        opacity: 1;
+      }
+
+      .result-slot.expanded {
+        flex: 0 0 100%;
+        max-width: 100%;
+        padding: 12px;
+      }
+
+      .result-slot.expanded .result-canvas-container {
+        width: 100%;
+      }
+
+      .result-slot.expanded .result-canvas-container:hover {
+        outline: none;
+      }
+
+      .result-slot.expanded .result-label {
+        font-size: 0.9rem;
+      }
+
+      .result-slot.expanded .result-rank {
+        font-size: 1.1rem;
       }
 
       .overlay-legend {
         display: none;
         gap: 12px;
         justify-content: center;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         color: #666;
         margin-top: 8px;
         flex-wrap: wrap;
       }
 
-      .overlay-legend.visible {
+      .result-slot.expanded .overlay-legend {
         display: flex;
       }
 
@@ -764,38 +791,6 @@
 
           <!-- Top 5 results row -->
           <div id="top-results" class="top-results" style="display: none"></div>
-
-          <!-- Error overlay legend -->
-          <div id="overlay-legend" class="overlay-legend">
-            <div class="overlay-legend-item">
-              <div
-                class="overlay-legend-swatch"
-                style="background: rgba(0, 200, 0, 0.3)"
-              ></div>
-              <span>Match</span>
-            </div>
-            <div class="overlay-legend-item">
-              <div
-                class="overlay-legend-swatch"
-                style="background: rgba(255, 0, 0, 0.45)"
-              ></div>
-              <span>Conflict</span>
-            </div>
-            <div class="overlay-legend-item">
-              <div
-                class="overlay-legend-swatch"
-                style="background: rgba(0, 100, 255, 0.35)"
-              ></div>
-              <span>Function</span>
-            </div>
-            <div class="overlay-legend-item">
-              <div
-                class="overlay-legend-swatch"
-                style="background: transparent"
-              ></div>
-              <span>Data</span>
-            </div>
-          </div>
         </div>
       </main>
 
@@ -14850,6 +14845,7 @@ self.onmessage = function(e) {
 
           // Create canvas for QR preview
           const canvas = document.createElement("canvas");
+          canvas.className = "result-slot-canvas";
           const moduleCount = result.moduleCount;
           canvas.width = moduleCount;
           canvas.height = moduleCount;
@@ -14866,7 +14862,7 @@ self.onmessage = function(e) {
           }
           ctx.putImageData(imageData, 0, 0);
 
-          // Create overlay canvas (hidden by default)
+          // Create overlay canvas (hidden until expanded)
           const overlayCanvas = document.createElement("canvas");
           overlayCanvas.className = "result-overlay";
           overlayCanvas.width = moduleCount;
@@ -14923,16 +14919,21 @@ self.onmessage = function(e) {
             copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
           };
 
-          // Errors toggle button
-          const errorsBtn = document.createElement("button");
-          errorsBtn.textContent = "Errors";
-          errorsBtn.onclick = function () {
-            const overlayCanvas =
-              canvasContainer.querySelector(".result-overlay");
-            const isVisible = overlayCanvas.classList.contains("visible");
+          // Click to expand/collapse with error overlay
+          canvasContainer.addEventListener("click", function () {
+            const isExpanded = slot.classList.contains("expanded");
 
-            if (!isVisible) {
-              // Show overlay - render and display
+            // Collapse any currently expanded slot
+            const currentlyExpanded = topResultsContainer.querySelector(".result-slot.expanded");
+            if (currentlyExpanded && currentlyExpanded !== slot) {
+              currentlyExpanded.classList.remove("expanded");
+            }
+
+            if (isExpanded) {
+              // Collapse this slot
+              slot.classList.remove("expanded");
+            } else {
+              // Expand this slot and render overlay
               const resultData = slot._resultData;
               const functionMask = createFunctionPatternMask(currentVersion);
               renderErrorOverlay(
@@ -14942,25 +14943,28 @@ self.onmessage = function(e) {
                 paintGrid.cells,
                 functionMask,
               );
-              overlayCanvas.classList.add("visible");
-              errorsBtn.classList.add("overlay-active");
-            } else {
-              // Hide overlay
-              overlayCanvas.classList.remove("visible");
-              errorsBtn.classList.remove("overlay-active");
+              slot.classList.add("expanded");
             }
-
-            // Update legend visibility
-            updateLegendVisibility();
-          };
+          });
 
           actions.appendChild(downloadBtn);
           actions.appendChild(copyBtn);
-          actions.appendChild(errorsBtn);
+
+          // Create legend (visible only when expanded)
+          const legend = document.createElement("div");
+          legend.className = "overlay-legend";
+          legend.innerHTML = [
+            ["rgba(0, 200, 0, 0.3)", "Match"],
+            ["rgba(255, 0, 0, 0.45)", "Conflict"],
+            ["rgba(0, 100, 255, 0.35)", "Function"],
+          ].map(([bg, text]) =>
+            `<div class="overlay-legend-item"><div class="overlay-legend-swatch" style="background:${bg}"></div><span>${text}</span></div>`
+          ).join("");
 
           // Assemble slot
           slot.appendChild(rank);
           slot.appendChild(canvasContainer);
+          slot.appendChild(legend);
           slot.appendChild(label);
           slot.appendChild(actions);
           topResultsContainer.appendChild(slot);
@@ -14970,21 +14974,6 @@ self.onmessage = function(e) {
         previousTopHashes = currentHashes;
       }
 
-      /**
-       * Update overlay legend visibility based on whether any overlays are visible
-       */
-      function updateLegendVisibility() {
-        const legend = document.getElementById("overlay-legend");
-        const visibleOverlays = document.querySelectorAll(
-          ".result-overlay.visible",
-        );
-
-        if (visibleOverlays.length > 0) {
-          legend.classList.add("visible");
-        } else {
-          legend.classList.remove("visible");
-        }
-      }
 
       /**
        * Handle search completion
