@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Phase 2 complete. Ready for Phase 3 planning.
+**Current focus:** Phase 3 complete. Ready for Phase 4 planning.
 
 ## Current Position
 
-Phase: 3 of 4 (Hash Optimization Loop)
-Plan: 1 of 2 in phase
-Status: In progress
-Last activity: 2026-02-09 — Completed 03-01-PLAN.md
+Phase: 3 of 4 (Hash Optimization Loop) — COMPLETE
+Plan: 2 of 2 in phase
+Status: Complete
+Last activity: 2026-02-09 — Completed 03-02-PLAN.md
 
-Progress: [████████████░░] 83% (5 of 6 plans complete)
+Progress: [██████████████] 100% (6 of 6 plans complete, Phases 1-3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 115 minutes
-- Total execution time: 9.6 hours
+- Total plans completed: 6
+- Average duration: 105 minutes
+- Total execution time: ~10.4 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [████████████░░] 83% (5 of 6 plans complet
 |-------|-------|-------|----------|
 | 1 | 2/2 | 20min | 10min |
 | 2 | 2/2 | 545min | 272min |
-| 3 | 1/2 | 5min | 5min |
+| 3 | 2/2 | 50min | 25min |
 
 **Recent Trend:**
-- Last plan: 03-01 (5 minutes)
-- Trend: Phase 3 started efficiently. Web Worker implementation completed quickly due to clear extraction pattern
+- Last plan: 03-02 (~45 minutes including iterative bug fixes during checkpoint)
+- Trend: Phase 3 completed efficiently despite multiple checkpoint fixes
 
 *Updated after each plan completion*
 
@@ -66,9 +66,12 @@ Recent decisions affecting current work:
 - Real-time re-decode on every paint click for instant feedback — Core user experience (02-02)
 - Extract QR encoding core for worker use — DOM-independent QR generation (03-01)
 - Runtime script extraction for jsQR in worker — Maintains single-file architecture (03-01)
-- Random hash with crypto.getRandomValues — 64^8 combinations from URL-safe charset (03-01)
+- Random hash with crypto.getRandomValues — a-z0-9 charset, 6 chars (03-01/03-02)
 - Top 5 tracking sorted by decodability then pixel diff — Best alignment results (03-01)
-- Progress every 100 attempts or 500ms — Responsive UI without main thread flooding (03-01)
+- Batched search loop (100 iterations + setTimeout(0)) — Allows stop messages (03-02)
+- Cumulative stats across runs — totalAttempts/totalDecodableCount persist (03-02)
+- Lock painting during optimization, reset on paint change — Prevents stale results (03-02)
+- HASH_OVERHEAD in version calculation — Ensures QR capacity for URL + hash (03-02)
 
 ### Pending Todos
 
@@ -85,13 +88,15 @@ None.
 - ✓ RESOLVED: Web Worker architecture verified - Blob URL pattern works with inline code
 - ✓ RESOLVED: QR encoding extraction successful - Core classes isolated from DOM rendering
 - ✓ RESOLVED: jsQR integration via runtime script concatenation working
-- Performance benchmarking needed: iterations/second will inform UI timeout defaults (Plan 02 can test)
+- ✓ RESOLVED: Worker ImageData scaling needed for jsQR decode (floor(400/moduleCount) px/module)
+- ✓ RESOLVED: Synchronous worker loop blocked stop messages - fixed with batched setTimeout
+- ✓ RESOLVED: Result accumulation across runs with cumulative stats
 
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 03-01-PLAN.md (Web Worker search engine)
+Stopped at: Completed Phase 3 (Hash Optimization Loop)
 Resume file: None
 
 ---
-*Next step: Execute 03-02-PLAN.md (UI Controls & Results Display)*
+*Next step: Plan Phase 4 (Results & Export)*
