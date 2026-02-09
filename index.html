@@ -12387,7 +12387,7 @@ self.onmessage = function(e) {
         paintedPixels: Array.from(paintGrid.cells),
         functionMask: Array.from(createFunctionPatternMask(currentVersion)),
         timeout: timeout,
-        existingTopResults: latestOptimizationResults?.topResults || []
+        existingTopResults: currentTopResults
       };
 
       optimizationWorker.postMessage(message);
@@ -12418,6 +12418,8 @@ self.onmessage = function(e) {
     let searchStartTime = 0;
     let progressInterval = null;
     let currentTimeout = 30;
+    let totalAttempts = 0;
+    let totalDecodableCount = 0;
 
     /**
      * Check paint state and enable/disable optimize button
@@ -12616,9 +12618,12 @@ self.onmessage = function(e) {
       // Store results for accumulation
       currentTopResults = data.topResults;
 
-      // Show summary
-      const decodableCount = data.decodableCount || 0;
-      searchSummary.textContent = `Done - ${data.attempts.toLocaleString()} attempts, ${decodableCount} decodable found`;
+      // Accumulate stats across runs
+      totalAttempts += data.attempts;
+      totalDecodableCount += (data.decodableCount || 0);
+
+      // Show summary with cumulative stats
+      searchSummary.textContent = `Done - ${totalAttempts.toLocaleString()} attempts, ${totalDecodableCount} decodable found`;
       searchSummary.style.display = 'block';
 
       // Final update to top results
