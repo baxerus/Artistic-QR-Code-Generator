@@ -12231,7 +12231,7 @@ function evaluateCandidate(hash) {
     }
   }
 
-  return { hash, pixelDiff, decodable, moduleData };
+  return { hash, pixelDiff, decodable, moduleData, moduleCount };
 }
 
 // Update top results
@@ -12263,7 +12263,8 @@ function sendProgress() {
       hash: r.hash,
       pixelDiff: r.pixelDiff,
       decodable: r.decodable,
-      moduleData: Array.from(r.moduleData)
+      moduleData: Array.from(r.moduleData),
+      moduleCount: r.moduleCount
     })),
     decodableCount: decodableCount
   });
@@ -12300,7 +12301,8 @@ function runSearch() {
       hash: r.hash,
       pixelDiff: r.pixelDiff,
       decodable: r.decodable,
-      moduleData: Array.from(r.moduleData)
+      moduleData: Array.from(r.moduleData),
+      moduleCount: r.moduleCount
     })),
     decodableCount: decodableCount
   });
