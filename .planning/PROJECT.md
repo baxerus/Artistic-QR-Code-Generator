@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A single-page HTML tool for creating artistic QR codes by embedding custom pixel patterns. Users paint patterns that are locked in place, then the tool searches for URL hash fragments whose natural QR encoding aligns well with the art, minimizing decoder errors while preserving 100% of the painted pattern.
+A single-file HTML tool (508KB, 15,161 lines) for creating artistic QR codes by embedding custom pixel patterns. Users paint three-state patterns onto a QR grid, then the tool runs a Web Worker-based search through URL hash fragments to find encodings that naturally align with the art, minimizing pixel conflicts while preserving 100% of the painted pattern.
 
 ## Core Value
 
@@ -12,35 +12,35 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Validated
 
-(None yet — ship to validate)
+- URL input field with validation — v1
+- Automatic minimum QR version calculation based on URL length + error correction level H — v1
+- QR version selector (Version 2-8) showing valid range for entered URL — v1
+- Painting canvas with grid matching selected QR version dimensions — v1
+- Three-state pixel painting: white (locked), black (locked), unset (QR decides) — v1
+- Click to cycle pixel states: unset → white → black → unset — v1
+- Visual distinction between all three pixel states — v1
+- Clear/reset button to wipe painted pattern — v1
+- Generate button to start optimization — v1
+- Hash fragment optimization algorithm that tries different #fragments — v1
+- Configurable max search time in seconds — v1
+- Manual stop button during search — v1
+- Live progress display: attempts counter, elapsed time — v1
+- Live preview of top 5 current best QR codes during search — v1
+- Live error count display for top 5 results — v1
+- Pixel diff error measurement (painted pixel vs QR module alignment) — v1
+- Top 5 results display ranked by decoder error count — v1
+- Download QR code as image (PNG) for each result — v1
+- Copy final URL (with hash fragment) for each result — v1
+- Error visualization overlay showing: locked pattern pixels, QR data pixels, error/conflict pixels — v1
+- QR error correction level H hardcoded — v1
+- All JavaScript libraries inlined in HTML (no external files) — v1
+- All CSS inlined in HTML — v1
+- Works when served by web server — v1
+- Works when opened via file:// protocol — v1
 
 ### Active
 
-- [ ] URL input field with validation
-- [ ] Automatic minimum QR version calculation based on URL length + error correction level H
-- [ ] QR version selector (Version 2-8) showing valid range for entered URL
-- [ ] Painting canvas with grid matching selected QR version dimensions
-- [ ] Three-state pixel painting: white (locked), black (locked), unset (QR decides)
-- [ ] Click to cycle pixel states: unset → white → black → unset
-- [ ] Visual distinction between all three pixel states
-- [ ] Clear/reset button to wipe painted pattern
-- [ ] Generate button to start optimization
-- [ ] Hash fragment optimization algorithm that tries different #fragments
-- [ ] Configurable max search time in seconds
-- [ ] Manual stop button during search
-- [ ] Live progress display: attempts counter, elapsed time
-- [ ] Live preview of current best QR code during search
-- [ ] Live error count display for current best result
-- [ ] QR decoder error counting (Reed-Solomon errors when decoding corrupted QR)
-- [ ] Top 5 results display ranked by decoder error count
-- [ ] Download QR code as image (PNG) for each result
-- [ ] Copy final URL (with hash fragment) for each result
-- [ ] Error visualization overlay showing: locked pattern pixels, QR data pixels, error/conflict pixels
-- [ ] QR error correction level H hardcoded
-- [ ] All JavaScript libraries inlined in HTML (no external files)
-- [ ] All CSS inlined in HTML
-- [ ] Works when served by web server
-- [ ] Works when opened via file:// protocol
+(None — v1 complete)
 
 ### Out of Scope
 
@@ -56,17 +56,20 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ## Context
 
+**Current State:**
+Shipped v1 MVP with 15,161 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (inlined), Web Workers via Blob URL. All 31 v1 requirements satisfied across 4 phases, 8 plans, 59 commits over 4 days.
+
 **Artistic QR Code Use Case:**
 The tool is designed for creating artistic/branded QR codes where visual aesthetics matter as much as (or more than) scannability. Users want to embed logos, patterns, or designs into QR codes.
 
 **Algorithm Insight:**
-Different URL contents produce different QR code pixel patterns. By varying the hash fragment (#abc123), we search through different natural QR encodings to find ones that happen to align well with the painted pattern. The pattern is fixed; we're finding the lucky URL variant.
+Different URL contents produce different QR code pixel patterns. By varying the hash fragment (#abc123), we search through different natural QR encodings to find ones that happen to align well with the painted pattern. The pattern is fixed; we're finding the lucky URL variant. Hash charset is a-z0-9, length 6 (~2.2B combinations).
 
 **Error Measurement:**
-"Error count" means decoder errors when a QR scanner attempts to read the pattern-corrupted code. The algorithm generates a valid QR for URL+hash, overlays the locked pattern (corrupting it), then measures how many errors the decoder reports. Lower errors = better natural alignment.
+"Error count" means pixel diff — the number of painted pixels that conflict with the QR module states. The algorithm generates a valid QR for URL+hash, overlays the locked pattern, then counts conflicts. Lower conflicts = better natural alignment. Results are sorted by decodability first, then by pixel diff ascending.
 
 **Top 5 Results Rationale:**
-The mathematically best result (fewest errors) might not be the aesthetically best. Showing top 5 lets users choose based on visual harmony, not just error metrics.
+The mathematically best result (fewest errors) might not be the aesthetically best. Showing top 5 lets users choose based on visual harmony, not just error metrics. Results accumulate across multiple optimization runs.
 
 ## Constraints
 
@@ -75,18 +78,24 @@ The mathematically best result (fewest errors) might not be the aesthetically be
 - **Protocol compatibility**: Must work both via http:// (web server) and file:// (local filesystem)
 - **Modern browsers**: Target recent Chrome, Firefox, Safari — no IE/legacy support needed
 - **Error correction**: Must use QR error correction level H (highest, ~30% error tolerance)
-- **QR version range**: Version 2 (25×25) to Version 8 (49×49) — configurable based on URL length
+- **QR version range**: Version 2 (25x25) to Version 8 (49x49) — configurable based on URL length
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Hash fragments for URL variants | Clean, doesn't affect destination URL, easy to generate | — Pending |
-| Three-state pixels (white/black/unset) | Pattern pixels are locked, others free for QR algorithm | — Pending |
-| Top 5 results instead of single best | Aesthetic choice matters beyond pure error metrics | — Pending |
-| Error correction level H | Maximum error tolerance for artistic corruption | — Pending |
-| Everything in single HTML file | Simplicity, portability, works via file:// | — Pending |
-| Modern browsers only | Simplifies development, avoid legacy compatibility | — Pending |
+| Hash fragments for URL variants | Clean, doesn't affect destination URL, easy to generate | ✓ Good — core algorithm works well |
+| Three-state pixels (white/black/unset) | Pattern pixels are locked, others free for QR algorithm | ✓ Good — intuitive UX |
+| Top 5 results instead of single best | Aesthetic choice matters beyond pure error metrics | ✓ Good — users can pick visually best |
+| Error correction level H | Maximum error tolerance for artistic corruption | ✓ Good — essential for pattern survival |
+| Everything in single HTML file | Simplicity, portability, works via file:// | ✓ Good — zero setup, easy sharing |
+| Modern browsers only | Simplifies development, avoid legacy compatibility | ✓ Good — no compatibility issues |
+| Pixel diff instead of Reed-Solomon errors | jsQR doesn't expose RS error counts; pixel diff is practical proxy | ✓ Good — effective alignment metric |
+| Web Worker via Blob URL | Non-blocking search in single-file architecture | ✓ Good — UI stays responsive |
+| Batched worker loop (100 + setTimeout) | Allows stop messages to interrupt search | ✓ Good — clean stop behavior |
+| 1:1 module resolution PNG export | No scaling artifacts, users resize as needed | ✓ Good — cleanest output |
+| Click-to-expand error overlay | Full-width preview better than toggle button | ✓ Good — clear visualization |
+| Paint locking during optimization | Prevents stale results from pattern changes | ✓ Good — data integrity |
 
 ---
-*Last updated: 2026-02-06 after initialization*
+*Last updated: 2026-02-09 after v1 milestone*
