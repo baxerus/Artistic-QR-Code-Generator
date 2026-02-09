@@ -12139,8 +12139,14 @@ function generateRandomHash(length) {
 function evaluateCandidate(hash) {
   const fullURL = searchConfig.baseURL + '#' + hash;
 
-  // Generate QR model
-  const qr = generateQRModel(fullURL, searchConfig.version, 2); // 2 = H level
+  // Generate QR model - may throw if URL+hash exceeds version capacity
+  let qr;
+  try {
+    qr = generateQRModel(fullURL, searchConfig.version, 2); // 2 = H level
+  } catch (e) {
+    // URL too long for this QR version - skip this candidate
+    return null;
+  }
   const moduleCount = qr.getModuleCount();
 
   // Calculate pixel diff (compare painted pixels with QR modules)
@@ -12268,7 +12274,9 @@ function runSearch() {
   while (!shouldStop && Date.now() < timeoutEnd) {
     const hash = generateRandomHash(8);
     const result = evaluateCandidate(hash);
-    updateTopResults(result);
+    if (result !== null) {
+      updateTopResults(result);
+    }
     attemptCount++;
 
     // Send progress every 100 attempts or 500ms
