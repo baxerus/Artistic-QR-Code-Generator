@@ -14450,6 +14450,8 @@ self.onmessage = function(e) {
         searchProgress.style.display = "block";
         searchSummary.style.display = "none";
         progressTime.textContent = `0s / ${currentTimeout}s`;
+        document.getElementById("attempts-counter").textContent = `${totalAttempts.toLocaleString()} attempts`;
+        document.getElementById("elapsed-counter").textContent = "0s elapsed";
 
         // Start progress animation
         searchStartTime = Date.now();
