@@ -438,6 +438,7 @@
       }
 
       #search-progress {
+        min-height: 58px;
         margin-bottom: 20px;
       }
 
@@ -458,18 +459,6 @@
         transition: width 0.3s ease;
       }
 
-      .progress-time {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 0.7rem;
-        color: #333;
-        font-weight: 500;
-        text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
-        pointer-events: none;
-      }
-
       .search-stats {
         display: flex;
         justify-content: space-between;
@@ -485,6 +474,10 @@
         margin-bottom: 20px;
         font-size: 0.9rem;
         color: #555;
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .top-results {
@@ -701,7 +694,6 @@
           <div id="search-progress" style="display: none">
             <div class="progress-bar-container">
               <div class="progress-bar" id="progress-bar"></div>
-              <span class="progress-time" id="progress-time">0s / 30s</span>
             </div>
             <div class="search-stats">
               <span id="attempts-counter">0 attempts</span>
@@ -14501,7 +14493,6 @@ self.onmessage = function(e) {
         const optimizeBtn = document.getElementById("optimize-btn");
         const searchProgress = document.getElementById("search-progress");
         const searchSummary = document.getElementById("search-summary");
-        const progressTime = document.getElementById("progress-time");
 
         currentTimeout = parseInt(timeoutInput.value);
 
@@ -14510,10 +14501,10 @@ self.onmessage = function(e) {
         optimizeBtn.textContent = "Stop";
         searchProgress.style.display = "block";
         searchSummary.style.display = "none";
-        progressTime.textContent = `0s / ${currentTimeout}s`;
         document.getElementById("attempts-counter").textContent =
           `${totalAttempts.toLocaleString()} attempts`;
-        document.getElementById("elapsed-counter").textContent = "0s elapsed";
+        document.getElementById("elapsed-counter").textContent =
+          `0 seconds of ${currentTimeout} seconds elapsed`;
 
         // Start progress animation
         searchStartTime = Date.now();
@@ -14540,11 +14531,9 @@ self.onmessage = function(e) {
       function updateProgressAnimation() {
         const elapsed = (Date.now() - searchStartTime) / 1000;
         const progressBar = document.getElementById("progress-bar");
-        const progressTime = document.getElementById("progress-time");
 
         const percentage = Math.min((elapsed / currentTimeout) * 100, 100);
         progressBar.style.width = percentage + "%";
-        progressTime.textContent = `${Math.floor(elapsed)}s / ${currentTimeout}s`;
       }
 
       /**
@@ -14555,7 +14544,7 @@ self.onmessage = function(e) {
         const elapsedCounter = document.getElementById("elapsed-counter");
 
         attemptsCounter.textContent = `${(totalAttempts + attempts).toLocaleString()} attempts`;
-        elapsedCounter.textContent = `${Math.floor(elapsed / 1000)}s elapsed`;
+        elapsedCounter.textContent = `${Math.floor(elapsed / 1000)} sec of ${currentTimeout} sec elapsed`;
       }
 
       /**
@@ -14823,7 +14812,7 @@ self.onmessage = function(e) {
 
         // Show summary with cumulative stats
         searchSummary.textContent = `Done - ${totalAttempts.toLocaleString()} attempts, ${totalDecodableCount} decodable found`;
-        searchSummary.style.display = "block";
+        searchSummary.style.display = "flex";
 
         // Final update to top results
         if (data.topResults && data.topResults.length > 0) {
