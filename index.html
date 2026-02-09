@@ -34,7 +34,7 @@
 
       .container {
         width: 100%;
-        max-width: 600px;
+        max-width: 900px;
         margin: 0 auto;
         background-color: #fff;
         border-radius: 8px;
@@ -191,7 +191,7 @@
 
       .paint-container {
         width: 100%;
-        max-width: 400px;
+        max-width: 600px;
         margin: 0 auto 15px;
         display: flex;
         align-items: center;
@@ -265,7 +265,7 @@
 
       .canvas-container {
         width: 100%;
-        max-width: 400px;
+        max-width: 600px;
         margin: 0 auto;
         aspect-ratio: 1 / 1;
         display: flex;
@@ -298,7 +298,7 @@
         color: #999;
       }
 
-      @media (max-width: 640px) {
+      @media (max-width: 940px) {
         .container {
           padding: 20px;
         }
@@ -490,8 +490,8 @@
       .top-results {
         display: flex;
         justify-content: center;
-        gap: 12px;
-        flex-wrap: wrap;
+        gap: 10px;
+        flex-wrap: nowrap;
         margin-top: 20px;
       }
 
@@ -499,13 +499,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
-        padding: 10px;
+        gap: 6px;
+        padding: 8px;
         border-radius: 6px;
         background-color: #fafafa;
         border: 1px solid #e0e0e0;
         transition: box-shadow 0.3s ease;
-        min-width: 120px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 160px;
       }
 
       .result-slot canvas {
@@ -554,10 +556,10 @@
       }
 
       .result-rank {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: 700;
         color: #333;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
       }
 
       .result-hash {
@@ -570,19 +572,20 @@
 
       .result-actions {
         display: flex;
-        gap: 6px;
+        gap: 4px;
         margin-top: 4px;
         flex-wrap: wrap;
         justify-content: center;
       }
 
       .result-actions button {
-        font-size: 0.7rem;
-        padding: 4px 8px;
+        font-size: 0.65rem;
+        padding: 3px 6px;
         cursor: pointer;
         border: 1px solid #ccc;
         border-radius: 4px;
         background: #fff;
+        color: #333;
         transition: background 0.2s ease;
       }
 
@@ -13010,7 +13013,7 @@
         const container = document.getElementById("canvas-container");
 
         // Step 1: Render clean QR to canvas
-        qrCanvas = renderQRToCanvas(qrModel, 400);
+        qrCanvas = renderQRToCanvas(qrModel, 600);
 
         // Step 2: Create function pattern mask
         const functionMask = createFunctionPatternMask(currentVersion);
@@ -13167,8 +13170,8 @@
         const canvas = document.getElementById("paint-canvas");
         const paintSection = document.getElementById("paint-section");
 
-        // Calculate canvas size - fit within 400px max, use integer cell sizes
-        const maxSize = 400;
+        // Calculate canvas size - fit within 600px max, use integer cell sizes
+        const maxSize = 600;
         paintCellSize = Math.floor(maxSize / gridSize);
         const canvasSize = gridSize * paintCellSize;
 
@@ -14736,12 +14739,12 @@ self.onmessage = function(e) {
           const statusSpan = document.createElement("span");
           statusSpan.className = `status ${result.decodable ? "decodable" : "not-decodable"}`;
           statusSpan.textContent = result.decodable
-            ? "decodable"
-            : "not decodable";
+            ? "Decodable"
+            : "Not decodable";
 
           const errorsSpan = document.createElement("span");
           errorsSpan.className = "errors";
-          errorsSpan.textContent = ` - ${result.pixelDiff} errors`;
+          errorsSpan.textContent = `${result.pixelDiff} errors`;
 
           label.appendChild(statusSpan);
           label.appendChild(document.createElement("br"));
@@ -14765,7 +14768,7 @@ self.onmessage = function(e) {
             const exportCanvas = renderResultToCanvas(
               result.moduleData,
               result.moduleCount,
-              512
+              512,
             );
             downloadCanvasAsPNG(exportCanvas, `qr-${result.hash}`);
           };
