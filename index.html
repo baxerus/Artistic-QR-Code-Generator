@@ -12123,7 +12123,7 @@ let startTime = 0;
 let lastProgressTime = 0;
 
 // Random hash generator (URL-safe charset)
-const HASH_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const HASH_CHARSET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
 function generateRandomHash(length) {
   const values = new Uint8Array(length);
@@ -12272,7 +12272,7 @@ function runSearch() {
   const timeoutEnd = startTime + searchConfig.timeout;
 
   while (!shouldStop && Date.now() < timeoutEnd) {
-    const hash = generateRandomHash(8);
+    const hash = generateRandomHash(6);
     const result = evaluateCandidate(hash);
     if (result !== null) {
       updateTopResults(result);
