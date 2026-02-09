@@ -11096,7 +11096,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
      * Calculate minimum QR version needed for URL
      * Returns version number (1-8) or -1 if too long
      */
-    const HASH_OVERHEAD = 1 + 6; // '#' + HASH_LENGTH chars
+    const HASH_LENGTH = 6;
+    const HASH_OVERHEAD = 1 + HASH_LENGTH; // '#' + hash chars
 
     function calculateMinimumVersion(url) {
       const byteLength = new Blob([url]).size + HASH_OVERHEAD;
