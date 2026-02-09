@@ -591,6 +591,60 @@
         cursor: default;
         background: #f0f0f0;
       }
+
+      .result-actions button.overlay-active {
+        background: #e3f2fd;
+        border-color: #90caf9;
+        color: #1976d2;
+      }
+
+      .result-canvas-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+      }
+
+      .result-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        image-rendering: pixelated;
+        display: none;
+      }
+
+      .result-overlay.visible {
+        display: block;
+      }
+
+      .overlay-legend {
+        display: none;
+        gap: 12px;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: #666;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+
+      .overlay-legend.visible {
+        display: flex;
+      }
+
+      .overlay-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .overlay-legend-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        border: 1px solid #ccc;
+      }
     </style>
   </head>
   <body>
@@ -710,6 +764,26 @@
 
           <!-- Top 5 results row -->
           <div id="top-results" class="top-results" style="display: none"></div>
+
+          <!-- Error overlay legend -->
+          <div id="overlay-legend" class="overlay-legend">
+            <div class="overlay-legend-item">
+              <div class="overlay-legend-swatch" style="background: rgba(0, 200, 0, 0.3);"></div>
+              <span>Match</span>
+            </div>
+            <div class="overlay-legend-item">
+              <div class="overlay-legend-swatch" style="background: rgba(255, 0, 0, 0.45);"></div>
+              <span>Conflict</span>
+            </div>
+            <div class="overlay-legend-item">
+              <div class="overlay-legend-swatch" style="background: rgba(0, 100, 255, 0.35);"></div>
+              <span>Function</span>
+            </div>
+            <div class="overlay-legend-item">
+              <div class="overlay-legend-swatch" style="background: transparent;"></div>
+              <span>Data</span>
+            </div>
+          </div>
         </div>
       </main>
 
@@ -14576,6 +14650,57 @@ self.onmessage = function(e) {
       }
 
       /**
+       * Render error visualization overlay
+       * @param {HTMLCanvasElement} overlayCanvas - Canvas to render overlay on
+       * @param {Array<number>} moduleData - QR module data (0=white, 1=black)
+       * @param {number} moduleCount - Size of QR code
+       * @param {Array<number>} paintedPixels - Paint grid cells (0=unset, 1=white, 2=black)
+       * @param {Array<boolean>} functionMask - Function pattern mask (true=function pattern)
+       */
+      function renderErrorOverlay(
+        overlayCanvas,
+        moduleData,
+        moduleCount,
+        paintedPixels,
+        functionMask,
+      ) {
+        // Set canvas to module resolution (CSS will scale with pixelated rendering)
+        overlayCanvas.width = moduleCount;
+        overlayCanvas.height = moduleCount;
+
+        const ctx = overlayCanvas.getContext("2d");
+        ctx.clearRect(0, 0, moduleCount, moduleCount);
+
+        // Iterate through all modules
+        for (let row = 0; row < moduleCount; row++) {
+          for (let col = 0; col < moduleCount; col++) {
+            const idx = row * moduleCount + col;
+
+            if (functionMask[idx]) {
+              // Function pattern pixels (finders, timing, alignment) - blue
+              ctx.fillStyle = "rgba(0, 100, 255, 0.35)";
+              ctx.fillRect(col, row, 1, 1);
+            } else if (paintedPixels[idx] !== 0) {
+              // Locked painted pixel - check if it matches QR data
+              const paintedIsDark = paintedPixels[idx] === 2;
+              const qrIsDark = moduleData[idx] === 1;
+
+              if (paintedIsDark === qrIsDark) {
+                // Match - green
+                ctx.fillStyle = "rgba(0, 200, 0, 0.3)";
+                ctx.fillRect(col, row, 1, 1);
+              } else {
+                // Conflict - red
+                ctx.fillStyle = "rgba(255, 0, 0, 0.45)";
+                ctx.fillRect(col, row, 1, 1);
+              }
+            }
+            // Unset data pixels have no overlay color
+          }
+        }
+      }
+
+      /**
        * Download canvas as PNG file
        * @param {HTMLCanvasElement} canvas - Canvas to export
        * @param {string} filename - Filename without extension
@@ -14685,6 +14810,9 @@ self.onmessage = function(e) {
           // Store hash for potential future use
           slot.dataset.hash = result.hash;
 
+          // Store result data for overlay rendering
+          slot._resultData = result;
+
           // Check if this is a new result
           const isNew = !previousTopHashes.includes(result.hash);
           if (isNew) {
@@ -14697,6 +14825,10 @@ self.onmessage = function(e) {
           const rank = document.createElement("div");
           rank.className = "result-rank";
           rank.textContent = `#${index + 1}`;
+
+          // Create canvas container for QR preview and overlay
+          const canvasContainer = document.createElement("div");
+          canvasContainer.className = "result-canvas-container";
 
           // Create canvas for QR preview
           const canvas = document.createElement("canvas");
@@ -14715,6 +14847,16 @@ self.onmessage = function(e) {
             imageData.data[i * 4 + 3] = 255;
           }
           ctx.putImageData(imageData, 0, 0);
+
+          // Create overlay canvas (hidden by default)
+          const overlayCanvas = document.createElement("canvas");
+          overlayCanvas.className = "result-overlay";
+          overlayCanvas.width = moduleCount;
+          overlayCanvas.height = moduleCount;
+
+          // Assemble canvas container
+          canvasContainer.appendChild(canvas);
+          canvasContainer.appendChild(overlayCanvas);
 
           // Create label with status and errors
           const label = document.createElement("div");
@@ -14763,12 +14905,43 @@ self.onmessage = function(e) {
             copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
           };
 
+          // Errors toggle button
+          const errorsBtn = document.createElement("button");
+          errorsBtn.textContent = "Errors";
+          errorsBtn.onclick = function () {
+            const overlayCanvas = canvasContainer.querySelector(".result-overlay");
+            const isVisible = overlayCanvas.classList.contains("visible");
+
+            if (!isVisible) {
+              // Show overlay - render and display
+              const resultData = slot._resultData;
+              const functionMask = createFunctionPatternMask(currentVersion);
+              renderErrorOverlay(
+                overlayCanvas,
+                resultData.moduleData,
+                resultData.moduleCount,
+                paintGrid.cells,
+                functionMask,
+              );
+              overlayCanvas.classList.add("visible");
+              errorsBtn.classList.add("overlay-active");
+            } else {
+              // Hide overlay
+              overlayCanvas.classList.remove("visible");
+              errorsBtn.classList.remove("overlay-active");
+            }
+
+            // Update legend visibility
+            updateLegendVisibility();
+          };
+
           actions.appendChild(downloadBtn);
           actions.appendChild(copyBtn);
+          actions.appendChild(errorsBtn);
 
           // Assemble slot
           slot.appendChild(rank);
-          slot.appendChild(canvas);
+          slot.appendChild(canvasContainer);
           slot.appendChild(label);
           slot.appendChild(actions);
           topResultsContainer.appendChild(slot);
@@ -14776,6 +14949,22 @@ self.onmessage = function(e) {
 
         // Update previous hashes for next comparison
         previousTopHashes = currentHashes;
+      }
+
+      /**
+       * Update overlay legend visibility based on whether any overlays are visible
+       */
+      function updateLegendVisibility() {
+        const legend = document.getElementById("overlay-legend");
+        const visibleOverlays = document.querySelectorAll(
+          ".result-overlay.visible",
+        );
+
+        if (visibleOverlays.length > 0) {
+          legend.classList.add("visible");
+        } else {
+          legend.classList.remove("visible");
+        }
       }
 
       /**
