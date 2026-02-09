@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Phase 3 complete. Ready for Phase 4 planning.
+**Current focus:** All 4 phases complete. Milestone 1 finished.
 
 ## Current Position
 
-Phase: 3 of 4 (Hash Optimization Loop) — COMPLETE
+Phase: 4 of 4 (Results & Export) — COMPLETE
 Plan: 2 of 2 in phase
-Status: Complete
-Last activity: 2026-02-09 — Completed 03-02-PLAN.md
+Status: Complete — All phases done
+Last activity: 2026-02-09 — Completed 04-02-PLAN.md
 
-Progress: [██████████████] 100% (6 of 6 plans complete, Phases 1-3)
+Progress: [████████████████] 100% (8 of 8 plans complete, Phases 1-4)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 105 minutes
-- Total execution time: ~10.4 hours
+- Total plans completed: 8
+- Average duration: ~90 minutes
+- Total execution time: ~11.6 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [██████████████] 100% (6 of 6 plans comple
 | 1 | 2/2 | 20min | 10min |
 | 2 | 2/2 | 545min | 272min |
 | 3 | 2/2 | 50min | 25min |
+| 4 | 2/2 | 75min | 37min |
 
 **Recent Trend:**
-- Last plan: 03-02 (~45 minutes including iterative bug fixes during checkpoint)
-- Trend: Phase 3 completed efficiently despite multiple checkpoint fixes
+- Last plan: 04-02 (~40 minutes including iterative checkpoint fixes)
+- Trend: Phase 4 completed with significant user-directed UI improvements during checkpoints
 
 *Updated after each plan completion*
 
@@ -71,6 +72,12 @@ Recent decisions affecting current work:
 - Batched search loop (100 iterations + setTimeout(0)) — Allows stop messages (03-02)
 - Cumulative stats across runs — totalAttempts/totalDecodableCount persist (03-02)
 - Lock painting during optimization, reset on paint change — Prevents stale results (03-02)
+- Export PNG at 1:1 scale (1 module = 1 pixel) — No scaling artifacts, users can resize (04-01)
+- Widened layout to 900px, canvases to 600px — Better use of screen space (04-01)
+- Click-to-expand results instead of toggle button — Full-width preview with overlay (04-02)
+- Added qrModuleData for accurate overlay comparison — moduleData has paint baked in (04-02)
+- Disabled result actions during optimization — Prevents issues with live-updating results (04-02)
+- HASH_OVERHEAD in version calculation — Ensures QR capacity for URL + hash (03-02)
 - HASH_OVERHEAD in version calculation — Ensures QR capacity for URL + hash (03-02)
 
 ### Pending Todos
@@ -95,8 +102,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed Phase 3 (Hash Optimization Loop)
+Stopped at: Completed Phase 4 (Results & Export) — All phases done
 Resume file: None
 
 ---
-*Next step: Plan Phase 4 (Results & Export)*
+*Milestone 1 complete. All 4 phases delivered.*

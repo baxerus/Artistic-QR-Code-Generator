@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & QR Generation** - Single-file architecture with URL input and basic QR code generation
 - [x] **Phase 2: Pixel Painting & Corruption** - Three-state canvas editor with pattern locking and error measurement
 - [x] **Phase 3: Hash Optimization Loop** - Web Worker search algorithm with live progress and top 5 tracking
-- [ ] **Phase 4: Results & Export** - Results display with PNG download, URL copy, and error visualization
+- [x] **Phase 4: Results & Export** - Results display with PNG download, URL copy, and error visualization
 
 ## Phase Details
 
@@ -82,8 +82,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Enhanced results display with Download PNG and Copy URL actions
-- [ ] 04-02-PLAN.md — Error visualization overlay with toggle and color legend
+- [x] 04-01-PLAN.md — Enhanced results display with Download PNG and Copy URL actions
+- [x] 04-02-PLAN.md — Error visualization overlay with click-to-expand and color legend
 
 ## Progress
 
@@ -95,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & QR Generation | 2/2 | Complete | 2026-02-07 |
 | 2. Pixel Painting & Corruption | 2/2 | Complete | 2026-02-07 |
 | 3. Hash Optimization Loop | 2/2 | Complete | 2026-02-09 |
-| 4. Results & Export | 0/2 | Not started | - |
+| 4. Results & Export | 2/2 | Complete | 2026-02-09 |
 
 ---
 *Roadmap created: 2026-02-06*
