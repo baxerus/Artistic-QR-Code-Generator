@@ -12174,8 +12174,10 @@ function evaluateCandidate(hash) {
     }
   }
 
-  // Render to ImageData for decode
-  const imageData = new ImageData(moduleCount, moduleCount);
+  // Render to scaled ImageData for decode (jsQR needs multiple pixels per module)
+  const scale = Math.floor(400 / moduleCount);
+  const canvasSize = moduleCount * scale;
+  const imageData = new ImageData(canvasSize, canvasSize);
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
       const idx = row * moduleCount + col;
@@ -12184,19 +12186,22 @@ function evaluateCandidate(hash) {
 
       let dark;
       if (!isFunctionPattern && paintedState !== 0) {
-        // Use painted pixel
         dark = (paintedState === 2);
       } else {
-        // Use QR module
         dark = qr.isDark(row, col);
       }
 
-      const pixelIdx = (row * moduleCount + col) * 4;
       const color = dark ? 0 : 255;
-      imageData.data[pixelIdx] = color;
-      imageData.data[pixelIdx + 1] = color;
-      imageData.data[pixelIdx + 2] = color;
-      imageData.data[pixelIdx + 3] = 255;
+      // Fill scale x scale block for this module
+      for (let py = 0; py < scale; py++) {
+        for (let px = 0; px < scale; px++) {
+          const pixelIdx = ((row * scale + py) * canvasSize + (col * scale + px)) * 4;
+          imageData.data[pixelIdx] = color;
+          imageData.data[pixelIdx + 1] = color;
+          imageData.data[pixelIdx + 2] = color;
+          imageData.data[pixelIdx + 3] = 255;
+        }
+      }
     }
   }
 
