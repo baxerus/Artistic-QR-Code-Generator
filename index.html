@@ -14232,27 +14232,38 @@ function sendProgress() {
   lastProgressTime = Date.now();
 }
 
-// Main search loop
+// Main search loop - runs in batches to allow message processing between batches
 function runSearch() {
   startTime = Date.now();
   lastProgressTime = startTime;
   const timeoutEnd = startTime + searchConfig.timeout;
+  runBatch(timeoutEnd);
+}
 
-  while (!shouldStop && Date.now() < timeoutEnd) {
+function runBatch(timeoutEnd) {
+  // Run a batch of iterations, then yield to allow message processing
+  const batchSize = 100;
+  for (let i = 0; i < batchSize; i++) {
+    if (shouldStop || Date.now() >= timeoutEnd) {
+      sendComplete();
+      return;
+    }
     const hash = generateRandomHash(HASH_LENGTH);
     const result = evaluateCandidate(hash);
     if (result !== null) {
       updateTopResults(result);
     }
     attemptCount++;
-
-    // Send progress every 100 attempts or 500ms
-    if (attemptCount % 100 === 0 || Date.now() - lastProgressTime >= 500) {
-      sendProgress();
-    }
   }
 
-  // Send final complete message
+  // Send progress after each batch
+  sendProgress();
+
+  // Yield to event loop so STOP messages can be processed, then continue
+  setTimeout(() => runBatch(timeoutEnd), 0);
+}
+
+function sendComplete() {
   const elapsed = Date.now() - startTime;
   self.postMessage({
     type: 'COMPLETE',
