@@ -338,15 +338,16 @@
 
       .decode-status {
         font-weight: 500;
-        margin-bottom: 8px;
       }
 
       .decode-result.success .decode-status {
         color: #059669;
+        margin-bottom: 8px;
       }
 
       .decode-result.failure .decode-status {
         color: #dc2626;
+        margin-bottom: 8px;
       }
 
       .decode-data {
@@ -645,7 +646,9 @@
           </div>
 
           <!-- Hint when no pixels painted -->
-          <div id="paint-hint" class="paint-hint">Paint pixels first</div>
+          <div id="paint-hint" class="paint-hint">
+            Paint a pixel pattern first
+          </div>
 
           <!-- Progress section (hidden until search starts) -->
           <div id="search-progress" style="display: none">
@@ -14242,7 +14245,7 @@ function runSearch() {
 
 function runBatch(timeoutEnd) {
   // Run a batch of iterations, then yield to allow message processing
-  const batchSize = 100;
+  const batchSize = 25;
   for (let i = 0; i < batchSize; i++) {
     if (shouldStop || Date.now() >= timeoutEnd) {
       sendComplete();
@@ -14461,7 +14464,8 @@ self.onmessage = function(e) {
         searchProgress.style.display = "block";
         searchSummary.style.display = "none";
         progressTime.textContent = `0s / ${currentTimeout}s`;
-        document.getElementById("attempts-counter").textContent = `${totalAttempts.toLocaleString()} attempts`;
+        document.getElementById("attempts-counter").textContent =
+          `${totalAttempts.toLocaleString()} attempts`;
         document.getElementById("elapsed-counter").textContent = "0s elapsed";
 
         // Start progress animation
@@ -14653,9 +14657,30 @@ self.onmessage = function(e) {
           }
         });
 
+        // Reset optimization results when paint pattern changes
+        function resetOptimizationResults() {
+          totalAttempts = 0;
+          totalDecodableCount = 0;
+          currentTopResults = [];
+          previousTopHashes = [];
+          if (searchState === "completed") {
+            searchState = "idle";
+            const optimizeBtn = document.getElementById("optimize-btn");
+            if (optimizeBtn) optimizeBtn.textContent = "Generate";
+            const searchSummary = document.getElementById("search-summary");
+            if (searchSummary) searchSummary.style.display = "none";
+            const topResultsContainer = document.getElementById("top-results");
+            if (topResultsContainer) {
+              topResultsContainer.style.display = "none";
+              topResultsContainer.innerHTML = "";
+            }
+          }
+        }
+
         // Paint canvas click - cycle pixel states
         paintCanvas.addEventListener("pointerdown", function (e) {
           if (!paintGrid) return;
+          if (searchState === "running") return; // Block painting during optimization
 
           const rect = paintCanvas.getBoundingClientRect();
 
@@ -14683,6 +14708,9 @@ self.onmessage = function(e) {
             // Re-run corruption pipeline to update QR display and decode status
             runCorruptionPipeline();
 
+            // Reset optimization results since pattern changed
+            resetOptimizationResults();
+
             // Check paint state for optimize button
             checkPaintState();
           }
@@ -14690,12 +14718,16 @@ self.onmessage = function(e) {
 
         // Clear button - reset all pixels to unset
         clearBtn.addEventListener("click", function () {
+          if (searchState === "running") return; // Block clearing during optimization
           if (paintGrid) {
             paintGrid.clear();
             renderPaintGrid(paintCanvas, paintGrid);
 
             // Re-run corruption pipeline to show clean QR and update decode status
             runCorruptionPipeline();
+
+            // Reset optimization results since pattern changed
+            resetOptimizationResults();
 
             // Check paint state for optimize button
             checkPaintState();
