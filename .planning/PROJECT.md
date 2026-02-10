@@ -40,21 +40,37 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Active
 
-(None — v1 complete)
+**v1.1 — UX Overhaul & Optimization**
+
+- [ ] State persistence via localStorage (URL, painted pattern, settings survive reload)
+- [ ] Paint pattern overlayed directly on QR code preview
+- [ ] Protected QR areas (finders, timing, alignment) visually marked as non-editable
+- [ ] Legend-based color selection replacing click-to-cycle (black/white/unset)
+- [ ] Click and drag painting with selected color; right-click paints opposite (white↔black)
+- [ ] Reject URLs ending in hash fragments
+- [ ] Smart generation: pattern exists → only button triggers generation, not dropdown
+- [ ] Version change with pattern: same size preserves pattern, size change warns user
+- [ ] Auto-stop optimization when 5 results with 0 errors found
+- [ ] Multiple Web Workers for parallel optimization search
+- [ ] QR version range expanded to Version 10 (57×57)
+- [ ] Max QR version extracted as a constant for easy future adjustment
 
 ### Out of Scope
 
 - QR error correction levels other than H — H provides maximum error tolerance needed for artistic patterns
-- Brush tools or drawing modes — simple click-to-cycle is sufficient for pixel art
+- Brush tools or advanced drawing modes (fill, shapes) — legend selection + drag painting is sufficient
 - Undo/redo — clear/reset is sufficient for initial version
-- Saving/loading patterns — focus on generation workflow first
+- Saving/loading patterns to file — localStorage persistence is sufficient for now
 - Mobile touch optimization — desktop-first, modern browsers only
 - SVG export — PNG is sufficient for initial version
 - Batch processing multiple URLs — single URL workflow only
-- Custom QR version ranges beyond 2-8 — sufficient range for most artistic use cases
+- Custom QR version ranges beyond 2-10 — sufficient range for most artistic use cases
 - Server-side processing — everything client-side in browser
 
 ## Context
+
+**Current Milestone: v1.1 UX Overhaul & Optimization**
+Goal: Improve the painting workflow (overlay on QR, drag painting, state persistence), add safety guards (hash fragment rejection, version change warnings), and speed up optimization (multi-worker, auto-stop).
 
 **Current State:**
 Shipped v1 MVP with 15,161 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (inlined), Web Workers via Blob URL. All 31 v1 requirements satisfied across 4 phases, 8 plans, 59 commits over 4 days.
@@ -71,6 +87,16 @@ Different URL contents produce different QR code pixel patterns. By varying the 
 **Top 5 Results Rationale:**
 The mathematically best result (fewest errors) might not be the aesthetically best. Showing top 5 lets users choose based on visual harmony, not just error metrics. Results accumulate across multiple optimization runs.
 
+**v1.1 User Feedback (from testing v1):**
+- Reloading page loses all state (URL, pattern) — frustrating during iterative testing
+- Painting on a separate canvas from the QR preview makes alignment hard to judge
+- Click-to-cycle is slow for painting larger patterns — drag painting needed
+- Protected QR areas (finders, timing) not visually obvious — users accidentally paint over them
+- Entering a URL with a hash fragment causes silent issues
+- Changing version dropdown while pattern exists silently destroys the pattern
+- Optimization runs to timeout even when perfect results (0 errors) already found
+- ~75 attempts/second feels slow — room for parallelization
+
 ## Constraints
 
 - **Single file**: All code (HTML, CSS, JS, libraries) must be in one .html file
@@ -78,7 +104,7 @@ The mathematically best result (fewest errors) might not be the aesthetically be
 - **Protocol compatibility**: Must work both via http:// (web server) and file:// (local filesystem)
 - **Modern browsers**: Target recent Chrome, Firefox, Safari — no IE/legacy support needed
 - **Error correction**: Must use QR error correction level H (highest, ~30% error tolerance)
-- **QR version range**: Version 2 (25x25) to Version 8 (49x49) — configurable based on URL length
+- **QR version range**: Version 2 (25x25) to Version 10 (57x57) — max version is a constant for easy adjustment
 
 ## Key Decisions
 
@@ -97,5 +123,10 @@ The mathematically best result (fewest errors) might not be the aesthetically be
 | Click-to-expand error overlay | Full-width preview better than toggle button | ✓ Good — clear visualization |
 | Paint locking during optimization | Prevents stale results from pattern changes | ✓ Good — data integrity |
 
+| Max QR version as constant | Frequently adjusted during testing, needs to be easy to change | — Pending |
+| Legend-based painting replacing click-to-cycle | Drag painting requires pre-selected color, legend is natural UI | — Pending |
+| Right-click paints opposite color | Fast workflow: left=selected, right=opposite, no legend switching | — Pending |
+| Multi-worker optimization | Single worker bottleneck at ~75 attempts/sec | — Pending |
+
 ---
-*Last updated: 2026-02-09 after v1 milestone*
+*Last updated: 2026-02-10 after v1.1 milestone start*
