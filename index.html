@@ -13410,6 +13410,12 @@
         // Create new grid
         paintGrid = new PixelGrid(gridSize);
 
+        // Try to restore saved pattern for this version
+        const savedCells = loadPattern(version);
+        if (savedCells) {
+          paintGrid.cells = savedCells;
+        }
+
         // Render initial grid
         renderPaintGrid(canvas, paintGrid);
 
@@ -15233,10 +15239,41 @@ self.onmessage = function(e) {
         const clearBtn = document.getElementById("clear-btn");
         const optimizeBtn = document.getElementById("optimize-btn");
 
+        // ===== STATE RESTORATION =====
+        // Restore saved state on page load
+        const savedURL = loadURL();
+        const savedVersion = loadVersion();
+
+        // Restore URL input and update UI
+        if (savedURL) {
+          urlInput.value = savedURL;
+          updateValidationUI(savedURL);
+
+          // Restore version dropdown if valid for this URL
+          // Must happen after updateValidationUI (which populates the dropdown)
+          const dropdown = document.getElementById("version-select");
+          if (savedVersion >= MIN_QR_VERSION && savedVersion <= MAX_QR_VERSION) {
+            // Check if this version exists as an option in the dropdown
+            const option = dropdown.querySelector(`option[value="${savedVersion}"]`);
+            if (option) {
+              dropdown.value = savedVersion;
+            }
+          }
+
+          // Auto-generate QR if saved URL is valid
+          if (isValidURL(savedURL) && !generateBtn.disabled) {
+            generateQR();
+          }
+        }
+
+        // Create debounced save function for URL input
+        const debouncedSaveURL = debounce(saveURL, 500);
+
         // URL input event - validate as user types
         urlInput.addEventListener("input", function () {
           const url = this.value.trim();
           updateValidationUI(url);
+          debouncedSaveURL(url);
         });
 
         // Generate button click
@@ -15253,6 +15290,7 @@ self.onmessage = function(e) {
 
         // Version change - regenerate QR if URL is valid
         versionSelect.addEventListener("change", function () {
+          saveVersion(parseInt(this.value, 10));
           const url = urlInput.value.trim();
           if (isValidURL(url) && !generateBtn.disabled) {
             generateQR();
@@ -15315,6 +15353,9 @@ self.onmessage = function(e) {
 
             // Check paint state for optimize button
             checkPaintState();
+
+            // Save pattern to localStorage
+            savePattern(currentVersion, paintGrid.cells);
           }
         });
 
@@ -15333,6 +15374,9 @@ self.onmessage = function(e) {
 
             // Check paint state for optimize button
             checkPaintState();
+
+            // Save cleared pattern to localStorage
+            savePattern(currentVersion, paintGrid.cells);
           }
         });
 
