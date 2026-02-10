@@ -31,10 +31,10 @@ Archived to `.planning/milestones/v1-ROADMAP.md`
   1. QR version dropdown offers versions 2 through 10 (previously capped at 8)
   2. Changing the max version constant in one place updates all version-related logic (dropdown range, validation, min-version calculation)
   3. Version 10 QR codes (57x57) generate, display, and optimize correctly
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 05-01: Extract max version constant and expand range to Version 10
+- [ ] 05-01-PLAN.md -- Extract version constants, extend capacity table to v10, implement dropdown UX (disable, auto-bump, glow)
 
 #### Phase 6: State Persistence
 **Goal**: Users never lose their work when reloading the page
