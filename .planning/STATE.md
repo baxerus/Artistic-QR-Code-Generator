@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 5 of 9 (Configuration Constants)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-02-10 -- Roadmap created for v1.1 milestone
+Plan: 1 of 1 in current phase
+Status: Phase complete
+Last activity: 2026-02-10 -- Completed 05-01-PLAN.md (Configuration Constants)
 
-Progress: [========........] 50% (8/16 plans: 8 v1 complete, 0/8 v1.1)
+Progress: [=========.......] 56% (9/16 plans: 8 v1 complete, 1/8 v1.1)
 
 ## Performance Metrics
 
@@ -24,15 +24,21 @@ Progress: [========........] 50% (8/16 plans: 8 v1 complete, 0/8 v1.1)
 - Timeline: 4 days (2026-02-06 -> 2026-02-09)
 
 **v1.1 Milestone (in progress):**
-- Total plans completed: 0
+- Total plans completed: 1
 - Total plans: 8 (across 5 phases)
+- Total commits: 2
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
-No new decisions for v1.1 yet.
+
+**Phase 5 (05-01):**
+- Version range controlled by MAX_QR_VERSION constant (now 10, was hardcoded 8)
+- Auto-bump only increases version, never decreases (user stability)
+- Green glow animation on auto-bump using existing result-highlight class
+- Dropdown disabled until URL entered (prevents confusion)
 
 ### Pending Todos
 
@@ -44,9 +50,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-10
-Stopped at: v1.1 roadmap created, ready to plan Phase 5
+Last session: 2026-02-10T20:02:05Z
+Stopped at: Completed 05-01-PLAN.md (Configuration Constants)
 Resume file: None
 
 ---
-*v1.1 roadmap created. Next: plan Phase 5 (Configuration Constants).*
+*Phase 5 complete. Next: Phase 6 (Session Persistence).*
