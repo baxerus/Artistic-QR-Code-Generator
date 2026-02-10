@@ -44,10 +44,10 @@ Plans:
   1. User reloads page and sees the same URL, QR version, painted pattern, and settings they had before
   2. Restored state re-renders the QR code with pattern overlay (not just raw data in localStorage)
   3. First visit (no saved state) works normally with default/empty state
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 06-01: localStorage save/restore for full app state with QR re-render on load
+- [ ] 06-01-PLAN.md -- Add localStorage persistence module and wire save/restore for URL, version, and pattern with auto-QR regeneration on load
 
 #### Phase 7: Painting Overhaul
 **Goal**: Users paint directly on the QR code preview with drag painting and clear visual feedback about protected areas
