@@ -537,7 +537,7 @@
         color: #666;
       }
 
-      @keyframes result-highlight {
+      @keyframes green-highlight {
         0% {
           box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
         }
@@ -549,8 +549,8 @@
         }
       }
 
-      .result-highlight {
-        animation: result-highlight 0.6s ease-out;
+      .green-highlight {
+        animation: green-highlight 0.6s ease-out;
       }
 
       .result-rank {
@@ -13155,7 +13155,7 @@
         { version: 6, capacity: 58 },
         { version: 7, capacity: 64 },
         { version: 8, capacity: 84 },
-        { version: 9, capacity: 98 },   // 53x53 modules
+        { version: 9, capacity: 98 }, // 53x53 modules
         { version: 10, capacity: 119 }, // 57x57 modules
       ];
 
@@ -13323,11 +13323,15 @@
         dropdown.value = selectedVersion;
 
         // Green glow on auto-bump (only when version increased from a previous value)
-        if (previousValue !== null && !isNaN(previousValue) && selectedVersion > previousValue) {
-          dropdown.classList.remove('result-highlight');
+        if (
+          previousValue !== null &&
+          !isNaN(previousValue) &&
+          selectedVersion > previousValue
+        ) {
+          dropdown.classList.remove("green-highlight");
           void dropdown.offsetWidth; // force reflow for animation replay
-          dropdown.classList.add('result-highlight');
-          setTimeout(() => dropdown.classList.remove('result-highlight'), 600);
+          dropdown.classList.add("green-highlight");
+          setTimeout(() => dropdown.classList.remove("green-highlight"), 600);
         }
       }
 
@@ -13401,7 +13405,8 @@
           button.disabled = true;
           // Reset dropdown to disabled state
           const dropdown = document.getElementById("version-select");
-          dropdown.innerHTML = '<option value="" disabled selected>Enter URL first</option>';
+          dropdown.innerHTML =
+            '<option value="" disabled selected>Enter URL first</option>';
           dropdown.disabled = true;
           return;
         }
@@ -13420,7 +13425,8 @@
             console.error(`URL too long for QR version ${MAX_QR_VERSION}`);
             // Reset dropdown to disabled state
             const dropdown = document.getElementById("version-select");
-            dropdown.innerHTML = '<option value="" disabled selected>Enter URL first</option>';
+            dropdown.innerHTML =
+              '<option value="" disabled selected>Enter URL first</option>';
             dropdown.disabled = true;
             return;
           }
@@ -13441,7 +13447,8 @@
           button.disabled = true;
           // Reset dropdown to disabled state
           const dropdown = document.getElementById("version-select");
-          dropdown.innerHTML = '<option value="" disabled selected>Enter URL first</option>';
+          dropdown.innerHTML =
+            '<option value="" disabled selected>Enter URL first</option>';
           dropdown.disabled = true;
         }
       }
@@ -13661,7 +13668,9 @@ class QRRSBlock {
     [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12],
     [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15],
     [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14],
-    [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15]
+    [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15],
+    [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13],
+    [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16]
   ];
 
   static getRSBlocks(typeNumber, errorCorrectLevel) {
@@ -13713,7 +13722,9 @@ const QRUtil = {
     [6, 30],
     [6, 34],
     [6, 22, 38],
-    [6, 24, 42]
+    [6, 24, 42],
+    [6, 26, 46],
+    [6, 28, 50]
   ],
 
   G15: (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
@@ -14886,9 +14897,9 @@ self.onmessage = function(e) {
           // Check if this is a new result
           const isNew = !previousTopHashes.includes(result.hash);
           if (isNew) {
-            slot.classList.add("result-highlight");
+            slot.classList.add("green-highlight");
             // Remove animation class after it completes
-            setTimeout(() => slot.classList.remove("result-highlight"), 600);
+            setTimeout(() => slot.classList.remove("green-highlight"), 600);
           }
 
           // Create rank number
