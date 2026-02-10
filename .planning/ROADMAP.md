@@ -47,7 +47,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 06-01-PLAN.md -- Add localStorage persistence module and wire save/restore for URL, version, and pattern with auto-QR regeneration on load
+- [x] 06-01-PLAN.md -- Add localStorage persistence module and wire save/restore for URL, version, and pattern with auto-QR regeneration on load
 
 #### Phase 7: Painting Overhaul
 **Goal**: Users paint directly on the QR code preview with drag painting and clear visual feedback about protected areas
@@ -107,11 +107,11 @@ Plans:
 | 3. Hash Optimization Loop | v1.0 | 2/2 | Complete | 2026-02-09 |
 | 4. Results & Export | v1.0 | 2/2 | Complete | 2026-02-09 |
 | 5. Configuration Constants | v1.1 | 1/1 | Complete | 2026-02-10 |
-| 6. State Persistence | v1.1 | 0/1 | Not started | - |
+| 6. State Persistence | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 7. Painting Overhaul | v1.1 | 0/2 | Not started | - |
 | 8. Generation Safety | v1.1 | 0/2 | Not started | - |
 | 9. Optimization Upgrades | v1.1 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10 (Phase 5 complete)*
+*Last updated: 2026-02-10 (Phase 6 complete)*

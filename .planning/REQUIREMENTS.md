@@ -9,8 +9,8 @@ Requirements for UX Overhaul & Optimization milestone. Each maps to roadmap phas
 
 ### State Persistence
 
-- [ ] **PERS-01**: App state (URL, painted pattern, QR version, settings) persists across page reloads via localStorage
-- [ ] **PERS-02**: State restores correctly on page load, including re-rendering the QR code and pattern overlay
+- [x] **PERS-01**: App state (URL, painted pattern, QR version, settings) persists across page reloads via localStorage
+- [x] **PERS-02**: State restores correctly on page load, including re-rendering the QR code and pattern overlay
 
 ### Painting Overhaul
 
@@ -75,8 +75,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | CONF-01 | Phase 5 | Complete |
 | CONF-02 | Phase 5 | Complete |
-| PERS-01 | Phase 6 | Pending |
-| PERS-02 | Phase 6 | Pending |
+| PERS-01 | Phase 6 | Complete |
+| PERS-02 | Phase 6 | Complete |
 | PAINT-01 | Phase 7 | Pending |
 | PAINT-02 | Phase 7 | Pending |
 | PAINT-03 | Phase 7 | Pending |
@@ -97,4 +97,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-10 after roadmap creation*
+*Last updated: 2026-02-10 (Phase 6 complete)*
