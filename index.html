@@ -13141,7 +13141,11 @@
       let paintGrid = null;
       let paintCellSize = 0;
 
-      // QR capacity table for error correction level H, byte mode (versions 1-8)
+      // QR version configuration
+      const MIN_QR_VERSION = 2;
+      const MAX_QR_VERSION = 10;
+
+      // QR capacity table for error correction level H, byte mode (versions 1-10)
       const CAPACITIES_H_BYTE = [
         { version: 1, capacity: 7 },
         { version: 2, capacity: 14 },
@@ -13151,6 +13155,8 @@
         { version: 6, capacity: 58 },
         { version: 7, capacity: 64 },
         { version: 8, capacity: 84 },
+        { version: 9, capacity: 98 },   // 53x53 modules
+        { version: 10, capacity: 119 }, // 57x57 modules
       ];
 
       // Global QR code instance
@@ -13175,7 +13181,7 @@
 
       /**
        * Calculate minimum QR version needed for URL
-       * Returns version number (1-8) or -1 if too long
+       * Returns version number (MIN_QR_VERSION-MAX_QR_VERSION) or -1 if too long
        */
       const HASH_CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789";
       const HASH_LENGTH = 4;
@@ -13188,7 +13194,7 @@
             return entry.version;
           }
         }
-        return -1; // URL too long for version 8
+        return -1; // URL too long for MAX_QR_VERSION
       }
 
       /**
@@ -13286,7 +13292,7 @@
         const dropdown = document.getElementById("version-select");
         dropdown.innerHTML = "";
 
-        for (let v = minVersion; v <= 8; v++) {
+        for (let v = minVersion; v <= MAX_QR_VERSION; v++) {
           const option = document.createElement("option");
           option.value = v;
           option.textContent =
@@ -13379,14 +13385,14 @@
         if (isValidURL(url)) {
           const minVersion = calculateMinimumVersion(url);
 
-          // URL too long for version 8
+          // URL too long for max supported version
           if (minVersion === -1) {
             input.classList.remove("valid");
             input.classList.add("invalid");
             icon.classList.remove("valid");
             icon.classList.add("invalid");
             button.disabled = true;
-            console.error("URL too long for QR version 8");
+            console.error(`URL too long for QR version ${MAX_QR_VERSION}`);
             return;
           }
 
