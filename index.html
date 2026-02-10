@@ -714,7 +714,7 @@
           <!-- Row 2: Version dropdown -->
           <div class="input-group">
             <label for="version-select">QR Version</label>
-            <select id="version-select">
+            <select id="version-select" disabled>
               <option value="" disabled selected>Enter URL first</option>
             </select>
           </div>
@@ -13290,7 +13290,9 @@
        */
       function updateVersionDropdown(minVersion) {
         const dropdown = document.getElementById("version-select");
+        const previousValue = dropdown.value ? parseInt(dropdown.value) : null;
         dropdown.innerHTML = "";
+        dropdown.disabled = false;
 
         for (let v = minVersion; v <= MAX_QR_VERSION; v++) {
           const option = document.createElement("option");
@@ -13306,8 +13308,27 @@
           dropdown.appendChild(option);
         }
 
-        // Auto-select minimum version
-        dropdown.value = minVersion;
+        // Auto-increase only: keep previous version if still valid, bump if needed
+        let selectedVersion = minVersion;
+        if (previousValue !== null && !isNaN(previousValue)) {
+          if (previousValue >= minVersion) {
+            // Previous version still valid - keep it (never auto-decrease)
+            selectedVersion = previousValue;
+          } else {
+            // Previous version too small - auto-bump to minimum
+            selectedVersion = minVersion;
+          }
+        }
+
+        dropdown.value = selectedVersion;
+
+        // Green glow on auto-bump (only when version increased from a previous value)
+        if (previousValue !== null && !isNaN(previousValue) && selectedVersion > previousValue) {
+          dropdown.classList.remove('result-highlight');
+          void dropdown.offsetWidth; // force reflow for animation replay
+          dropdown.classList.add('result-highlight');
+          setTimeout(() => dropdown.classList.remove('result-highlight'), 600);
+        }
       }
 
       /**
@@ -13378,6 +13399,10 @@
           input.classList.remove("valid", "invalid");
           icon.classList.remove("valid", "invalid");
           button.disabled = true;
+          // Reset dropdown to disabled state
+          const dropdown = document.getElementById("version-select");
+          dropdown.innerHTML = '<option value="" disabled selected>Enter URL first</option>';
+          dropdown.disabled = true;
           return;
         }
 
@@ -13393,6 +13418,10 @@
             icon.classList.add("invalid");
             button.disabled = true;
             console.error(`URL too long for QR version ${MAX_QR_VERSION}`);
+            // Reset dropdown to disabled state
+            const dropdown = document.getElementById("version-select");
+            dropdown.innerHTML = '<option value="" disabled selected>Enter URL first</option>';
+            dropdown.disabled = true;
             return;
           }
 
@@ -13410,6 +13439,10 @@
           icon.classList.remove("valid");
           icon.classList.add("invalid");
           button.disabled = true;
+          // Reset dropdown to disabled state
+          const dropdown = document.getElementById("version-select");
+          dropdown.innerHTML = '<option value="" disabled selected>Enter URL first</option>';
+          dropdown.disabled = true;
         }
       }
 
