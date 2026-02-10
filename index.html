@@ -13159,6 +13159,139 @@
         { version: 10, capacity: 119 }, // 57x57 modules
       ];
 
+      // ===== STATE PERSISTENCE =====
+
+      const STORAGE_KEYS = {
+        URL: 'qr-art.url',
+        VERSION: 'qr-art.version',
+        PATTERN: 'qr-art.pattern'
+      };
+
+      /**
+       * Debounce utility function
+       * Delays execution until `wait` ms after the last call
+       */
+      function debounce(callback, wait) {
+        let timeoutId = null;
+        return (...args) => {
+          window.clearTimeout(timeoutId);
+          timeoutId = window.setTimeout(() => {
+            callback.apply(null, args);
+          }, wait);
+        };
+      }
+
+      /**
+       * Save URL to localStorage
+       */
+      function saveURL(url) {
+        try {
+          localStorage.setItem(STORAGE_KEYS.URL, url);
+        } catch (err) {
+          console.warn('Failed to save URL to localStorage:', err);
+        }
+      }
+
+      /**
+       * Save QR version to localStorage
+       */
+      function saveVersion(version) {
+        try {
+          localStorage.setItem(STORAGE_KEYS.VERSION, version.toString());
+        } catch (err) {
+          console.warn('Failed to save version to localStorage:', err);
+        }
+      }
+
+      /**
+       * Save paint pattern to localStorage
+       * Pattern is tied to version and grid size
+       */
+      function savePattern(version, cells) {
+        try {
+          const data = {
+            version: version,
+            cells: Array.from(cells)
+          };
+          localStorage.setItem(STORAGE_KEYS.PATTERN, JSON.stringify(data));
+        } catch (err) {
+          console.warn('Failed to save pattern to localStorage:', err);
+        }
+      }
+
+      /**
+       * Load URL from localStorage
+       * Returns empty string if not found
+       */
+      function loadURL() {
+        try {
+          return localStorage.getItem(STORAGE_KEYS.URL) || '';
+        } catch (err) {
+          console.warn('Failed to load URL from localStorage:', err);
+          return '';
+        }
+      }
+
+      /**
+       * Load QR version from localStorage
+       * Returns MIN_QR_VERSION if invalid or not found
+       */
+      function loadVersion() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEYS.VERSION);
+          if (!stored) return MIN_QR_VERSION;
+
+          const version = parseInt(stored, 10);
+          if (isNaN(version) || version < MIN_QR_VERSION || version > MAX_QR_VERSION) {
+            console.warn('Invalid stored version:', stored, '- using MIN_QR_VERSION');
+            return MIN_QR_VERSION;
+          }
+
+          return version;
+        } catch (err) {
+          console.warn('Failed to load version from localStorage:', err);
+          return MIN_QR_VERSION;
+        }
+      }
+
+      /**
+       * Load paint pattern from localStorage
+       * Returns null if not found, corrupt, or version mismatch
+       */
+      function loadPattern(expectedVersion) {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEYS.PATTERN);
+          if (!stored) return null;
+
+          const data = JSON.parse(stored);
+
+          // Validate data structure
+          if (!data || typeof data !== 'object' || !data.version || !Array.isArray(data.cells)) {
+            console.warn('Invalid pattern data structure');
+            return null;
+          }
+
+          // Validate version match
+          if (data.version !== expectedVersion) {
+            console.warn('Pattern version mismatch:', data.version, '!==', expectedVersion);
+            return null;
+          }
+
+          // Validate cell count
+          const expectedSize = getModuleSize(data.version);
+          const expectedCellCount = expectedSize * expectedSize;
+          if (data.cells.length !== expectedCellCount) {
+            console.warn('Pattern size mismatch:', data.cells.length, '!==', expectedCellCount);
+            return null;
+          }
+
+          return data.cells;
+        } catch (err) {
+          console.warn('Failed to load pattern from localStorage:', err);
+          return null;
+        }
+      }
+
       // Global QR code instance
       let qrCodeInstance = null;
 
