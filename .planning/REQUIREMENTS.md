@@ -73,8 +73,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONF-01 | Phase 5 | Pending |
-| CONF-02 | Phase 5 | Pending |
+| CONF-01 | Phase 5 | Complete |
+| CONF-02 | Phase 5 | Complete |
 | PERS-01 | Phase 6 | Pending |
 | PERS-02 | Phase 6 | Pending |
 | PAINT-01 | Phase 7 | Pending |

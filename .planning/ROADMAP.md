@@ -34,7 +34,7 @@ Archived to `.planning/milestones/v1-ROADMAP.md`
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md -- Extract version constants, extend capacity table to v10, implement dropdown UX (disable, auto-bump, glow)
+- [x] 05-01-PLAN.md -- Extract version constants, extend capacity table to v10, implement dropdown UX (disable, auto-bump, glow)
 
 #### Phase 6: State Persistence
 **Goal**: Users never lose their work when reloading the page
@@ -106,7 +106,7 @@ Plans:
 | 2. Pixel Painting & Corruption | v1.0 | 2/2 | Complete | 2026-02-07 |
 | 3. Hash Optimization Loop | v1.0 | 2/2 | Complete | 2026-02-09 |
 | 4. Results & Export | v1.0 | 2/2 | Complete | 2026-02-09 |
-| 5. Configuration Constants | v1.1 | 0/1 | Not started | - |
+| 5. Configuration Constants | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 6. State Persistence | v1.1 | 0/1 | Not started | - |
 | 7. Painting Overhaul | v1.1 | 0/2 | Not started | - |
 | 8. Generation Safety | v1.1 | 0/2 | Not started | - |
@@ -114,4 +114,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-10*
+*Last updated: 2026-02-10 (Phase 5 complete)*
