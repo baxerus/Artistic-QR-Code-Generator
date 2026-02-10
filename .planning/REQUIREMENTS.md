@@ -18,7 +18,7 @@ Requirements for UX Overhaul & Optimization milestone. Each maps to roadmap phas
 - [ ] **PAINT-02**: Protected QR areas (finder patterns, timing patterns, alignment patterns) visually marked as non-editable
 - [ ] **PAINT-03**: Color selection via legend (black/white/unset) replaces click-to-cycle behavior
 - [ ] **PAINT-04**: Left-click and drag paints selected color across multiple pixels
-- [ ] **PAINT-05**: Right-click and drag paints opposite color (white↔black); does nothing when unset is selected
+- [ ] **PAINT-05**: Right-click and drag paints opposite color (white<->black); does nothing when unset is selected
 
 ### Generation Safety
 
@@ -73,28 +73,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERS-01 | — | Pending |
-| PERS-02 | — | Pending |
-| PAINT-01 | — | Pending |
-| PAINT-02 | — | Pending |
-| PAINT-03 | — | Pending |
-| PAINT-04 | — | Pending |
-| PAINT-05 | — | Pending |
-| SAFE-01 | — | Pending |
-| SAFE-02 | — | Pending |
-| SAFE-03 | — | Pending |
-| SAFE-04 | — | Pending |
-| SAFE-05 | — | Pending |
-| OPT-01 | — | Pending |
-| OPT-02 | — | Pending |
-| CONF-01 | — | Pending |
-| CONF-02 | — | Pending |
+| CONF-01 | Phase 5 | Pending |
+| CONF-02 | Phase 5 | Pending |
+| PERS-01 | Phase 6 | Pending |
+| PERS-02 | Phase 6 | Pending |
+| PAINT-01 | Phase 7 | Pending |
+| PAINT-02 | Phase 7 | Pending |
+| PAINT-03 | Phase 7 | Pending |
+| PAINT-04 | Phase 7 | Pending |
+| PAINT-05 | Phase 7 | Pending |
+| SAFE-01 | Phase 8 | Pending |
+| SAFE-02 | Phase 8 | Pending |
+| SAFE-03 | Phase 8 | Pending |
+| SAFE-04 | Phase 8 | Pending |
+| SAFE-05 | Phase 8 | Pending |
+| OPT-01 | Phase 9 | Pending |
+| OPT-02 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 (pending roadmap creation)
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-10 after initial definition*
+*Last updated: 2026-02-10 after roadmap creation*
