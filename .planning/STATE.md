@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 7 of 9 (Painting Overhaul)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-13 -- Completed 07-01-PLAN.md (Unified Canvas Rendering)
+Plan: 2 of 2 in current phase
+Status: Complete
+Last activity: 2026-02-13 -- Completed 07-02-PLAN.md (Legend and Drag Painting)
 
-Progress: [==========>.....] 68% (11/16 plans: 8 v1 complete, 3/8 v1.1)
+Progress: [===========>....] 71% (12/16 plans: 8 v1 complete, 4/8 v1.1)
 
 ## Performance Metrics
 
@@ -24,12 +24,18 @@ Progress: [==========>.....] 68% (11/16 plans: 8 v1 complete, 3/8 v1.1)
 - Timeline: 4 days (2026-02-06 -> 2026-02-09)
 
 **v1.1 Milestone (in progress):**
-- Total plans completed: 3
+- Total plans completed: 4
 - Total plans: 8 (across 5 phases)
-- Total commits: 5
+- Total commits: 8
 
 **Plan 07-01:**
 - Duration: 20 min
+- Tasks: 3
+- Files: 1
+- Completed: 2026-02-13
+
+**Plan 07-02:**
+- Duration: 4 min
 - Tasks: 3
 - Files: 1
 - Completed: 2026-02-13
@@ -53,7 +59,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - All localStorage failures are silent with console.warn only (graceful degradation)
 - Pattern persists even when URL cleared (preserves user artwork)
 
-**Phase 7 (07-01):**
+**Phase 7 (07-01 - Unified Canvas):**
 - Painted pixels render as solid color overlay (no transparency) for clear visual distinction
 - Painted white: #d0d0d0 (light gray), painted black: #404040 (dark gray)
 - Protected area outlines always visible with red dashed borders (#ff6b6b)
@@ -62,6 +68,15 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Single unified canvas replaces separate paint-canvas element
 - [Phase 07]: Painted pixels render as solid color overlay (no transparency) with light gray (#d0d0d0) for white and dark gray (#404040) for black
 - [Phase 07]: Protected area outlines always visible (not hover-only) with red dashed borders (#ff6b6b); grid lines only on hover
+
+**Phase 7 (07-02 - Legend and Drag Painting):**
+- Legend positioned to the right of QR canvas using flex layout
+- Unset selected by default to prevent accidental painting
+- Right-click paints opposite color (black ↔ white)
+- Right-click does nothing when 'unset' is selected
+- GRID_SENSITIVITY = 0.5 for precise grid cell detection during drag
+- Protected areas are transparent to drag (painting continues through them)
+- Drag painting uses pointer events with setPointerCapture for smooth tracking
 
 ### Pending Todos
 
@@ -73,10 +88,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-13T22:57:01Z
-Stopped at: Completed 07-01-PLAN.md (Unified Canvas Rendering)
+Last session: 2026-02-13T22:48:27Z
+Stopped at: Completed 07-02-PLAN.md (Legend and Drag Painting)
 Resume file: None
 
 ---
-*Phase 7 in progress. Plan 1 complete. Next: 07-02 (Drag Painting).*
+*Phase 7 complete. Both plans finished. Ready for Phase 8.*
 
