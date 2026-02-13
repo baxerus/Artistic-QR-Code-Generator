@@ -75,11 +75,11 @@ Plans:
   3. When a painted pattern exists, only the "Generate QR Code" button triggers QR generation
   4. Generating a new QR code at the same version preserves all painted pixels on the new code
   5. Changing to a different QR version (via dropdown or URL-forced version change) shows a confirmation dialog warning about pattern loss before proceeding
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: Hash fragment URL rejection and generation guard logic
-- [ ] 08-02: Pattern preservation on same-version regeneration and version-change confirmation dialog
+- [ ] 08-01-PLAN.md — Hash fragment URL rejection (SAFE-01) and generation guards (SAFE-02, SAFE-03)
+- [ ] 08-02-PLAN.md — Version change confirmation dialog (SAFE-05) and pattern preservation verification (SAFE-04)
 
 #### Phase 9: Optimization Upgrades
 **Goal**: Optimization searches faster with multiple workers and stops automatically when ideal results are found
