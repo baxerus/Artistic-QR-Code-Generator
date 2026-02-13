@@ -200,13 +200,20 @@
         border: 2px solid #d0d0d0;
         border-radius: 6px;
         padding: 10px;
+      }
+
+      .qr-canvas-container {
+        position: relative;
+        display: inline-block;
         cursor: crosshair;
       }
 
-      #paint-canvas {
-        display: block;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
+      .qr-canvas-container.blocked {
+        cursor: not-allowed;
+      }
+
+      .qr-canvas-container.paintable {
+        cursor: crosshair;
       }
 
       .paint-controls {
@@ -238,15 +245,16 @@
       }
 
       .legend-box.unset {
-        background-color: #e8e8e8;
+        background-color: transparent;
+        border: 1px solid #ccc;
       }
 
       .legend-box.white {
-        background-color: #ffffff;
+        background-color: #d0d0d0;
       }
 
       .legend-box.black {
-        background-color: #000000;
+        background-color: #404040;
       }
 
       #clear-btn {
@@ -730,8 +738,8 @@
         <!-- Paint Pattern Section -->
         <div class="paint-section" id="paint-section">
           <h2>Paint Pattern</h2>
-          <div class="paint-container">
-            <canvas id="paint-canvas"></canvas>
+          <div class="paint-container" id="paint-container">
+            <!-- QR canvas will be rendered here -->
           </div>
           <div class="paint-controls">
             <div class="paint-legend">
@@ -13093,7 +13101,7 @@
       /**
        * Run full corruption and decode pipeline
        */
-      function runCorruptionPipeline() {
+      function runCorruptionPipeline(isHovering = false) {
         if (!qrModel || !currentVersion || !currentURL) {
           console.log("QR model not ready");
           return;
@@ -13101,26 +13109,65 @@
 
         const container = document.getElementById("canvas-container");
 
-        // Step 1: Render clean QR to canvas
-        qrCanvas = renderQRToCanvas(qrModel, 600);
-
-        // Step 2: Create function pattern mask
-        const functionMask = createFunctionPatternMask(currentVersion);
-
-        // Step 3: Overlay painted pixels (if any exist)
-        if (paintGrid) {
-          overlayPaintedPixels(qrCanvas, paintGrid, functionMask);
+        // Step 1: Create or get existing canvas
+        if (!qrCanvas) {
+          qrCanvas = document.createElement('canvas');
+          qrCanvas.width = 600;
+          qrCanvas.height = 600;
         }
 
-        // Step 4: Replace QR display with our canvas
+        // Step 2: Ensure function mask exists
+        if (!functionMask) {
+          functionMask = createFunctionPatternMask(currentVersion);
+        }
+
+        // Step 3: Render QR with overlay, grid lines (if hovering), and protected outlines
+        renderQRWithOverlay(qrCanvas, qrModel, paintGrid, functionMask, isHovering);
+
+        // Step 4: Wrap canvas in container for styling and event handling
+        const paintContainer = document.getElementById("paint-container");
+        if (paintContainer && paintContainer.children.length === 0) {
+          // First render - set up the container
+          qrCanvas.style.maxWidth = "100%";
+          qrCanvas.style.maxHeight = "100%";
+          qrCanvas.style.imageRendering = "pixelated";
+
+          // Wrap in qr-canvas-container for event handling
+          const wrapper = document.createElement('div');
+          wrapper.className = 'qr-canvas-container paintable';
+          wrapper.appendChild(qrCanvas);
+          paintContainer.appendChild(wrapper);
+
+          // Add hover event listeners
+          wrapper.addEventListener('mouseenter', function() {
+            wrapper.classList.add('hovering');
+            runCorruptionPipeline(true);
+          });
+
+          wrapper.addEventListener('mouseleave', function() {
+            wrapper.classList.remove('hovering');
+            runCorruptionPipeline(false);
+          });
+
+          wrapper.addEventListener('mousemove', function(e) {
+            updateCursorForPosition(e, wrapper, qrCanvas);
+          });
+        }
+
+        // Also update the canvas-container display
         container.innerHTML = "";
-        qrCanvas.style.maxWidth = "100%";
-        qrCanvas.style.maxHeight = "100%";
-        qrCanvas.style.imageRendering = "pixelated";
-        container.appendChild(qrCanvas);
+        const displayCanvas = document.createElement('canvas');
+        displayCanvas.width = 600;
+        displayCanvas.height = 600;
+        const displayCtx = displayCanvas.getContext('2d');
+        displayCtx.drawImage(qrCanvas, 0, 0);
+        displayCanvas.style.maxWidth = "100%";
+        displayCanvas.style.maxHeight = "100%";
+        displayCanvas.style.imageRendering = "pixelated";
+        container.appendChild(displayCanvas);
 
         // Step 5: Decode corrupted QR
-        const decodeResult = decodeCorruptedQR(qrCanvas);
+        const decodeResult = decodeCorruptedQR(displayCanvas);
 
         // Step 6: Check if any pattern exists
         let hasPattern = false;
@@ -13137,9 +13184,155 @@
         updateDecodeResult(decodeResult, hasPattern);
       }
 
+      /**
+       * Update cursor based on position (protected vs paintable)
+       */
+      function updateCursorForPosition(e, wrapper, canvas) {
+        if (!paintGrid || !functionMask) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const canvasX = (e.clientX - rect.left) * scaleX;
+        const canvasY = (e.clientY - rect.top) * scaleY;
+
+        const gridSize = paintGrid.size;
+        const cellSize = canvas.width / gridSize;
+        const gridX = Math.floor(canvasX / cellSize);
+        const gridY = Math.floor(canvasY / cellSize);
+
+        const protectedCell = isProtected(gridX, gridY, gridSize, functionMask);
+
+        if (protectedCell) {
+          wrapper.classList.remove('paintable');
+          wrapper.classList.add('blocked');
+        } else {
+          wrapper.classList.remove('blocked');
+          wrapper.classList.add('paintable');
+        }
+      }
+
       // Module-level paint canvas state
       let paintGrid = null;
       let paintCellSize = 0;
+      let functionMask = null; // Cached function pattern mask for painting
+
+      // Color constants for painted overlay
+      const PAINTED_WHITE = '#d0d0d0';
+      const PAINTED_BLACK = '#404040';
+      const PROTECTED_OUTLINE_COLOR = '#ff6b6b';
+      const GRID_LINE_COLOR = '#e0e0e0';
+
+      /**
+       * Check if a position is protected (part of QR function patterns)
+       */
+      function isProtected(x, y, gridSize, mask) {
+        if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return false;
+        return mask[y * gridSize + x] === true;
+      }
+
+      /**
+       * Draw grid lines on canvas
+       */
+      function drawGridLines(ctx, gridSize, cellSize) {
+        ctx.strokeStyle = GRID_LINE_COLOR;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+
+        // Draw vertical lines
+        for (let i = 0; i <= gridSize; i++) {
+          const x = i * cellSize;
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, gridSize * cellSize);
+        }
+
+        // Draw horizontal lines
+        for (let i = 0; i <= gridSize; i++) {
+          const y = i * cellSize;
+          ctx.moveTo(0, y);
+          ctx.lineTo(gridSize * cellSize, y);
+        }
+
+        ctx.stroke();
+      }
+
+      /**
+       * Draw protected area outlines (border around function pattern cells)
+       */
+      function drawProtectedAreaOutlines(ctx, mask, gridSize, cellSize) {
+        ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 2]);
+
+        // Draw outline around each protected cell
+        for (let y = 0; y < gridSize; y++) {
+          for (let x = 0; x < gridSize; x++) {
+            if (mask[y * gridSize + x] === true) {
+              const px = x * cellSize;
+              const py = y * cellSize;
+              ctx.strokeRect(px, py, cellSize, cellSize);
+            }
+          }
+        }
+
+        ctx.setLineDash([]);
+      }
+
+      /**
+       * Render QR code with painted overlay, grid lines, and protected area outlines
+       * Layer order:
+       *   - Layer 0: QR base
+       *   - Layer 1: Painted overlay
+       *   - Layer 2: Grid lines (if hovering)
+       *   - Layer 3: Protected area outlines (always visible)
+       */
+      function renderQRWithOverlay(qrCanvas, qrModel, paintGrid, mask, isHovering = false) {
+        if (!qrCanvas || !qrModel) return;
+
+        const ctx = qrCanvas.getContext('2d');
+        const gridSize = qrModel.getModuleCount();
+        const cellSize = qrCanvas.width / gridSize;
+
+        // Layer 0: Draw base QR code modules
+        for (let y = 0; y < gridSize; y++) {
+          for (let x = 0; x < gridSize; x++) {
+            const isDark = qrModel.isDark(y, x);
+            ctx.fillStyle = isDark ? '#000000' : '#ffffff';
+            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          }
+        }
+
+        // Layer 1: Draw painted pixel overlay
+        if (paintGrid) {
+          for (let y = 0; y < gridSize; y++) {
+            for (let x = 0; x < gridSize; x++) {
+              // Skip protected areas
+              if (mask && mask[y * gridSize + x]) continue;
+
+              const state = paintGrid.get(x, y);
+              if (state === 1) {
+                // Painted white
+                ctx.fillStyle = PAINTED_WHITE;
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+              } else if (state === 2) {
+                // Painted black
+                ctx.fillStyle = PAINTED_BLACK;
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+              }
+            }
+          }
+        }
+
+        // Layer 2: Draw grid lines if hovering
+        if (isHovering) {
+          drawGridLines(ctx, gridSize, cellSize);
+        }
+
+        // Layer 3: Draw protected area outlines
+        if (mask) {
+          drawProtectedAreaOutlines(ctx, mask, gridSize, cellSize);
+        }
+      }
 
       // QR version configuration
       const MIN_QR_VERSION = 2;
@@ -13395,20 +13588,19 @@
        */
       function initPaintCanvas(version) {
         const gridSize = getModuleSize(version);
-        const canvas = document.getElementById("paint-canvas");
         const paintSection = document.getElementById("paint-section");
+        const paintContainer = document.getElementById("paint-container");
 
         // Calculate canvas size - fit within 600px max, use integer cell sizes
         const maxSize = 600;
         paintCellSize = Math.floor(maxSize / gridSize);
         const canvasSize = gridSize * paintCellSize;
 
-        // Set canvas dimensions
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-
         // Create new grid
         paintGrid = new PixelGrid(gridSize);
+
+        // Create and cache function pattern mask for painting
+        functionMask = createFunctionPatternMask(version);
 
         // Try to restore saved pattern for this version
         const savedCells = loadPattern(version);
@@ -13416,11 +13608,11 @@
           paintGrid.cells = savedCells;
         }
 
-        // Render initial grid
-        renderPaintGrid(canvas, paintGrid);
-
         // Show paint section
         paintSection.style.display = "block";
+
+        // Note: The QR canvas will be rendered by runCorruptionPipeline()
+        // which calls renderQRWithOverlay with the paintGrid and functionMask
       }
 
       /**
@@ -15235,7 +15427,6 @@ self.onmessage = function(e) {
         const urlInput = document.getElementById("url-input");
         const versionSelect = document.getElementById("version-select");
         const generateBtn = document.getElementById("generate-btn");
-        const paintCanvas = document.getElementById("paint-canvas");
         const clearBtn = document.getElementById("clear-btn");
         const optimizeBtn = document.getElementById("optimize-btn");
 
@@ -15318,22 +15509,29 @@ self.onmessage = function(e) {
         }
 
         // Paint canvas click - cycle pixel states
-        paintCanvas.addEventListener("pointerdown", function (e) {
+        // Event delegation on paint-container since canvas is dynamically created
+        const paintContainer = document.getElementById("paint-container");
+        paintContainer.addEventListener("pointerdown", function (e) {
           if (!paintGrid) return;
           if (searchState === "running") return; // Block painting during optimization
 
-          const rect = paintCanvas.getBoundingClientRect();
+          const canvas = paintContainer.querySelector('canvas');
+          if (!canvas) return;
+
+          const rect = canvas.getBoundingClientRect();
 
           // Calculate pointer position relative to canvas
           // Account for CSS scaling vs actual canvas size
-          const scaleX = paintCanvas.width / rect.width;
-          const scaleY = paintCanvas.height / rect.height;
+          const scaleX = canvas.width / rect.width;
+          const scaleY = canvas.height / rect.height;
           const canvasX = (e.clientX - rect.left) * scaleX;
           const canvasY = (e.clientY - rect.top) * scaleY;
 
           // Convert to grid coordinates
-          const gridX = Math.floor(canvasX / paintCellSize);
-          const gridY = Math.floor(canvasY / paintCellSize);
+          const gridSize = paintGrid.size;
+          const cellSize = canvas.width / gridSize;
+          const gridX = Math.floor(canvasX / cellSize);
+          const gridY = Math.floor(canvasY / cellSize);
 
           // Bounds check
           if (
@@ -15342,8 +15540,12 @@ self.onmessage = function(e) {
             gridY >= 0 &&
             gridY < paintGrid.size
           ) {
+            // Check if position is protected - don't allow painting on protected areas
+            if (functionMask && isProtected(gridX, gridY, gridSize, functionMask)) {
+              return; // Can't paint on protected areas
+            }
+
             paintGrid.cycle(gridX, gridY);
-            renderPaintGrid(paintCanvas, paintGrid);
 
             // Re-run corruption pipeline to update QR display and decode status
             runCorruptionPipeline();
@@ -15364,7 +15566,6 @@ self.onmessage = function(e) {
           if (searchState === "running") return; // Block clearing during optimization
           if (paintGrid) {
             paintGrid.clear();
-            renderPaintGrid(paintCanvas, paintGrid);
 
             // Re-run corruption pipeline to show clean QR and update decode status
             runCorruptionPipeline();
