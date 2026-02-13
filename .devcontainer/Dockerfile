@@ -3,8 +3,6 @@ FROM node:20
 ARG TZ
 ENV TZ="$TZ"
 
-ARG CLAUDE_CODE_VERSION=latest
-
 # Install basic development tools and iptables/ipset
 RUN apt-get update && apt-get install -y --no-install-recommends \
   less \
@@ -38,8 +36,8 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 ENV DEVCONTAINER=true
 
 # Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /home/node/.claude && \
-  chown -R node:node /workspace /home/node/.claude
+RUN mkdir -p /workspace /home/node/.opencode && \
+  chown -R node:node /workspace /home/node/.opencode
 
 WORKDIR /workspace
 
@@ -64,7 +62,7 @@ ENV EDITOR=nano
 ENV VISUAL=nano
 
 # Default powerline10k theme
-ARG ZSH_IN_DOCKER_VERSION=1.2.0
+ARG ZSH_IN_DOCKER_VERSION=1.2.1
 RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v${ZSH_IN_DOCKER_VERSION}/zsh-in-docker.sh)" -- \
   -p git \
   -p fzf \
@@ -73,10 +71,10 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
 
-# Install Claude
-RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
+# Install OpenCode
+ARG OPENCODE_VERSION=latest
+RUN npm --verbose install --global opencode-ai@${OPENCODE_VERSION}
 
-USER node
-
-# Install Get Shit Done Plugin for Claude Code
-RUN npx get-shit-done-cc --claude --global
+# Install Get Shit Done Plugin for OpenCode
+ARG GSD_VERSION=latest
+RUN npx --verbose --yes get-shit-done-cc@${GSD_VERSION} --opencode --global

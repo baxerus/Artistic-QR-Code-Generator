@@ -24,8 +24,9 @@
     "reedsolomon",
     "Sangmin"
   ],
-  "claudeCode.initialPermissionMode": "bypassPermissions",
-  "claudeCode.preferredLocation": "sidebar",
-  "claudeCode.allowDangerouslySkipPermissions": true,
-  "claudeCode.useCtrlEnterToSend": true
+  "github.copilot.enable": {
+    "*": false
+  },
+  "github.copilot.nextEditSuggestions.enabled": false,
+  "github.copilot.editor.enableCodeActions": false
 }
