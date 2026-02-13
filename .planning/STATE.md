@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Phase 6 - State Persistence
+**Current focus:** Phase 7 complete - Ready for Phase 8
 
 ## Current Position
 
@@ -70,13 +70,17 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 07]: Protected area outlines always visible (not hover-only) with red dashed borders (#ff6b6b); grid lines only on hover
 
 **Phase 7 (07-02 - Legend and Drag Painting):**
-- Legend positioned to the right of QR canvas using flex layout
-- Unset selected by default to prevent accidental painting
-- Right-click paints opposite color (black ↔ white)
-- Right-click does nothing when 'unset' is selected
+- Legend positioned below QR canvas, centered with Clear Pattern button
+- Color selection persists to localStorage across reloads
+- Right-click paints opposite color (black ↔ white), or unsets when Unset selected
 - GRID_SENSITIVITY = 0.5 for precise grid cell detection during drag
 - Protected areas are transparent to drag (painting continues through them)
 - Drag painting uses pointer events with setPointerCapture for smooth tracking
+- Green borders (#22c55e) around painted regions (outer edges only)
+- Red overlay and dashed outlines for protected areas (outer edges only)
+- Collapsible Paint Pattern section, auto-collapses on Generate click
+- Clear Pattern button shows confirmation dialog
+- Pointer cursor on paintable areas, not-allowed on protected areas
 
 ### Pending Todos
 

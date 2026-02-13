@@ -62,8 +62,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Refactor to unified QR canvas with overlay rendering, protected area border outlines, hover grid lines
-- [ ] 07-02-PLAN.md — Interactive color legend with drag painting (left-click) and opposite color (right-click)
+- [x] 07-01-PLAN.md — Refactor to unified QR canvas with overlay rendering, protected area border outlines
+- [x] 07-02-PLAN.md — Interactive color legend with drag painting (left-click) and opposite color (right-click)
 
 #### Phase 8: Generation Safety
 **Goal**: Users are protected from accidental pattern loss and invalid URL inputs
@@ -108,10 +108,10 @@ Plans:
 | 4. Results & Export | v1.0 | 2/2 | Complete | 2026-02-09 |
 | 5. Configuration Constants | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 6. State Persistence | v1.1 | 1/1 | Complete | 2026-02-10 |
-| 7. Painting Overhaul | v1.1 | 2/2 | Planned | 2026-02-13 |
+| 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. Generation Safety | v1.1 | 0/2 | Not started | - |
 | 9. Optimization Upgrades | v1.1 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-13 (Phase 7 planned)*
+*Last updated: 2026-02-13 (Phase 7 complete)*
