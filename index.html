@@ -14279,8 +14279,15 @@
 
       // ===== WEB WORKER FOR HASH OPTIMIZATION =====
 
-      let optimizationWorker = null;
-      let latestOptimizationResults = null;
+      // ===== WORKER POOL STATE (OPT-02) =====
+      const WORKER_COUNT = Math.min(Math.max((navigator.hardwareConcurrency || 4) - 1, 2), 8);
+      let optimizationWorkers = [];           // Array of Worker instances
+      let workerResultBuffers = [];           // Per-worker result arrays
+      let workerAttemptCounts = [];           // Per-worker attempt counts
+      let workerDecodableCounts = [];         // Per-worker decodable counts
+      let completedWorkerCount = 0;           // Track how many workers have sent COMPLETE
+      let latestOptimizationResults = null;   // Keep for compatibility
+      let workerBlobUrl = null;               // Reusable blob URL for worker code
 
       /**
        * Create optimization Web Worker with QR encoding + jsQR decoding
