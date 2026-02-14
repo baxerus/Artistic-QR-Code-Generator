@@ -15420,6 +15420,21 @@ self.onmessage = function(e) {
       let totalAttempts = 0;
       let totalDecodableCount = 0;
 
+      const PERFECT_RESULT_THRESHOLD = 5;  // OPT-01: Auto-stop when this many 0-error results found
+
+      /**
+       * Check if auto-stop condition is met (OPT-01)
+       * @param {Array} topResults - Current merged top results
+       * @returns {boolean} True if 5+ results have 0 pixel errors AND are decodable
+       */
+      function checkAutoStopCondition(topResults) {
+        if (!topResults || topResults.length < PERFECT_RESULT_THRESHOLD) {
+          return false;
+        }
+        const perfectCount = topResults.filter(r => r.decodable && r.pixelDiff === 0).length;
+        return perfectCount >= PERFECT_RESULT_THRESHOLD;
+      }
+
       /**
        * Check paint state and enable/disable optimize button
        */
