@@ -90,11 +90,11 @@ Plans:
   2. Multiple Web Workers run in parallel during optimization, with combined throughput visibly higher than single-worker baseline
   3. Auto-stop and multi-worker features work together (all workers stop when 5 perfect results accumulated)
   4. Results from all workers merge correctly into the top-5 ranking (no duplicates, proper sorting)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: Auto-stop logic for 0-error result accumulation
-- [ ] 09-02: Multi-worker parallelization with result merging
+- [ ] 09-01-PLAN.md — Auto-stop when 5 results with 0 pixel errors found (OPT-01)
+- [ ] 09-02-PLAN.md — Multi-worker parallelization with result merging (OPT-02)
 
 ## Progress
 
