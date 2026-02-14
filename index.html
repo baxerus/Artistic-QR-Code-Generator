@@ -15485,30 +15485,19 @@ self.onmessage = function(e) {
       }
 
       /**
-       * Terminate optimization worker
-       */
-      function terminateOptimizationWorker() {
-        if (optimizationWorker) {
-          optimizationWorker.terminate();
-          optimizationWorker = null;
-        }
-      }
-
-      /**
-       * Start optimization search
+       * Start parallel optimization search (OPT-02)
+       * @param {number} timeout - Timeout in milliseconds
        */
       function startOptimization(timeout = 10000) {
         if (!currentURL || !currentVersion || !paintGrid) {
-          console.error(
-            "Cannot start optimization: missing URL, version, or paint grid",
-          );
+          console.error('Cannot start optimization: missing URL, version, or paint grid');
           return;
         }
-
-        createOptimizationWorker();
-
+        
+        createWorkerPool();
+        
         const message = {
-          type: "START_OPTIMIZATION",
+          type: 'START_OPTIMIZATION',
           baseURL: currentURL,
           version: currentVersion,
           paintedPixels: Array.from(paintGrid.cells),
@@ -15516,25 +15505,36 @@ self.onmessage = function(e) {
           timeout: timeout,
           existingTopResults: currentTopResults,
         };
-
-        optimizationWorker.postMessage(message);
+        
+        console.log(`Starting parallel optimization with ${WORKER_COUNT} workers, timeout ${timeout}ms`);
+        
+        // Send to all workers simultaneously
+        optimizationWorkers.forEach(worker => {
+          worker.postMessage(message);
+        });
       }
 
       /**
-       * Stop optimization search
+       * Stop optimization search (OPT-02)
        */
       function stopOptimization() {
-        if (optimizationWorker) {
-          optimizationWorker.postMessage({ type: "STOP_OPTIMIZATION" });
-        }
+        stopAllWorkers();
+      }
+
+      /**
+       * Terminate optimization worker pool (OPT-02)
+       */
+      function terminateOptimizationWorker() {
+        terminateWorkerPool();
       }
 
       // Expose worker functions globally for console testing
-      window.createOptimizationWorker = createOptimizationWorker;
+      window.createWorkerPool = createWorkerPool;
       window.startOptimization = startOptimization;
       window.stopOptimization = stopOptimization;
-      window.terminateOptimizationWorker = terminateOptimizationWorker;
+      window.terminateWorkerPool = terminateWorkerPool;
       window.getLatestOptimizationResults = () => latestOptimizationResults;
+      window.WORKER_COUNT = WORKER_COUNT;
 
       // ===== OPTIMIZATION UI STATE AND FUNCTIONS =====
 
