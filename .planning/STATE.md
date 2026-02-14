@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Phase 7 complete - Ready for Phase 8
+**Current focus:** Phase 8 plan 01 complete - URL validation and generation guards
 
 ## Current Position
 
-Phase: 7 of 9 (Painting Overhaul)
-Plan: 2 of 2 in current phase
-Status: Complete
-Last activity: 2026-02-13 -- Completed 07-02-PLAN.md (Legend and Drag Painting)
+Phase: 8 of 9 (Generation Safety)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-02-14 -- Completed 08-01-PLAN.md (URL Validation & Generation Guards)
 
-Progress: [===========>....] 71% (12/16 plans: 8 v1 complete, 4/8 v1.1)
+Progress: [============>...] 78% (13/16 plans: 8 v1 complete, 5/8 v1.1)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [===========>....] 71% (12/16 plans: 8 v1 complete, 4/8 v1.1)
 - Timeline: 4 days (2026-02-06 -> 2026-02-09)
 
 **v1.1 Milestone (in progress):**
-- Total plans completed: 4
+- Total plans completed: 5
 - Total plans: 8 (across 5 phases)
-- Total commits: 8
+- Total commits: 10
 
 **Plan 07-01:**
 - Duration: 20 min
@@ -39,6 +39,12 @@ Progress: [===========>....] 71% (12/16 plans: 8 v1 complete, 4/8 v1.1)
 - Tasks: 3
 - Files: 1
 - Completed: 2026-02-13
+
+**Plan 08-01:**
+- Duration: 2 min
+- Tasks: 2
+- Files: 1
+- Completed: 2026-02-14
 
 ## Accumulated Context
 
@@ -82,6 +88,13 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Clear Pattern button shows confirmation dialog
 - Pointer cursor on paintable areas, not-allowed on protected areas
 
+**Phase 8 (08-01 - URL Validation & Generation Guards):**
+- Use native URL API for hash detection (url.hash.length > 0)
+- Inline error message under input field for hash fragment rejection
+- hasPattern() helper extracts pattern existence check for reuse
+- Version change handler skips auto-generation when pattern exists
+- Generate button remains only way to trigger generation with pattern
+
 ### Pending Todos
 
 None.
@@ -92,10 +105,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-13T22:48:27Z
-Stopped at: Completed 07-02-PLAN.md (Legend and Drag Painting)
+Last session: 2026-02-14T20:49:26Z
+Stopped at: Completed 08-01-PLAN.md (URL Validation & Generation Guards)
 Resume file: None
 
 ---
-*Phase 7 complete. Both plans finished. Ready for Phase 8.*
+*Phase 8 plan 01 complete. Ready for 08-02 (Pattern Preservation).*
 
