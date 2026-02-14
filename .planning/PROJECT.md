@@ -8,6 +8,15 @@ A single-file HTML tool (16,353 lines) for creating artistic QR codes by embeddi
 
 The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art, not the other way around. Even if it means the QR code won't scan, the pattern survives at 100%.
 
+## Current Milestone: v1.2 Visual Consistency & Result Inspection
+
+**Goal:** Unify protected area visualization (blue everywhere) and make scaled results easier to inspect by hiding overlays until hover.
+
+**Target features:**
+- Blue dashed borders for protected areas (paint canvas + results)
+- Scaled results show plain QR by default
+- Error visualization appears on hover
+
 ## Current State
 
 **Shipped:** v1.1 UX Overhaul & Optimization (2026-02-14)
@@ -52,7 +61,10 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Active
 
-(None — next milestone to be planned via `/gsd-new-milestone`)
+**v1.2 Visual Consistency & Result Inspection:**
+- [ ] Protected area borders use blue (not red) on paint canvas
+- [ ] Scaled results show plain QR by default (no overlay)
+- [ ] Scaled results show error visualization + blue dashed borders on hover
 
 ### Out of Scope
 
@@ -108,4 +120,4 @@ Based on v1.1 development, potential future work:
 - High-resolution export (300+ DPI for print)
 
 ---
-*Last updated: 2026-02-14 after v1.1 milestone completion*
+*Last updated: 2026-02-15 after v1.2 milestone start*
