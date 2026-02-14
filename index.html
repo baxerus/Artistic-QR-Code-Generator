@@ -15334,6 +15334,18 @@ self.onmessage = function(e) {
             updateSearchStats(e.data.attempts, e.data.elapsed);
             if (e.data.topResults && e.data.topResults.length > 0) {
               updateTopResults(e.data.topResults);
+              
+              // OPT-01: Check auto-stop condition after results update
+              if (checkAutoStopCondition(currentTopResults)) {
+                console.log('Auto-stop triggered: 5 perfect results found');
+                stopOptimization();
+                // Flag that this was auto-stopped (for UI display)
+                handleSearchComplete({ 
+                  ...e.data, 
+                  autoStopped: true,
+                  topResults: currentTopResults 
+                });
+              }
             }
           } else if (e.data.type === "COMPLETE") {
             latestOptimizationResults = e.data;
