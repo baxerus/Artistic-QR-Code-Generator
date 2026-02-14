@@ -55,15 +55,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | — | Pending |
-| VIS-02 | — | Pending |
-| INSP-01 | — | Pending |
-| INSP-02 | — | Pending |
+| VIS-01 | Phase 10 | Pending |
+| VIS-02 | Phase 10 | Pending |
+| INSP-01 | Phase 10 | Pending |
+| INSP-02 | Phase 10 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 4 total
-- Mapped to phases: 0
-- Unmapped: 4 (pending roadmap)
+- Mapped to phases: 4 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-15*

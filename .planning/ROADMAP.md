@@ -4,6 +4,30 @@
 
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-02-09) → [archive](milestones/v1-ROADMAP.md)
 - ✅ **v1.1 UX Overhaul & Optimization** — Phases 5-9 (shipped 2026-02-14) → [archive](milestones/v1.1-ROADMAP.md)
+- 🔄 **v1.2 Visual Consistency & Result Inspection** — Phase 10 (in progress)
+
+## v1.2 Visual Consistency & Result Inspection
+
+**Goal:** Unify protected area visualization (blue everywhere) and make scaled results easier to inspect by showing plain QR codes by default with overlays appearing on hover.
+
+### Phase 10: Visual Polish & Result Inspection
+
+**Goal:** Users can clearly identify protected areas (blue borders) and inspect scaled results without visual clutter.
+
+**Dependencies:** None — builds on existing v1.1 rendering
+
+**Requirements:**
+- VIS-01: Protected area borders on paint canvas use blue instead of red
+- VIS-02: Scaled results show blue dashed borders around protected areas on hover
+- INSP-01: Scaled results display plain QR code by default (no overlay colors)
+- INSP-02: Scaled results show error visualization overlay on hover
+
+**Success Criteria:**
+1. Paint canvas shows blue dashed borders around finder patterns, timing patterns, and alignment patterns (not red)
+2. Scaled results in Top 5 list display clean black/white QR codes without colored overlays
+3. Hovering over a scaled result reveals error visualization (red/green pixels showing conflicts)
+4. Hovering over a scaled result shows blue dashed borders around protected areas
+5. Moving mouse away from scaled result returns it to plain QR view
 
 ## Phases
 
@@ -28,6 +52,13 @@
 
 </details>
 
+<details open>
+<summary>🔄 v1.2 Visual Consistency & Result Inspection (Phase 10) — IN PROGRESS</summary>
+
+- [ ] Phase 10: Visual Polish & Result Inspection (0/? plans) — pending
+
+</details>
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -41,9 +72,10 @@
 | 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. Generation Safety | v1.1 | 2/2 | Complete | 2026-02-14 |
 | 9. Optimization Upgrades | v1.1 | 2/2 | Complete | 2026-02-14 |
+| 10. Visual Polish & Result Inspection | v1.2 | 0/? | Pending | — |
 
-**Total:** 9 phases, 17 plans across 2 milestones
+**Total:** 10 phases across 3 milestones (2 shipped, 1 in progress)
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-14 (v1.1 milestone archived)*
+*Last updated: 2026-02-15 (v1.2 roadmap added)*
