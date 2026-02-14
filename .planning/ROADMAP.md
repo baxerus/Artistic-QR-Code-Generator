@@ -78,8 +78,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Hash fragment URL rejection (SAFE-01) and generation guards (SAFE-02, SAFE-03)
-- [ ] 08-02-PLAN.md — Version change confirmation dialog (SAFE-05) and pattern preservation verification (SAFE-04)
+- [x] 08-01-PLAN.md — Hash fragment URL rejection (SAFE-01) and generation guards (SAFE-02, SAFE-03)
+- [x] 08-02-PLAN.md — Version change confirmation dialog (SAFE-05) and pattern preservation verification (SAFE-04)
 
 #### Phase 9: Optimization Upgrades
 **Goal**: Optimization searches faster with multiple workers and stops automatically when ideal results are found
@@ -109,9 +109,9 @@ Plans:
 | 5. Configuration Constants | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 6. State Persistence | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
-| 8. Generation Safety | v1.1 | 0/2 | Not started | - |
+| 8. Generation Safety | v1.1 | 2/2 | Complete | 2026-02-14 |
 | 9. Optimization Upgrades | v1.1 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-13 (Phase 7 complete)*
+*Last updated: 2026-02-14 (Phase 8 complete)*

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Phase 8 plan 01 complete - URL validation and generation guards
+**Current focus:** Phase 8 complete - All generation safety guards implemented
 
 ## Current Position
 
 Phase: 8 of 9 (Generation Safety)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-14 -- Completed 08-01-PLAN.md (URL Validation & Generation Guards)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase Complete
+Last activity: 2026-02-14 -- Completed 08-02-PLAN.md (Pattern Preservation)
 
-Progress: [============>...] 78% (13/16 plans: 8 v1 complete, 5/8 v1.1)
+Progress: [=============>.] 84% (14/16 plans: 8 v1 complete, 6/8 v1.1)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [============>...] 78% (13/16 plans: 8 v1 complete, 5/8 v1.1)
 - Timeline: 4 days (2026-02-06 -> 2026-02-09)
 
 **v1.1 Milestone (in progress):**
-- Total plans completed: 5
+- Total plans completed: 6
 - Total plans: 8 (across 5 phases)
-- Total commits: 10
+- Total commits: 12
 
 **Plan 07-01:**
 - Duration: 20 min
@@ -43,6 +43,12 @@ Progress: [============>...] 78% (13/16 plans: 8 v1 complete, 5/8 v1.1)
 **Plan 08-01:**
 - Duration: 2 min
 - Tasks: 2
+- Files: 1
+- Completed: 2026-02-14
+
+**Plan 08-02:**
+- Duration: 1 min
+- Tasks: 3
 - Files: 1
 - Completed: 2026-02-14
 
@@ -95,6 +101,12 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Version change handler skips auto-generation when pattern exists
 - Generate button remains only way to trigger generation with pattern
 
+**Phase 8 (08-02 - Pattern Preservation):**
+- Confirmation dialogs use native confirm() for simplicity and cross-browser support
+- URL-forced version bumps restore previous URL on cancel (not just dropdown)
+- previousValidURL tracked globally to enable clean URL restoration
+- SAFE-05 pattern-aware version change guards implemented
+
 ### Pending Todos
 
 None.
@@ -105,10 +117,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-14T20:49:26Z
-Stopped at: Completed 08-01-PLAN.md (URL Validation & Generation Guards)
+Last session: 2026-02-14T20:52:54Z
+Stopped at: Completed 08-02-PLAN.md (Pattern Preservation)
 Resume file: None
 
 ---
-*Phase 8 plan 01 complete. Ready for 08-02 (Pattern Preservation).*
+*Phase 8 complete. Ready for Phase 9 (Optimization).*
 
