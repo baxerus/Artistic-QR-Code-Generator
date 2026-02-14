@@ -720,6 +720,22 @@
         opacity: 1;
       }
 
+      .result-slot:hover .result-overlay {
+        opacity: 1;
+      }
+
+      .result-slot:hover .overlay-legend {
+        display: flex;
+      }
+
+      .results-disabled .result-slot:hover .result-overlay {
+        opacity: 0;
+      }
+
+      .results-disabled .result-slot:hover .overlay-legend {
+        display: none;
+      }
+
       .result-slot.expanded {
         flex: 0 0 100%;
         max-width: 100%;
@@ -16024,11 +16040,21 @@ self.onmessage = function(e) {
           }
           ctx.putImageData(imageData, 0, 0);
 
-          // Create overlay canvas (hidden until expanded)
+          // Create overlay canvas (rendered eagerly, shown on hover via CSS)
           const overlayCanvas = document.createElement("canvas");
           overlayCanvas.className = "result-overlay";
           overlayCanvas.width = moduleCount;
           overlayCanvas.height = moduleCount;
+
+          // Render overlay immediately (will be shown on hover via CSS)
+          const functionMask = createFunctionPatternMask(currentVersion);
+          renderErrorOverlay(
+            overlayCanvas,
+            result.qrModuleData,
+            result.moduleCount,
+            paintGrid.cells,
+            functionMask,
+          );
 
           // Assemble canvas container
           canvasContainer.appendChild(canvas);
@@ -16084,7 +16110,7 @@ self.onmessage = function(e) {
             copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
           };
 
-          // Click to expand/collapse with error overlay (disabled during search)
+          // Click to expand/collapse (overlay already rendered, disabled during search)
           canvasContainer.addEventListener("click", function () {
             if (searchState === "running") return;
             const isExpanded = slot.classList.contains("expanded");
@@ -16097,22 +16123,8 @@ self.onmessage = function(e) {
               currentlyExpanded.classList.remove("expanded");
             }
 
-            if (isExpanded) {
-              // Collapse this slot
-              slot.classList.remove("expanded");
-            } else {
-              // Expand this slot and render overlay
-              const resultData = slot._resultData;
-              const functionMask = createFunctionPatternMask(currentVersion);
-              renderErrorOverlay(
-                overlayCanvas,
-                resultData.qrModuleData,
-                resultData.moduleCount,
-                paintGrid.cells,
-                functionMask,
-              );
-              slot.classList.add("expanded");
-            }
+            // Toggle expanded state
+            slot.classList.toggle("expanded", !isExpanded);
           });
 
           actions.appendChild(downloadBtn);
