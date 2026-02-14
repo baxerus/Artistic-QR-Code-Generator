@@ -124,6 +124,13 @@
         color: #ef4444;
       }
 
+      .url-error {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 4px;
+        display: none;
+      }
+
       select {
         padding-right: 12px;
         cursor: pointer;
@@ -767,6 +774,7 @@
               />
               <span class="validation-icon" id="validation-icon"></span>
             </div>
+            <div class="url-error" id="url-error"></div>
           </div>
 
           <!-- Row 2: Version dropdown -->
@@ -13896,14 +13904,31 @@
       let qrCodeInstance = null;
 
       /**
+       * Check if URL contains a hash fragment
+       * @param {string} urlString - URL to check
+       * @returns {boolean} True if URL has hash fragment
+       */
+      function hasHashFragment(urlString) {
+        try {
+          const url = new URL(urlString);
+          return url.hash.length > 0;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      /**
        * Validate URL using native URL constructor
        * Only accept http: and https: protocols
+       * Rejects URLs with hash fragments (SAFE-01)
        */
       function isValidURL(string) {
         try {
           const url = new URL(string);
           if (url.protocol !== "http:" && url.protocol !== "https:")
             return false;
+          // SAFE-01: Reject URLs with hash fragments
+          if (url.hash.length > 0) return false;
           const host = url.hostname;
           const dot = host.indexOf(".");
           return dot > 0 && dot < host.length - 1;
@@ -14126,6 +14151,18 @@
       }
 
       /**
+       * Show or hide URL error message
+       * @param {string|null} message - Error message to show, or null to hide
+       */
+      function showURLError(message) {
+        const errorDiv = document.getElementById("url-error");
+        if (errorDiv) {
+          errorDiv.textContent = message || "";
+          errorDiv.style.display = message ? "block" : "none";
+        }
+      }
+
+      /**
        * Update validation UI state
        */
       function updateValidationUI(url) {
@@ -14138,6 +14175,7 @@
           input.classList.remove("valid", "invalid");
           icon.classList.remove("valid", "invalid");
           button.disabled = true;
+          showURLError(null);
           // Reset dropdown to disabled state
           const dropdown = document.getElementById("version-select");
           dropdown.innerHTML =
@@ -14145,6 +14183,27 @@
           dropdown.disabled = true;
           return;
         }
+
+        // SAFE-01: Check for hash fragment before other validation
+        if (hasHashFragment(url)) {
+          input.classList.remove("valid");
+          input.classList.add("invalid");
+          icon.classList.remove("valid");
+          icon.classList.add("invalid");
+          button.disabled = true;
+          showURLError(
+            "URLs with # fragments are not supported. The optimizer adds its own hash suffixes.",
+          );
+          // Reset dropdown to disabled state
+          const dropdown = document.getElementById("version-select");
+          dropdown.innerHTML =
+            '<option value="" disabled selected>Enter URL first</option>';
+          dropdown.disabled = true;
+          return;
+        }
+
+        // Clear any previous error
+        showURLError(null);
 
         // Valid URL
         if (isValidURL(url)) {
