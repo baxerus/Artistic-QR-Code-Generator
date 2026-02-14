@@ -15933,8 +15933,12 @@ self.onmessage = function(e) {
         totalAttempts += data.attempts;
         totalDecodableCount += data.decodableCount || 0;
 
-        // Show summary with cumulative stats
-        searchSummary.textContent = `Done - ${totalAttempts.toLocaleString()} attempts, ${totalDecodableCount} decodable found`;
+        // OPT-01: Show auto-stop or normal completion message
+        if (data.autoStopped) {
+          searchSummary.textContent = `Auto-stopped - 5 perfect results found! (${totalAttempts.toLocaleString()} attempts)`;
+        } else {
+          searchSummary.textContent = `Done - ${totalAttempts.toLocaleString()} attempts, ${totalDecodableCount} decodable found`;
+        }
         searchSummary.style.display = "flex";
 
         // Final update to top results
