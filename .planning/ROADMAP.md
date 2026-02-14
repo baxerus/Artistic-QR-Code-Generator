@@ -3,7 +3,7 @@
 ## Milestones
 
 - v1.0 MVP - Phases 1-4 (shipped 2026-02-09)
-- v1.1 UX Overhaul & Optimization - Phases 5-9 (in progress)
+- v1.1 UX Overhaul & Optimization - Phases 5-9 (shipped 2026-02-14)
 
 ## Phases
 
@@ -19,7 +19,7 @@ Archived to `.planning/milestones/v1-ROADMAP.md`
 
 </details>
 
-### v1.1 UX Overhaul & Optimization (In Progress)
+### v1.1 UX Overhaul & Optimization (Complete)
 
 **Milestone Goal:** Improve the painting workflow (overlay on QR, drag painting, state persistence), add safety guards (hash fragment rejection, version change warnings), and speed up optimization (multi-worker, auto-stop).
 
@@ -93,8 +93,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Auto-stop when 5 results with 0 pixel errors found (OPT-01)
-- [ ] 09-02-PLAN.md — Multi-worker parallelization with result merging (OPT-02)
+- [x] 09-01-PLAN.md — Auto-stop when 5 results with 0 pixel errors found (OPT-01)
+- [x] 09-02-PLAN.md — Multi-worker parallelization with result merging (OPT-02)
 
 ## Progress
 
@@ -110,8 +110,8 @@ Plans:
 | 6. State Persistence | v1.1 | 1/1 | Complete | 2026-02-10 |
 | 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. Generation Safety | v1.1 | 2/2 | Complete | 2026-02-14 |
-| 9. Optimization Upgrades | v1.1 | 0/2 | Not started | - |
+| 9. Optimization Upgrades | v1.1 | 2/2 | Complete | 2026-02-14 |
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-14 (Phase 8 complete)*
+*Last updated: 2026-02-14 (Phase 9 complete - v1.1 Milestone Complete)*
