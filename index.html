@@ -12937,6 +12937,7 @@
       let qrModel = null;
       let currentVersion = null;
       let currentURL = null;
+      let previousValidURL = ''; // Track last valid URL for reverting on cancelled version bumps
 
       // Alignment pattern positions by version (from QR spec)
       const ALIGNMENT_POSITIONS = {
@@ -14090,7 +14091,21 @@
             // Previous version still valid - keep it (never auto-decrease)
             selectedVersion = previousValue;
           } else {
-            // Previous version too small - auto-bump to minimum
+            // Previous version too small - would need auto-bump
+            // SAFE-05: Warn if pattern exists (URL-forced version change)
+            if (hasPattern()) {
+              const confirmed = confirm(
+                "This URL requires a larger QR version (" + minVersion + ") and will clear your painted pattern. Continue?"
+              );
+
+              if (!confirmed) {
+                // Restore previous URL
+                const urlInput = document.getElementById("url-input");
+                urlInput.value = previousValidURL;
+                updateValidationUI(previousValidURL);
+                return; // Exit without updating dropdown
+              }
+            }
             selectedVersion = minVersion;
           }
         }
@@ -14147,6 +14162,7 @@
         window.currentQRModel = qrModel; // Store globally for painting
         currentVersion = version;
         currentURL = url;
+        previousValidURL = url; // Track for reverting on cancelled version bumps
 
         // Initialize paint canvas for this version
         initPaintCanvas(version);
