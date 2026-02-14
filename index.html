@@ -241,7 +241,8 @@
         line-height: 1;
       }
 
-      .arrow-up, .arrow-down {
+      .arrow-up,
+      .arrow-down {
         transition: transform 0.35s linear;
       }
 
@@ -266,7 +267,10 @@
       .collapsible-content {
         overflow: hidden;
         max-height: 2000px;
-        transition: max-height 0.35s linear, opacity 0.35s linear, padding 0.35s linear;
+        transition:
+          max-height 0.35s linear,
+          opacity 0.35s linear,
+          padding 0.35s linear;
         opacity: 1;
         padding: 15px;
       }
@@ -810,15 +814,21 @@
               <div class="paint-controls">
                 <div class="paint-legend" id="paint-legend">
                   <button class="legend-btn" data-color="black">
-                    <span class="legend-swatch" style="background: #000;"></span>
+                    <span class="legend-swatch" style="background: #000"></span>
                     <span>Black</span>
                   </button>
                   <button class="legend-btn" data-color="white">
-                    <span class="legend-swatch" style="background: #fff; border: 1px solid #ccc;"></span>
+                    <span
+                      class="legend-swatch"
+                      style="background: #fff; border: 1px solid #ccc"
+                    ></span>
                     <span>White</span>
                   </button>
                   <button class="legend-btn active" data-color="unset">
-                    <span class="legend-swatch" style="background: transparent; border: 1px dashed #999;"></span>
+                    <span
+                      class="legend-swatch"
+                      style="background: transparent; border: 1px dashed #999"
+                    ></span>
                     <span>Unset</span>
                   </button>
                 </div>
@@ -12937,7 +12947,7 @@
       let qrModel = null;
       let currentVersion = null;
       let currentURL = null;
-      let previousValidURL = ''; // Track last valid URL for reverting on cancelled version bumps
+      let previousValidURL = ""; // Track last valid URL for reverting on cancelled version bumps
 
       // Alignment pattern positions by version (from QR spec)
       const ALIGNMENT_POSITIONS = {
@@ -13175,7 +13185,7 @@
 
         // Step 1: Create or get existing canvas
         if (!qrCanvas) {
-          qrCanvas = document.createElement('canvas');
+          qrCanvas = document.createElement("canvas");
           qrCanvas.width = 600;
           qrCanvas.height = 600;
         }
@@ -13189,7 +13199,9 @@
         renderQRWithOverlay(qrCanvas, qrModel, paintGrid, functionMask);
 
         // Step 4: Wrap canvas in container for styling and event handling
-        const qrCanvasContainer = document.getElementById("qr-canvas-container");
+        const qrCanvasContainer = document.getElementById(
+          "qr-canvas-container",
+        );
         if (qrCanvasContainer && qrCanvasContainer.children.length === 0) {
           // First render - set up the container
           qrCanvas.style.maxWidth = "100%";
@@ -13199,7 +13211,7 @@
           qrCanvasContainer.appendChild(qrCanvas);
 
           // Add cursor feedback on mousemove
-          qrCanvasContainer.addEventListener('mousemove', function(e) {
+          qrCanvasContainer.addEventListener("mousemove", function (e) {
             updateCursorForPosition(e, qrCanvasContainer, qrCanvas);
           });
 
@@ -13210,10 +13222,10 @@
         // Step 5: Decode corrupted QR
         // Create a separate canvas for decoding with actual black/white values
         // (not the gray overlay colors used for visual distinction)
-        const decodeCanvas = document.createElement('canvas');
+        const decodeCanvas = document.createElement("canvas");
         decodeCanvas.width = qrCanvas.width;
         decodeCanvas.height = qrCanvas.height;
-        const decodeCtx = decodeCanvas.getContext('2d');
+        const decodeCtx = decodeCanvas.getContext("2d");
         const gridSize = qrModel.getModuleCount();
         const cellSize = decodeCanvas.width / gridSize;
 
@@ -13235,7 +13247,7 @@
               isDark = qrModel.isDark(y, x);
             }
 
-            decodeCtx.fillStyle = isDark ? '#000000' : '#ffffff';
+            decodeCtx.fillStyle = isDark ? "#000000" : "#ffffff";
             decodeCtx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
           }
         }
@@ -13277,9 +13289,9 @@
         const protectedCell = isProtected(gridX, gridY, gridSize, functionMask);
 
         if (protectedCell) {
-          wrapper.classList.add('blocked');
+          wrapper.classList.add("blocked");
         } else {
-          wrapper.classList.remove('blocked');
+          wrapper.classList.remove("blocked");
         }
       }
 
@@ -13289,7 +13301,7 @@
       let functionMask = null; // Cached function pattern mask for painting
 
       // Color selection state for drag painting
-      let selectedColor = 'unset'; // 'black' | 'white' | 'unset'
+      let selectedColor = "unset"; // 'black' | 'white' | 'unset'
       let isPainting = false;
       let lastPaintedCell = null;
       let currentPaintButton = 0; // Track which mouse button started painting
@@ -13299,13 +13311,13 @@
        * Toggle paint section collapsed state
        */
       function togglePaintSection(forceCollapsed) {
-        const wrapper = document.getElementById('paint-section-wrapper');
+        const wrapper = document.getElementById("paint-section-wrapper");
         if (!wrapper) return;
-        
-        if (typeof forceCollapsed === 'boolean') {
-          wrapper.classList.toggle('collapsed', forceCollapsed);
+
+        if (typeof forceCollapsed === "boolean") {
+          wrapper.classList.toggle("collapsed", forceCollapsed);
         } else {
-          wrapper.classList.toggle('collapsed');
+          wrapper.classList.toggle("collapsed");
         }
       }
 
@@ -13313,9 +13325,9 @@
        * Initialize collapsible section toggle
        */
       function initCollapsibleSection() {
-        const toggle = document.getElementById('paint-section-toggle');
+        const toggle = document.getElementById("paint-section-toggle");
         if (toggle) {
-          toggle.addEventListener('click', function() {
+          toggle.addEventListener("click", function () {
             togglePaintSection();
           });
         }
@@ -13328,7 +13340,7 @@
         try {
           localStorage.setItem(STORAGE_KEYS.COLOR, color);
         } catch (err) {
-          console.warn('Failed to save color to localStorage:', err);
+          console.warn("Failed to save color to localStorage:", err);
         }
       }
 
@@ -13338,32 +13350,32 @@
       function loadSelectedColor() {
         try {
           const color = localStorage.getItem(STORAGE_KEYS.COLOR);
-          if (color && ['black', 'white', 'unset'].includes(color)) {
+          if (color && ["black", "white", "unset"].includes(color)) {
             return color;
           }
         } catch (err) {
-          console.warn('Failed to load color from localStorage:', err);
+          console.warn("Failed to load color from localStorage:", err);
         }
-        return 'unset'; // Default
+        return "unset"; // Default
       }
 
       /**
        * Set the selected color from the legend
        */
       function setSelectedColor(color, save = true) {
-        if (!['black', 'white', 'unset'].includes(color)) {
-          console.warn('Invalid color:', color);
+        if (!["black", "white", "unset"].includes(color)) {
+          console.warn("Invalid color:", color);
           return;
         }
 
         selectedColor = color;
 
         // Update UI
-        const buttons = document.querySelectorAll('#paint-legend .legend-btn');
-        buttons.forEach(btn => {
-          btn.classList.remove('active');
+        const buttons = document.querySelectorAll("#paint-legend .legend-btn");
+        buttons.forEach((btn) => {
+          btn.classList.remove("active");
           if (btn.dataset.color === color) {
-            btn.classList.add('active');
+            btn.classList.add("active");
           }
         });
 
@@ -13377,11 +13389,11 @@
        * Initialize legend click handlers
        */
       function initLegendHandlers() {
-        const legend = document.getElementById('paint-legend');
+        const legend = document.getElementById("paint-legend");
         if (!legend) return;
 
-        legend.addEventListener('click', function(e) {
-          const btn = e.target.closest('.legend-btn');
+        legend.addEventListener("click", function (e) {
+          const btn = e.target.closest(".legend-btn");
           if (!btn) return;
 
           setSelectedColor(btn.dataset.color);
@@ -13398,14 +13410,14 @@
       function getPaintValue(button) {
         if (button === 0) {
           // Left click: paint selected color
-          if (selectedColor === 'black') return 2;
-          if (selectedColor === 'white') return 1;
-          if (selectedColor === 'unset') return 0;
+          if (selectedColor === "black") return 2;
+          if (selectedColor === "white") return 1;
+          if (selectedColor === "unset") return 0;
         } else if (button === 2) {
           // Right click: paint opposite color (or unset if unset selected)
-          if (selectedColor === 'unset') return 0; // Unset the pixel
-          if (selectedColor === 'black') return 1; // Opposite of black is white
-          if (selectedColor === 'white') return 2; // Opposite of white is black
+          if (selectedColor === "unset") return 0; // Unset the pixel
+          if (selectedColor === "black") return 1; // Opposite of black is white
+          if (selectedColor === "white") return 2; // Opposite of white is black
         }
         return null;
       }
@@ -13436,12 +13448,13 @@
        * Paint at the current pointer position
        */
       function paintAt(x, y, button) {
-        const container = document.getElementById('qr-canvas-container');
-        const qrCanvas = container ? container.querySelector('canvas') : null;
+        const container = document.getElementById("qr-canvas-container");
+        const qrCanvas = container ? container.querySelector("canvas") : null;
         if (!qrCanvas || !paintGrid) return;
 
         // Bounds check
-        if (x < 0 || x >= paintGrid.size || y < 0 || y >= paintGrid.size) return;
+        if (x < 0 || x >= paintGrid.size || y < 0 || y >= paintGrid.size)
+          return;
 
         const cellKey = `${x},${y}`;
 
@@ -13466,7 +13479,12 @@
         lastPaintedCell = cellKey;
 
         // Re-render with overlay
-        renderQRWithOverlay(qrCanvas, window.currentQRModel, paintGrid, functionMask);
+        renderQRWithOverlay(
+          qrCanvas,
+          window.currentQRModel,
+          paintGrid,
+          functionMask,
+        );
 
         // Run corruption pipeline to update QR display
         runCorruptionPipeline();
@@ -13485,62 +13503,62 @@
        * Set up painting event handlers
        */
       function setupPaintingEvents() {
-        const container = document.getElementById('qr-canvas-container');
+        const container = document.getElementById("qr-canvas-container");
         if (!container) return;
 
-        container.addEventListener('pointerdown', function(e) {
+        container.addEventListener("pointerdown", function (e) {
           if (e.button !== 0 && e.button !== 2) return; // Only left/right mouse
-          if (searchState === 'running') return; // Block during optimization
+          if (searchState === "running") return; // Block during optimization
 
           e.preventDefault(); // Prevent text selection during drag
-          
+
           isPainting = true;
           currentPaintButton = e.button; // Remember which button started painting
           lastPaintedCell = null; // Reset for new paint stroke
           container.setPointerCapture(e.pointerId);
-          
-          const canvas = container.querySelector('canvas');
+
+          const canvas = container.querySelector("canvas");
           if (canvas) {
             const coords = getGridCoordinates(canvas, e);
             paintAt(coords.x, coords.y, currentPaintButton);
           }
         });
 
-        container.addEventListener('pointermove', function(e) {
+        container.addEventListener("pointermove", function (e) {
           if (!isPainting) return;
-          
-          const canvas = container.querySelector('canvas');
+
+          const canvas = container.querySelector("canvas");
           if (canvas) {
             const coords = getGridCoordinates(canvas, e);
             paintAt(coords.x, coords.y, currentPaintButton);
           }
         });
 
-        container.addEventListener('pointerup', function(e) {
+        container.addEventListener("pointerup", function (e) {
           isPainting = false;
           lastPaintedCell = null;
           currentPaintButton = 0;
           container.releasePointerCapture(e.pointerId);
         });
 
-        container.addEventListener('pointercancel', function(e) {
+        container.addEventListener("pointercancel", function (e) {
           isPainting = false;
           lastPaintedCell = null;
           currentPaintButton = 0;
         });
 
         // Prevent context menu on right-click
-        container.addEventListener('contextmenu', function(e) {
+        container.addEventListener("contextmenu", function (e) {
           e.preventDefault();
         });
       }
 
       // Color constants for painted overlay
-      const PAINTED_WHITE = '#d0d0d0';
-      const PAINTED_BLACK = '#404040';
-      const PROTECTED_OUTLINE_COLOR = '#ff6b6b';
-      const PROTECTED_OVERLAY_COLOR = 'rgba(255, 107, 107, 0.15)'; // Faint red overlay for protected areas
-      const PAINTED_BORDER_COLOR = '#22c55e'; // Green border around painted regions
+      const PAINTED_WHITE = "#d0d0d0";
+      const PAINTED_BLACK = "#404040";
+      const PROTECTED_OUTLINE_COLOR = "#ff6b6b";
+      const PROTECTED_OVERLAY_COLOR = "rgba(255, 107, 107, 0.15)"; // Faint red overlay for protected areas
+      const PAINTED_BORDER_COLOR = "#22c55e"; // Green border around painted regions
 
       /**
        * Check if a position is protected (part of QR function patterns)
@@ -13580,28 +13598,44 @@
 
             // Check each edge - draw border only if neighbor is not painted
             // Top edge
-            if (y === 0 || !isPainted(x, y - 1, gridSize, paintGrid) || (mask && mask[(y - 1) * gridSize + x])) {
+            if (
+              y === 0 ||
+              !isPainted(x, y - 1, gridSize, paintGrid) ||
+              (mask && mask[(y - 1) * gridSize + x])
+            ) {
               ctx.beginPath();
               ctx.moveTo(px, py);
               ctx.lineTo(pxEnd, py);
               ctx.stroke();
             }
             // Bottom edge
-            if (y === gridSize - 1 || !isPainted(x, y + 1, gridSize, paintGrid) || (mask && mask[(y + 1) * gridSize + x])) {
+            if (
+              y === gridSize - 1 ||
+              !isPainted(x, y + 1, gridSize, paintGrid) ||
+              (mask && mask[(y + 1) * gridSize + x])
+            ) {
               ctx.beginPath();
               ctx.moveTo(px, pyEnd);
               ctx.lineTo(pxEnd, pyEnd);
               ctx.stroke();
             }
             // Left edge
-            if (x === 0 || !isPainted(x - 1, y, gridSize, paintGrid) || (mask && mask[y * gridSize + (x - 1)])) {
+            if (
+              x === 0 ||
+              !isPainted(x - 1, y, gridSize, paintGrid) ||
+              (mask && mask[y * gridSize + (x - 1)])
+            ) {
               ctx.beginPath();
               ctx.moveTo(px, py);
               ctx.lineTo(px, pyEnd);
               ctx.stroke();
             }
             // Right edge
-            if (x === gridSize - 1 || !isPainted(x + 1, y, gridSize, paintGrid) || (mask && mask[y * gridSize + (x + 1)])) {
+            if (
+              x === gridSize - 1 ||
+              !isPainted(x + 1, y, gridSize, paintGrid) ||
+              (mask && mask[y * gridSize + (x + 1)])
+            ) {
               ctx.beginPath();
               ctx.moveTo(pxEnd, py);
               ctx.lineTo(pxEnd, pyEnd);
@@ -13684,7 +13718,7 @@
       function renderQRWithOverlay(qrCanvas, qrModel, paintGrid, mask) {
         if (!qrCanvas || !qrModel) return;
 
-        const ctx = qrCanvas.getContext('2d');
+        const ctx = qrCanvas.getContext("2d");
         const gridSize = qrModel.getModuleCount();
         const cellSize = qrCanvas.width / gridSize;
 
@@ -13696,9 +13730,9 @@
             const py = Math.round(y * cellSize);
             const pw = Math.round((x + 1) * cellSize) - px;
             const ph = Math.round((y + 1) * cellSize) - py;
-            
+
             const isDark = qrModel.isDark(y, x);
-            ctx.fillStyle = isDark ? '#000000' : '#ffffff';
+            ctx.fillStyle = isDark ? "#000000" : "#ffffff";
             ctx.fillRect(px, py, pw, ph);
           }
         }
@@ -13717,7 +13751,7 @@
                 const py = Math.round(y * cellSize);
                 const pw = Math.round((x + 1) * cellSize) - px;
                 const ph = Math.round((y + 1) * cellSize) - py;
-                
+
                 ctx.fillStyle = state === 1 ? PAINTED_WHITE : PAINTED_BLACK;
                 ctx.fillRect(px, py, pw, ph);
               }
@@ -13743,7 +13777,7 @@
               }
             }
           }
-          
+
           // Draw outlines on outer edges
           drawProtectedAreaOutlines(ctx, mask, gridSize, cellSize);
         }
@@ -13770,10 +13804,10 @@
       // ===== STATE PERSISTENCE =====
 
       const STORAGE_KEYS = {
-        URL: 'qr-art.url',
-        VERSION: 'qr-art.version',
-        PATTERN: 'qr-art.pattern',
-        COLOR: 'qr-art.color'
+        URL: "qr-art.url",
+        VERSION: "qr-art.version",
+        PATTERN: "qr-art.pattern",
+        COLOR: "qr-art.color",
       };
 
       /**
@@ -13797,7 +13831,7 @@
         try {
           localStorage.setItem(STORAGE_KEYS.URL, url);
         } catch (err) {
-          console.warn('Failed to save URL to localStorage:', err);
+          console.warn("Failed to save URL to localStorage:", err);
         }
       }
 
@@ -13808,7 +13842,7 @@
         try {
           localStorage.setItem(STORAGE_KEYS.VERSION, version.toString());
         } catch (err) {
-          console.warn('Failed to save version to localStorage:', err);
+          console.warn("Failed to save version to localStorage:", err);
         }
       }
 
@@ -13820,11 +13854,11 @@
         try {
           const data = {
             version: version,
-            cells: Array.from(cells)
+            cells: Array.from(cells),
           };
           localStorage.setItem(STORAGE_KEYS.PATTERN, JSON.stringify(data));
         } catch (err) {
-          console.warn('Failed to save pattern to localStorage:', err);
+          console.warn("Failed to save pattern to localStorage:", err);
         }
       }
 
@@ -13834,10 +13868,10 @@
        */
       function loadURL() {
         try {
-          return localStorage.getItem(STORAGE_KEYS.URL) || '';
+          return localStorage.getItem(STORAGE_KEYS.URL) || "";
         } catch (err) {
-          console.warn('Failed to load URL from localStorage:', err);
-          return '';
+          console.warn("Failed to load URL from localStorage:", err);
+          return "";
         }
       }
 
@@ -13851,14 +13885,22 @@
           if (!stored) return MIN_QR_VERSION;
 
           const version = parseInt(stored, 10);
-          if (isNaN(version) || version < MIN_QR_VERSION || version > MAX_QR_VERSION) {
-            console.warn('Invalid stored version:', stored, '- using MIN_QR_VERSION');
+          if (
+            isNaN(version) ||
+            version < MIN_QR_VERSION ||
+            version > MAX_QR_VERSION
+          ) {
+            console.warn(
+              "Invalid stored version:",
+              stored,
+              "- using MIN_QR_VERSION",
+            );
             return MIN_QR_VERSION;
           }
 
           return version;
         } catch (err) {
-          console.warn('Failed to load version from localStorage:', err);
+          console.warn("Failed to load version from localStorage:", err);
           return MIN_QR_VERSION;
         }
       }
@@ -13875,14 +13917,24 @@
           const data = JSON.parse(stored);
 
           // Validate data structure
-          if (!data || typeof data !== 'object' || !data.version || !Array.isArray(data.cells)) {
-            console.warn('Invalid pattern data structure');
+          if (
+            !data ||
+            typeof data !== "object" ||
+            !data.version ||
+            !Array.isArray(data.cells)
+          ) {
+            console.warn("Invalid pattern data structure");
             return null;
           }
 
           // Validate version match
           if (data.version !== expectedVersion) {
-            console.warn('Pattern version mismatch:', data.version, '!==', expectedVersion);
+            console.warn(
+              "Pattern version mismatch:",
+              data.version,
+              "!==",
+              expectedVersion,
+            );
             return null;
           }
 
@@ -13890,13 +13942,18 @@
           const expectedSize = getModuleSize(data.version);
           const expectedCellCount = expectedSize * expectedSize;
           if (data.cells.length !== expectedCellCount) {
-            console.warn('Pattern size mismatch:', data.cells.length, '!==', expectedCellCount);
+            console.warn(
+              "Pattern size mismatch:",
+              data.cells.length,
+              "!==",
+              expectedCellCount,
+            );
             return null;
           }
 
           return data.cells;
         } catch (err) {
-          console.warn('Failed to load pattern from localStorage:', err);
+          console.warn("Failed to load pattern from localStorage:", err);
           return null;
         }
       }
@@ -14095,7 +14152,9 @@
             // SAFE-05: Warn if pattern exists (URL-forced version change)
             if (hasPattern()) {
               const confirmed = confirm(
-                "This URL requires a larger QR version (" + minVersion + ") and will clear your painted pattern. Continue?"
+                "This URL requires a larger QR version (" +
+                  minVersion +
+                  ") and will clear your painted pattern. Continue?",
               );
 
               if (!confirmed) {
@@ -14280,23 +14339,24 @@
       // ===== WEB WORKER FOR HASH OPTIMIZATION =====
 
       // ===== WORKER POOL STATE (OPT-02) =====
-      const WORKER_COUNT = Math.min(Math.max((navigator.hardwareConcurrency || 4) - 1, 2), 8);
-      let optimizationWorkers = [];           // Array of Worker instances
-      let workerResultBuffers = [];           // Per-worker result arrays
-      let workerAttemptCounts = [];           // Per-worker attempt counts
-      let workerDecodableCounts = [];         // Per-worker decodable counts
-      let completedWorkerCount = 0;           // Track how many workers have sent COMPLETE
-      let latestOptimizationResults = null;   // Keep for compatibility
-      let workerBlobUrl = null;               // Reusable blob URL for worker code
+      const WORKER_COUNT = Math.min(
+        Math.max((navigator.hardwareConcurrency || 4) - 1, 2),
+        16,
+      );
+      const PROGRESS_INTERVAL = 1000; // Progress update interval in ms
+      let optimizationWorkers = []; // Array of Worker instances
+      let workerResultBuffers = []; // Per-worker result arrays
+      let workerAttemptCounts = []; // Per-worker attempt counts
+      let workerDecodableCounts = []; // Per-worker decodable counts
+      let completedWorkerCount = 0; // Track how many workers have sent COMPLETE
+      let latestOptimizationResults = null; // Keep for compatibility
+      let workerBlobUrl = null; // Reusable blob URL for worker code
 
       /**
-       * Create optimization Web Worker with QR encoding + jsQR decoding
+       * Create optimization Web Worker code string (OPT-02)
+       * Returns the worker code for use by createWorkerPool
        */
       function createOptimizationWorker() {
-        if (optimizationWorker) {
-          return optimizationWorker;
-        }
-
         // Extract jsQR library code from the page
         const jsQRScript = document.querySelectorAll("script")[1].textContent;
 
@@ -15258,34 +15318,61 @@ function sendProgress() {
 }
 
 // Main search loop - runs in batches to allow message processing between batches
+let isFirstBatch = true;
+
 function runSearch() {
   startTime = Date.now();
   lastProgressTime = startTime;
+  isFirstBatch = true;
   const timeoutEnd = startTime + searchConfig.timeout;
   runBatch(timeoutEnd);
 }
 
+let progressInterval = 1000; // Default, will be set from START_OPTIMIZATION message
+
 function runBatch(timeoutEnd) {
-  // Run a batch of iterations, then yield to allow message processing
-  const batchSize = 25;
-  for (let i = 0; i < batchSize; i++) {
+  // First batch is small for immediate UI feedback
+  if (isFirstBatch) {
+    isFirstBatch = false;
+    for (let i = 0; i < 10; i++) {
+      if (shouldStop || Date.now() >= timeoutEnd) {
+        sendComplete();
+        return;
+      }
+      const hash = generateRandomHash(HASH_LENGTH);
+      const result = evaluateCandidate(hash);
+      if (result !== null) {
+        updateTopResults(result);
+      }
+      attemptCount++;
+    }
+    sendProgress();
+    setTimeout(() => runBatch(timeoutEnd), 0);
+    return;
+  }
+
+  // Subsequent batches: run until progress interval reached or timeout
+  while (true) {
     if (shouldStop || Date.now() >= timeoutEnd) {
       sendComplete();
       return;
     }
+
     const hash = generateRandomHash(HASH_LENGTH);
     const result = evaluateCandidate(hash);
     if (result !== null) {
       updateTopResults(result);
     }
     attemptCount++;
+
+    // Check if it's time to send progress
+    if (Date.now() - lastProgressTime >= progressInterval) {
+      sendProgress();
+      // Yield to event loop so STOP messages can be processed
+      setTimeout(() => runBatch(timeoutEnd), 0);
+      return;
+    }
   }
-
-  // Send progress after each batch
-  sendProgress();
-
-  // Yield to event loop so STOP messages can be processed, then continue
-  setTimeout(() => runBatch(timeoutEnd), 0);
 }
 
 function sendComplete() {
@@ -15311,6 +15398,7 @@ self.onmessage = function(e) {
   if (e.data.type === 'START_OPTIMIZATION') {
     shouldStop = false;
     searchConfig = e.data;
+    progressInterval = e.data.progressInterval || 1000;
     topResults = e.data.existingTopResults || [];
     attemptCount = 0;
     decodableCount = 0;
@@ -15331,46 +15419,53 @@ self.onmessage = function(e) {
        * @returns {function} Message handler function
        */
       function createWorkerMessageHandler(workerId) {
-        return function(e) {
-          if (e.data.type === 'PROGRESS') {
+        return function (e) {
+          if (e.data.type === "PROGRESS") {
             // Update this worker's buffers
             workerResultBuffers[workerId] = e.data.topResults || [];
             workerAttemptCounts[workerId] = e.data.attempts || 0;
             workerDecodableCounts[workerId] = e.data.decodableCount || 0;
-            
+
             // Merge results from all workers
             currentTopResults = mergeWorkerResults(workerResultBuffers);
-            
+
             // Calculate total stats across all workers
-            const totalAttemptsSoFar = workerAttemptCounts.reduce((a, b) => a + b, 0);
-            const totalDecodableSoFar = workerDecodableCounts.reduce((a, b) => a + b, 0);
-            
+            const totalAttemptsSoFar = workerAttemptCounts.reduce(
+              (a, b) => a + b,
+              0,
+            );
+            const totalDecodableSoFar = workerDecodableCounts.reduce(
+              (a, b) => a + b,
+              0,
+            );
+
             // Update UI with merged data
             updateSearchStats(totalAttemptsSoFar, e.data.elapsed);
             if (currentTopResults.length > 0) {
               updateTopResults(currentTopResults);
             }
-            
+
             // OPT-01: Check auto-stop condition after merge
             if (checkAutoStopCondition(currentTopResults)) {
-              console.log('Auto-stop triggered: 5 perfect results found');
+              console.log("Auto-stop triggered: 5 perfect results found");
               stopAllWorkers();
               handleSearchComplete({
                 attempts: totalAttemptsSoFar,
                 decodableCount: totalDecodableSoFar,
                 topResults: currentTopResults,
-                autoStopped: true
+                autoStopped: true,
               });
             }
-            
-          } else if (e.data.type === 'COMPLETE') {
+          } else if (e.data.type === "COMPLETE") {
             completedWorkerCount++;
             workerResultBuffers[workerId] = e.data.topResults || [];
             workerAttemptCounts[workerId] = e.data.attempts || 0;
             workerDecodableCounts[workerId] = e.data.decodableCount || 0;
-            
-            console.log(`Worker ${workerId} complete (${completedWorkerCount}/${WORKER_COUNT})`);
-            
+
+            console.log(
+              `Worker ${workerId} complete (${completedWorkerCount}/${WORKER_COUNT})`,
+            );
+
             // All workers done?
             if (completedWorkerCount >= WORKER_COUNT) {
               finalizeParallelOptimization();
@@ -15388,22 +15483,22 @@ self.onmessage = function(e) {
       function mergeWorkerResults(buffers) {
         // Flatten all worker results
         const combined = buffers.flat();
-        
+
         // Deduplicate by hash (same hash = same QR configuration)
         const seen = new Set();
-        const unique = combined.filter(r => {
+        const unique = combined.filter((r) => {
           if (!r || !r.hash) return false;
           if (seen.has(r.hash)) return false;
           seen.add(r.hash);
           return true;
         });
-        
+
         // Sort: decodable first, then by pixelDiff ascending
         unique.sort((a, b) => {
           if (a.decodable !== b.decodable) return b.decodable ? 1 : -1;
           return a.pixelDiff - b.pixelDiff;
         });
-        
+
         return unique.slice(0, 5);
       }
 
@@ -15414,21 +15509,21 @@ self.onmessage = function(e) {
       function createWorkerPool() {
         // Terminate any existing workers first
         terminateWorkerPool();
-        
+
         // Get the worker code from createOptimizationWorker
         const workerCode = createOptimizationWorker();
-        
+
         // Create blob URL once, reuse for all workers
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const blob = new Blob([workerCode], { type: "application/javascript" });
         workerBlobUrl = URL.createObjectURL(blob);
-        
+
         // Reset state
         optimizationWorkers = [];
         workerResultBuffers = new Array(WORKER_COUNT).fill([]);
         workerAttemptCounts = new Array(WORKER_COUNT).fill(0);
         workerDecodableCounts = new Array(WORKER_COUNT).fill(0);
         completedWorkerCount = 0;
-        
+
         // Create workers
         for (let i = 0; i < WORKER_COUNT; i++) {
           const worker = new Worker(workerBlobUrl);
@@ -15437,7 +15532,7 @@ self.onmessage = function(e) {
           worker.onerror = (err) => console.error(`Worker ${i} error:`, err);
           optimizationWorkers.push(worker);
         }
-        
+
         console.log(`Created worker pool with ${WORKER_COUNT} workers`);
         return optimizationWorkers;
       }
@@ -15446,13 +15541,13 @@ self.onmessage = function(e) {
        * Terminate all workers and clean up (OPT-02)
        */
       function terminateWorkerPool() {
-        optimizationWorkers.forEach(w => w.terminate());
+        optimizationWorkers.forEach((w) => w.terminate());
         optimizationWorkers = [];
         workerResultBuffers = [];
         workerAttemptCounts = [];
         workerDecodableCounts = [];
         completedWorkerCount = 0;
-        
+
         if (workerBlobUrl) {
           URL.revokeObjectURL(workerBlobUrl);
           workerBlobUrl = null;
@@ -15463,8 +15558,8 @@ self.onmessage = function(e) {
        * Stop all workers (OPT-02)
        */
       function stopAllWorkers() {
-        optimizationWorkers.forEach(worker => {
-          worker.postMessage({ type: 'STOP_OPTIMIZATION' });
+        optimizationWorkers.forEach((worker) => {
+          worker.postMessage({ type: "STOP_OPTIMIZATION" });
         });
       }
 
@@ -15472,15 +15567,21 @@ self.onmessage = function(e) {
        * Finalize parallel optimization when all workers complete (OPT-02)
        */
       function finalizeParallelOptimization() {
-        const totalWorkerAttempts = workerAttemptCounts.reduce((a, b) => a + b, 0);
-        const totalWorkerDecodable = workerDecodableCounts.reduce((a, b) => a + b, 0);
+        const totalWorkerAttempts = workerAttemptCounts.reduce(
+          (a, b) => a + b,
+          0,
+        );
+        const totalWorkerDecodable = workerDecodableCounts.reduce(
+          (a, b) => a + b,
+          0,
+        );
         currentTopResults = mergeWorkerResults(workerResultBuffers);
-        
+
         handleSearchComplete({
           attempts: totalWorkerAttempts,
           decodableCount: totalWorkerDecodable,
           topResults: currentTopResults,
-          autoStopped: false
+          autoStopped: false,
         });
       }
 
@@ -15490,27 +15591,35 @@ self.onmessage = function(e) {
        */
       function startOptimization(timeout = 10000) {
         if (!currentURL || !currentVersion || !paintGrid) {
-          console.error('Cannot start optimization: missing URL, version, or paint grid');
+          console.error(
+            "Cannot start optimization: missing URL, version, or paint grid",
+          );
           return;
         }
-        
+
         createWorkerPool();
-        
+
         const message = {
-          type: 'START_OPTIMIZATION',
+          type: "START_OPTIMIZATION",
           baseURL: currentURL,
           version: currentVersion,
           paintedPixels: Array.from(paintGrid.cells),
           functionMask: Array.from(createFunctionPatternMask(currentVersion)),
           timeout: timeout,
+          progressInterval: PROGRESS_INTERVAL,
           existingTopResults: currentTopResults,
         };
-        
-        console.log(`Starting parallel optimization with ${WORKER_COUNT} workers, timeout ${timeout}ms`);
-        
-        // Send to all workers simultaneously
-        optimizationWorkers.forEach(worker => {
-          worker.postMessage(message);
+
+        console.log(
+          `Starting parallel optimization with ${WORKER_COUNT} workers, timeout ${timeout}ms`,
+        );
+
+        // Stagger worker starts to spread progress updates over PROGRESS_INTERVAL
+        const staggerDelay = PROGRESS_INTERVAL / WORKER_COUNT;
+        optimizationWorkers.forEach((worker, index) => {
+          setTimeout(() => {
+            worker.postMessage(message);
+          }, index * staggerDelay);
         });
       }
 
@@ -15547,7 +15656,7 @@ self.onmessage = function(e) {
       let totalAttempts = 0;
       let totalDecodableCount = 0;
 
-      const PERFECT_RESULT_THRESHOLD = 5;  // OPT-01: Auto-stop when this many 0-error results found
+      const PERFECT_RESULT_THRESHOLD = 5; // OPT-01: Auto-stop when this many 0-error results found
 
       /**
        * Check if auto-stop condition is met (OPT-01)
@@ -15558,7 +15667,9 @@ self.onmessage = function(e) {
         if (!topResults || topResults.length < PERFECT_RESULT_THRESHOLD) {
           return false;
         }
-        const perfectCount = topResults.filter(r => r.decodable && r.pixelDiff === 0).length;
+        const perfectCount = topResults.filter(
+          (r) => r.decodable && r.pixelDiff === 0,
+        ).length;
         return perfectCount >= PERFECT_RESULT_THRESHOLD;
       }
 
@@ -16052,7 +16163,7 @@ self.onmessage = function(e) {
         if (data.autoStopped) {
           searchSummary.textContent = `Auto-stopped - 5 perfect results found! (${totalAttempts.toLocaleString()} attempts)`;
         } else {
-          searchSummary.textContent = `Done - ${totalAttempts.toLocaleString()} attempts, ${totalDecodableCount} decodable found`;
+          searchSummary.textContent = `Done - ${totalAttempts.toLocaleString()} attempts, ${totalDecodableCount.toLocaleString()} decodable found`;
         }
         searchSummary.style.display = "flex";
 
@@ -16114,9 +16225,14 @@ self.onmessage = function(e) {
           // Restore version dropdown if valid for this URL
           // Must happen after updateValidationUI (which populates the dropdown)
           const dropdown = document.getElementById("version-select");
-          if (savedVersion >= MIN_QR_VERSION && savedVersion <= MAX_QR_VERSION) {
+          if (
+            savedVersion >= MIN_QR_VERSION &&
+            savedVersion <= MAX_QR_VERSION
+          ) {
             // Check if this version exists as an option in the dropdown
-            const option = dropdown.querySelector(`option[value="${savedVersion}"]`);
+            const option = dropdown.querySelector(
+              `option[value="${savedVersion}"]`,
+            );
             if (option) {
               dropdown.value = savedVersion;
             }
@@ -16158,7 +16274,7 @@ self.onmessage = function(e) {
           // SAFE-05: Warn before version change when pattern exists
           if (hasPattern() && newVersion !== currentVersion) {
             const confirmed = confirm(
-              "Changing QR version will clear your painted pattern. Continue?"
+              "Changing QR version will clear your painted pattern. Continue?",
             );
 
             if (!confirmed) {
