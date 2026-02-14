@@ -15321,59 +15321,167 @@ self.onmessage = function(e) {
 };
 `;
 
-        // Create worker from blob
-        const blob = new Blob([workerCode], { type: "application/javascript" });
-        optimizationWorker = new Worker(URL.createObjectURL(blob));
+        // Return the workerCode for use by createWorkerPool (OPT-02)
+        return workerCode;
+      }
 
-        // Worker message handler
-        optimizationWorker.onmessage = function (e) {
-          if (e.data.type === "PROGRESS") {
-            latestOptimizationResults = e.data;
-            console.log(
-              "Optimization progress:",
-              e.data.attempts,
-              "attempts,",
-              e.data.decodableCount,
-              "decodable",
-            );
-
-            // Update UI
-            updateSearchStats(e.data.attempts, e.data.elapsed);
-            if (e.data.topResults && e.data.topResults.length > 0) {
-              updateTopResults(e.data.topResults);
-              
-              // OPT-01: Check auto-stop condition after results update
-              if (checkAutoStopCondition(currentTopResults)) {
-                console.log('Auto-stop triggered: 5 perfect results found');
-                stopOptimization();
-                // Flag that this was auto-stopped (for UI display)
-                handleSearchComplete({ 
-                  ...e.data, 
-                  autoStopped: true,
-                  topResults: currentTopResults 
-                });
-              }
+      /**
+       * Create message handler for a specific worker (OPT-02)
+       * @param {number} workerId - Worker index for tracking
+       * @returns {function} Message handler function
+       */
+      function createWorkerMessageHandler(workerId) {
+        return function(e) {
+          if (e.data.type === 'PROGRESS') {
+            // Update this worker's buffers
+            workerResultBuffers[workerId] = e.data.topResults || [];
+            workerAttemptCounts[workerId] = e.data.attempts || 0;
+            workerDecodableCounts[workerId] = e.data.decodableCount || 0;
+            
+            // Merge results from all workers
+            currentTopResults = mergeWorkerResults(workerResultBuffers);
+            
+            // Calculate total stats across all workers
+            const totalAttemptsSoFar = workerAttemptCounts.reduce((a, b) => a + b, 0);
+            const totalDecodableSoFar = workerDecodableCounts.reduce((a, b) => a + b, 0);
+            
+            // Update UI with merged data
+            updateSearchStats(totalAttemptsSoFar, e.data.elapsed);
+            if (currentTopResults.length > 0) {
+              updateTopResults(currentTopResults);
             }
-          } else if (e.data.type === "COMPLETE") {
-            latestOptimizationResults = e.data;
-            console.log(
-              "Optimization complete:",
-              e.data.attempts,
-              "attempts,",
-              e.data.elapsed,
-              "ms",
-            );
-
-            // Update UI and transition state
-            handleSearchComplete(e.data);
+            
+            // OPT-01: Check auto-stop condition after merge
+            if (checkAutoStopCondition(currentTopResults)) {
+              console.log('Auto-stop triggered: 5 perfect results found');
+              stopAllWorkers();
+              handleSearchComplete({
+                attempts: totalAttemptsSoFar,
+                decodableCount: totalDecodableSoFar,
+                topResults: currentTopResults,
+                autoStopped: true
+              });
+            }
+            
+          } else if (e.data.type === 'COMPLETE') {
+            completedWorkerCount++;
+            workerResultBuffers[workerId] = e.data.topResults || [];
+            workerAttemptCounts[workerId] = e.data.attempts || 0;
+            workerDecodableCounts[workerId] = e.data.decodableCount || 0;
+            
+            console.log(`Worker ${workerId} complete (${completedWorkerCount}/${WORKER_COUNT})`);
+            
+            // All workers done?
+            if (completedWorkerCount >= WORKER_COUNT) {
+              finalizeParallelOptimization();
+            }
           }
         };
+      }
 
-        optimizationWorker.onerror = function (err) {
-          console.error("Worker error:", err);
-        };
+      /**
+       * Merge results from all workers into single top-5 (OPT-02)
+       * Deduplicates by hash, sorts by decodable then pixelDiff
+       * @param {Array<Array>} buffers - Per-worker result arrays
+       * @returns {Array} Merged and sorted top-5 results
+       */
+      function mergeWorkerResults(buffers) {
+        // Flatten all worker results
+        const combined = buffers.flat();
+        
+        // Deduplicate by hash (same hash = same QR configuration)
+        const seen = new Set();
+        const unique = combined.filter(r => {
+          if (!r || !r.hash) return false;
+          if (seen.has(r.hash)) return false;
+          seen.add(r.hash);
+          return true;
+        });
+        
+        // Sort: decodable first, then by pixelDiff ascending
+        unique.sort((a, b) => {
+          if (a.decodable !== b.decodable) return b.decodable ? 1 : -1;
+          return a.pixelDiff - b.pixelDiff;
+        });
+        
+        return unique.slice(0, 5);
+      }
 
-        return optimizationWorker;
+      /**
+       * Create worker pool with N workers (OPT-02)
+       * @returns {Array<Worker>} Array of worker instances
+       */
+      function createWorkerPool() {
+        // Terminate any existing workers first
+        terminateWorkerPool();
+        
+        // Get the worker code from createOptimizationWorker
+        const workerCode = createOptimizationWorker();
+        
+        // Create blob URL once, reuse for all workers
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        workerBlobUrl = URL.createObjectURL(blob);
+        
+        // Reset state
+        optimizationWorkers = [];
+        workerResultBuffers = new Array(WORKER_COUNT).fill([]);
+        workerAttemptCounts = new Array(WORKER_COUNT).fill(0);
+        workerDecodableCounts = new Array(WORKER_COUNT).fill(0);
+        completedWorkerCount = 0;
+        
+        // Create workers
+        for (let i = 0; i < WORKER_COUNT; i++) {
+          const worker = new Worker(workerBlobUrl);
+          worker.workerId = i;
+          worker.onmessage = createWorkerMessageHandler(i);
+          worker.onerror = (err) => console.error(`Worker ${i} error:`, err);
+          optimizationWorkers.push(worker);
+        }
+        
+        console.log(`Created worker pool with ${WORKER_COUNT} workers`);
+        return optimizationWorkers;
+      }
+
+      /**
+       * Terminate all workers and clean up (OPT-02)
+       */
+      function terminateWorkerPool() {
+        optimizationWorkers.forEach(w => w.terminate());
+        optimizationWorkers = [];
+        workerResultBuffers = [];
+        workerAttemptCounts = [];
+        workerDecodableCounts = [];
+        completedWorkerCount = 0;
+        
+        if (workerBlobUrl) {
+          URL.revokeObjectURL(workerBlobUrl);
+          workerBlobUrl = null;
+        }
+      }
+
+      /**
+       * Stop all workers (OPT-02)
+       */
+      function stopAllWorkers() {
+        optimizationWorkers.forEach(worker => {
+          worker.postMessage({ type: 'STOP_OPTIMIZATION' });
+        });
+      }
+
+      /**
+       * Finalize parallel optimization when all workers complete (OPT-02)
+       */
+      function finalizeParallelOptimization() {
+        const totalWorkerAttempts = workerAttemptCounts.reduce((a, b) => a + b, 0);
+        const totalWorkerDecodable = workerDecodableCounts.reduce((a, b) => a + b, 0);
+        currentTopResults = mergeWorkerResults(workerResultBuffers);
+        
+        handleSearchComplete({
+          attempts: totalWorkerAttempts,
+          decodableCount: totalWorkerDecodable,
+          topResults: currentTopResults,
+          autoStopped: false
+        });
       }
 
       /**
