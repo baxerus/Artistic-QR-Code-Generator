@@ -55,7 +55,8 @@
 <details open>
 <summary>🔄 v1.2 Visual Consistency & Result Inspection (Phase 10) — IN PROGRESS</summary>
 
-- [ ] Phase 10: Visual Polish & Result Inspection (0/? plans) — pending
+- [ ] Phase 10: Visual Polish & Result Inspection (0/1 plans) — planned
+  - [ ] 10-01-PLAN.md — Visual consistency and hover-based result inspection
 
 </details>
 
@@ -72,7 +73,7 @@
 | 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. Generation Safety | v1.1 | 2/2 | Complete | 2026-02-14 |
 | 9. Optimization Upgrades | v1.1 | 2/2 | Complete | 2026-02-14 |
-| 10. Visual Polish & Result Inspection | v1.2 | 0/? | Pending | — |
+| 10. Visual Polish & Result Inspection | v1.2 | 0/1 | Planned | — |
 
 **Total:** 10 phases across 3 milestones (2 shipped, 1 in progress)
 
