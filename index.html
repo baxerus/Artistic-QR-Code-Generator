@@ -14016,6 +14016,20 @@
       }
 
       /**
+       * Check if any pixels are painted
+       * @returns {boolean} True if pattern exists
+       */
+      function hasPattern() {
+        if (!paintGrid) return false;
+        for (let i = 0; i < paintGrid.cells.length; i++) {
+          if (paintGrid.cells[i] !== 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      /**
        * Initialize paint canvas for given QR version
        */
       function initPaintCanvas(version) {
@@ -15974,13 +15988,21 @@ self.onmessage = function(e) {
           }
         });
 
-        // Version change - regenerate QR if URL is valid
+        // Version change - regenerate QR if URL is valid (guarded by pattern check)
         versionSelect.addEventListener("change", function () {
-          saveVersion(parseInt(this.value, 10));
+          const newVersion = parseInt(this.value, 10);
+          saveVersion(newVersion);
+
           const url = urlInput.value.trim();
-          if (isValidURL(url) && !generateBtn.disabled) {
-            generateQR();
+          if (!isValidURL(url) || generateBtn.disabled) return;
+
+          // SAFE-02/03: If pattern exists, don't auto-generate
+          // User must click Generate button explicitly
+          if (hasPattern()) {
+            return;
           }
+
+          generateQR();
         });
 
         // Drag painting is handled in setupPaintingEvents() function
