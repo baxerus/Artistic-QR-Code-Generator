@@ -131,6 +131,42 @@
         display: none;
       }
 
+      .version-warning {
+        color: #f59e0b;
+        font-size: 0.875rem;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 6px;
+        display: none;
+      }
+
+      .version-warning-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .version-warning-buttons button {
+        padding: 4px 12px;
+        font-size: 0.875rem;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .version-warning-buttons .btn-proceed {
+        background: #f59e0b;
+        color: white;
+        border: none;
+      }
+
+      .version-warning-buttons .btn-cancel {
+        background: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+      }
+
       select {
         padding-right: 12px;
         cursor: pointer;
@@ -787,6 +823,13 @@
             <select id="version-select" disabled>
               <option value="" disabled selected>Enter URL first</option>
             </select>
+            <div class="version-warning" id="version-warning">
+              <div>The painted pattern will not be copied to the new QR version.</div>
+              <div class="version-warning-buttons">
+                <button type="button" class="btn-proceed" id="version-warning-proceed">Proceed</button>
+                <button type="button" class="btn-cancel" id="version-warning-cancel">Cancel</button>
+              </div>
+            </div>
           </div>
 
           <!-- Row 3: Generate button -->
@@ -16267,30 +16310,21 @@ self.onmessage = function(e) {
         });
 
         // Version change - regenerate QR if URL is valid (guarded by pattern check)
-        versionSelect.addEventListener("change", function () {
-          const newVersion = parseInt(this.value, 10);
+        const versionWarning = document.getElementById("version-warning");
+        const versionWarningProceed = document.getElementById("version-warning-proceed");
+        const versionWarningCancel = document.getElementById("version-warning-cancel");
+        let pendingVersionChange = null;
+
+        function hideVersionWarning() {
+          versionWarning.style.display = "none";
+          pendingVersionChange = null;
+        }
+
+        function applyVersionChange(newVersion) {
           const url = urlInput.value.trim();
-
-          // SAFE-05: Warn before version change when pattern exists
-          if (hasPattern() && newVersion !== currentVersion) {
-            const confirmed = confirm(
-              "Changing QR version will clear your painted pattern. Continue?",
-            );
-
-            if (!confirmed) {
-              // Revert dropdown to current version
-              this.value = currentVersion;
-              return;
-            }
-
-            // User confirmed - pattern will be cleared by initPaintCanvas
-            // (loadPattern returns null for different version)
-          }
-
           saveVersion(newVersion);
 
           // SAFE-02/03: If pattern exists at same version, don't auto-generate
-          // (User confirmed version change above, so this is only for same-version case)
           // Note: SAFE-04 (same-version pattern preservation) is handled by
           // initPaintCanvas() which restores saved pattern via loadPattern()
           if (hasPattern()) {
@@ -16300,6 +16334,34 @@ self.onmessage = function(e) {
           if (!isValidURL(url) || generateBtn.disabled) return;
 
           generateQR();
+        }
+
+        versionWarningProceed.addEventListener("click", function () {
+          if (pendingVersionChange !== null) {
+            const newVersion = pendingVersionChange;
+            hideVersionWarning();
+            applyVersionChange(newVersion);
+          }
+        });
+
+        versionWarningCancel.addEventListener("click", function () {
+          // Revert dropdown to current version
+          versionSelect.value = currentVersion;
+          hideVersionWarning();
+        });
+
+        versionSelect.addEventListener("change", function () {
+          const newVersion = parseInt(this.value, 10);
+
+          // SAFE-05: Warn before version change when pattern exists
+          if (hasPattern() && newVersion !== currentVersion) {
+            // Show inline warning instead of confirm()
+            pendingVersionChange = newVersion;
+            versionWarning.style.display = "block";
+            return;
+          }
+
+          applyVersionChange(newVersion);
         });
 
         // Drag painting is handled in setupPaintingEvents() function
