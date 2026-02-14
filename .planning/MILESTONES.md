@@ -1,13 +1,36 @@
 # Project Milestones: Artistic QR Code Generator
 
-## v1 MVP (Shipped: 2026-02-09)
+## v1.1 UX Overhaul & Optimization (Shipped: 2026-02-14)
+
+**Delivered:** Major UX improvements with interactive painting overlay, state persistence, generation safety guards, and multi-worker optimization with auto-stop.
+
+**Phases completed:** 5-9 (8 plans total)
+
+**Key accomplishments:**
+- Extended QR version range to Version 10 (57×57) with configurable MAX_QR_VERSION constant for easy adjustment
+- Full state persistence via localStorage — URL, version, and painted pattern survive page reloads with automatic QR regeneration
+- Unified QR canvas with painted overlay rendering, protected area visualization (red dashed borders), and hover grid lines
+- Interactive legend-based color selection with drag painting (left-click) and opposite color (right-click)
+- Generation safety guards: hash fragment URL rejection, pattern-aware version changes with confirmation dialogs
+- Multi-worker parallel optimization (2-8 workers based on CPU) with auto-stop when 5 perfect results found
+
+**Stats:**
+- 1 file (index.html), 16,353 lines of HTML/CSS/JS (+1,192 lines from v1.0)
+- 5 phases, 8 plans, 16 commits
+- 5 days from start to ship (2026-02-10 → 2026-02-14)
+
+**Git range:** `c104790` → `7cb2d22`
+
+---
+
+## v1.0 MVP (Shipped: 2026-02-09)
 
 **Delivered:** Single-file HTML tool for creating artistic QR codes by painting pixel patterns and searching for URL hash fragments that naturally align with the art.
 
 **Phases completed:** 1-4 (8 plans total)
 
 **Key accomplishments:**
-- Single-file HTML architecture (508KB, 15,161 lines) with qrcodejs and jsQR libraries inlined -- works via both http:// and file:// protocol
+- Single-file HTML architecture (508KB, 15,161 lines) with qrcodejs and jsQR libraries inlined — works via both http:// and file:// protocol
 - Three-state pixel painting canvas with click-to-cycle interaction and real-time QR corruption feedback
 - Function pattern masking system protecting QR structural elements (finders, timing, alignment) from artistic corruption
 - Web Worker hash optimization engine running non-blocking search with live progress and top 5 result tracking across runs
@@ -16,25 +39,13 @@
 **Stats:**
 - 1 file (index.html), 15,161 lines of HTML/CSS/JS
 - 4 phases, 8 plans, 59 commits
-- 4 days from start to ship (2026-02-06 -> 2026-02-09)
+- 4 days from start to ship (2026-02-06 → 2026-02-09)
 
-**Git range:** `3ddf08b` -> `97d10be`
-
----
-
-## v1.1 UX Overhaul & Optimization (In Progress: 2026-02-10)
-
-**Goal:** Improve the painting workflow (overlay on QR, drag painting, state persistence), add safety guards (hash fragment rejection, version change warnings), and speed up optimization (multi-worker, auto-stop).
-
-**Phases:** 5-9 (8 plans estimated)
-
-**Scope:**
-- Configuration constants: max version as named constant, expanded range to Version 10
-- State persistence: localStorage save/restore for full app state
-- Painting overhaul: overlay on QR preview, protected area visualization, legend-based drag painting
-- Generation safety: hash fragment rejection, version change guards, pattern preservation
-- Optimization upgrades: auto-stop on perfect results, multi-worker parallelization
-
-**Requirements:** 16 (CONF-01/02, PERS-01/02, PAINT-01-05, SAFE-01-05, OPT-01/02)
+**Git range:** `3ddf08b` → `97d10be`
 
 ---
+
+**Total Project Stats:**
+- 2 milestones shipped
+- 9 phases, 17 plans, 75 commits
+- 9 days total development
