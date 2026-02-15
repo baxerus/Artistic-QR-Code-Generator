@@ -50,10 +50,16 @@ None — ready for next milestone planning.
 
 None.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Fix URL too long alert - cancel should revert URL change | 2026-02-15 | 59c41c5 | [1-fix-url-too-long-alert-cancel-should-rev](./quick/1-fix-url-too-long-alert-cancel-should-rev/) |
+
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed v1.2 milestone
+Stopped at: Completed quick task 1: Fix URL too long alert cancel behavior
 Resume: Start next milestone with `/gsd-new-milestone`
 
 ---
