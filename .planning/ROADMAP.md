@@ -55,9 +55,10 @@
 <details open>
 <summary>🔄 v1.2 Visual Consistency & Result Inspection (Phase 10) — IN PROGRESS</summary>
 
-- [ ] Phase 10: Visual Polish & Result Inspection (2/2 plans) — in progress
+- [ ] Phase 10: Visual Polish & Result Inspection (3/3 plans) — in progress
   - [x] 10-01-PLAN.md — Visual consistency and hover-based result inspection
-  - [ ] 10-02-PLAN.md — UAT gap closure: overlay visibility and hover fixes
+  - [x] 10-02-PLAN.md — UAT gap closure: overlay visibility and hover fixes
+  - [ ] 10-03-PLAN.md — UAT revalidation gap closure: overlay anti-aliasing and border visibility
 
 </details>
 
@@ -74,7 +75,7 @@
 | 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. Generation Safety | v1.1 | 2/2 | Complete | 2026-02-14 |
 | 9. Optimization Upgrades | v1.1 | 2/2 | Complete | 2026-02-14 |
-| 10. Visual Polish & Result Inspection | v1.2 | 2/2 | In Progress | - |
+| 10. Visual Polish & Result Inspection | v1.2 | 3/3 | In Progress | - |
 
 **Total:** 10 phases across 3 milestones (3 shipped)
 
