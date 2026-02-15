@@ -15657,10 +15657,15 @@ self.onmessage = function(e) {
 
         createWorkerPool();
 
+        // Calculate dynamic hash length to fill QR capacity
+        const hashLength = calculateDynamicHashLength(currentURL, currentVersion);
+        console.log(`Using dynamic hash length: ${hashLength} (version ${currentVersion}, URL ${currentURL.length} bytes)`);
+
         const message = {
           type: "START_OPTIMIZATION",
           baseURL: currentURL,
           version: currentVersion,
+          hashLength: hashLength,
           paintedPixels: Array.from(paintGrid.cells),
           functionMask: Array.from(createFunctionPatternMask(currentVersion)),
           timeout: timeout,
