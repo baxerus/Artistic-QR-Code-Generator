@@ -14028,8 +14028,8 @@
        * Returns version number (MIN_QR_VERSION-MAX_QR_VERSION) or -1 if too long
        */
       const HASH_CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789";
-      const HASH_LENGTH = 4;
-      const HASH_OVERHEAD = 1 + HASH_LENGTH; // '#' + hash chars
+      const MIN_HASH_LENGTH = 4;
+      const HASH_OVERHEAD = 1 + MIN_HASH_LENGTH; // '#' + minimum hash chars
 
       function calculateMinimumVersion(url) {
         const byteLength = new Blob([url]).size + HASH_OVERHEAD;
@@ -14039,6 +14039,24 @@
           }
         }
         return -1; // URL too long for MAX_QR_VERSION
+      }
+
+      /**
+       * Calculate optimal hash length to fill available QR capacity
+       * @param {string} url - Base URL without hash
+       * @param {number} version - QR version (1-10)
+       * @returns {number} Hash length (at least MIN_HASH_LENGTH)
+       */
+      function calculateDynamicHashLength(url, version) {
+        const urlBytes = new Blob([url]).size;
+        const hashPrefixBytes = 1; // '#'
+        const capacity = CAPACITIES_H_BYTE.find(e => e.version === version)?.capacity || 0;
+        
+        // Available bytes for hash = capacity - url bytes - '#'
+        const availableBytes = capacity - urlBytes - hashPrefixBytes;
+        
+        // Return at least MIN_HASH_LENGTH, at most available bytes
+        return Math.max(MIN_HASH_LENGTH, availableBytes);
       }
 
       /**
