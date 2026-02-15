@@ -716,12 +716,12 @@
         transition: opacity 0.1s ease;
       }
 
-      .result-slot:hover .result-overlay,
-      .result-slot.expanded:hover .result-overlay {
+      /* Hover on canvas container only, not full slot */
+      .result-canvas-container:hover .result-overlay {
         opacity: 1;
       }
 
-      .results-disabled .result-slot:hover .result-overlay {
+      .results-disabled .result-canvas-container:hover .result-overlay {
         opacity: 0;
       }
 
@@ -735,8 +735,10 @@
         padding: 12px;
       }
 
+      /* Expanded canvas uses same size as paint pattern (set via JS) */
       .result-slot.expanded .result-canvas-container {
-        width: 100%;
+        width: 600px;
+        max-width: 100%;
       }
 
       .result-slot.expanded .result-canvas-container:hover {
@@ -13582,6 +13584,9 @@
       const PROTECTED_OUTLINE_COLOR = "#3b82f6";
       const PROTECTED_OVERLAY_COLOR = "rgba(59, 130, 246, 0.25)"; // Blue overlay for protected areas (0.25 for visibility)
       const PAINTED_BORDER_COLOR = "#22c55e"; // Green border around painted regions
+      
+      // Canvas size constant - used for both paint canvas and expanded results
+      const CANVAS_DISPLAY_SIZE = 600;
 
       /**
        * Check if a position is protected (part of QR function patterns)
@@ -14117,9 +14122,8 @@
         const gridSize = getModuleSize(version);
         const paintSection = document.getElementById("paint-section");
 
-        // Calculate canvas size - fit within 600px max, use integer cell sizes
-        const maxSize = 600;
-        paintCellSize = Math.floor(maxSize / gridSize);
+        // Calculate canvas size - fit within max, use integer cell sizes
+        paintCellSize = Math.floor(CANVAS_DISPLAY_SIZE / gridSize);
 
         // Create new grid
         paintGrid = new PixelGrid(gridSize);
@@ -15847,24 +15851,31 @@ self.onmessage = function(e) {
         moduleCount,
         paintedPixels,
         functionMask,
+        displaySize,
+        includeBorders,
       ) {
-        // Set canvas to module resolution (CSS will scale with pixelated rendering)
-        overlayCanvas.width = moduleCount;
-        overlayCanvas.height = moduleCount;
-
+        // Render at specified display resolution
+        const cellSize = displaySize ? Math.floor(displaySize / moduleCount) : 1;
+        // Canvas size must match actual rendered size (cellSize * moduleCount) for alignment
+        const canvasSize = cellSize * moduleCount;
+        
+        overlayCanvas.width = canvasSize;
+        overlayCanvas.height = canvasSize;
+        
         const ctx = overlayCanvas.getContext("2d");
-        ctx.imageSmoothingEnabled = false;
-        ctx.clearRect(0, 0, moduleCount, moduleCount);
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-        // Iterate through all modules
+        // Iterate through all modules - draw colored fills
         for (let row = 0; row < moduleCount; row++) {
           for (let col = 0; col < moduleCount; col++) {
             const idx = row * moduleCount + col;
+            const x = col * cellSize;
+            const y = row * cellSize;
 
             if (functionMask[idx]) {
               // Function pattern pixels (finders, timing, alignment) - blue
               ctx.fillStyle = "rgba(0, 100, 255, 0.35)";
-              ctx.fillRect(col, row, 1, 1);
+              ctx.fillRect(x, y, cellSize, cellSize);
             } else if (paintedPixels[idx] !== 0) {
               // Locked painted pixel - compare against original QR data
               const paintedIsDark = paintedPixels[idx] === 2;
@@ -15873,68 +15884,63 @@ self.onmessage = function(e) {
               if (paintedIsDark === qrIsDark) {
                 // Match - green
                 ctx.fillStyle = "rgba(0, 200, 0, 0.3)";
-                ctx.fillRect(col, row, 1, 1);
+                ctx.fillRect(x, y, cellSize, cellSize);
               } else {
                 // Conflict - red
                 ctx.fillStyle = "rgba(255, 0, 0, 0.45)";
-                ctx.fillRect(col, row, 1, 1);
+                ctx.fillRect(x, y, cellSize, cellSize);
               }
             }
             // Unset data pixels have no overlay color
           }
         }
-      }
+        
+        // Draw dashed borders only if requested (for expanded view)
+        if (includeBorders && displaySize) {
+          ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 2]);
 
-      /**
-       * Render protected area borders as an overlay (blue dashed)
-       * @param {HTMLCanvasElement} canvas - Canvas to render on
-       * @param {number} moduleCount - Size of QR code
-       * @param {Array<boolean>} functionMask - Function pattern mask
-       */
-      function renderProtectedBordersOverlay(canvas, moduleCount, functionMask) {
-        const ctx = canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = false;
-        ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
-        ctx.lineWidth = 1; // Full pixel width for visibility when CSS-scaled
-        ctx.setLineDash([0.5, 0.25]); // Sub-module dashes visible after CSS scaling
+          for (let y = 0; y < moduleCount; y++) {
+            for (let x = 0; x < moduleCount; x++) {
+              const idx = y * moduleCount + x;
+              if (!functionMask[idx]) continue;
 
-        for (let y = 0; y < moduleCount; y++) {
-          for (let x = 0; x < moduleCount; x++) {
-            const idx = y * moduleCount + x;
-            if (!functionMask[idx]) continue;
+              const px = x * cellSize;
+              const py = y * cellSize;
 
-            // Draw border only on outer edges
-            // Top
-            if (y === 0 || !functionMask[(y - 1) * moduleCount + x]) {
-              ctx.beginPath();
-              ctx.moveTo(x, y);
-              ctx.lineTo(x + 1, y);
-              ctx.stroke();
-            }
-            // Bottom
-            if (y === moduleCount - 1 || !functionMask[(y + 1) * moduleCount + x]) {
-              ctx.beginPath();
-              ctx.moveTo(x, y + 1);
-              ctx.lineTo(x + 1, y + 1);
-              ctx.stroke();
-            }
-            // Left
-            if (x === 0 || !functionMask[y * moduleCount + (x - 1)]) {
-              ctx.beginPath();
-              ctx.moveTo(x, y);
-              ctx.lineTo(x, y + 1);
-              ctx.stroke();
-            }
-            // Right
-            if (x === moduleCount - 1 || !functionMask[y * moduleCount + (x + 1)]) {
-              ctx.beginPath();
-              ctx.moveTo(x + 1, y);
-              ctx.lineTo(x + 1, y + 1);
-              ctx.stroke();
+              // Top edge
+              if (y === 0 || !functionMask[(y - 1) * moduleCount + x]) {
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(px + cellSize, py);
+                ctx.stroke();
+              }
+              // Bottom edge
+              if (y === moduleCount - 1 || !functionMask[(y + 1) * moduleCount + x]) {
+                ctx.beginPath();
+                ctx.moveTo(px, py + cellSize);
+                ctx.lineTo(px + cellSize, py + cellSize);
+                ctx.stroke();
+              }
+              // Left edge
+              if (x === 0 || !functionMask[y * moduleCount + (x - 1)]) {
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(px, py + cellSize);
+                ctx.stroke();
+              }
+              // Right edge
+              if (x === moduleCount - 1 || !functionMask[y * moduleCount + (x + 1)]) {
+                ctx.beginPath();
+                ctx.moveTo(px + cellSize, py);
+                ctx.lineTo(px + cellSize, py + cellSize);
+                ctx.stroke();
+              }
             }
           }
+          ctx.setLineDash([]);
         }
-        ctx.setLineDash([]);
       }
 
       /**
@@ -16086,13 +16092,11 @@ self.onmessage = function(e) {
           }
           ctx.putImageData(imageData, 0, 0);
 
-          // Create overlay canvas (rendered eagerly, shown on hover via CSS)
+          // Create overlay canvas (rendered at module resolution, CSS scales with pixelated)
           const overlayCanvas = document.createElement("canvas");
           overlayCanvas.className = "result-overlay";
-          overlayCanvas.width = moduleCount;
-          overlayCanvas.height = moduleCount;
 
-          // Render overlay immediately (will be shown on hover via CSS)
+          // Render overlay at module resolution (no borders for small view)
           const functionMask = createFunctionPatternMask(currentVersion);
           renderErrorOverlay(
             overlayCanvas,
@@ -16100,9 +16104,15 @@ self.onmessage = function(e) {
             result.moduleCount,
             paintGrid.cells,
             functionMask,
+            null,  // module resolution
+            false, // no borders for small view
           );
-          // Add blue dashed borders around protected areas
-          renderProtectedBordersOverlay(overlayCanvas, result.moduleCount, functionMask);
+          
+          // Store data for re-rendering when expanded
+          overlayCanvas.dataset.moduleCount = result.moduleCount;
+          overlayCanvas.dataset.qrModuleData = JSON.stringify(result.qrModuleData);
+          overlayCanvas.dataset.paintedPixels = JSON.stringify(paintGrid.cells);
+          overlayCanvas.dataset.version = currentVersion;
 
           // Assemble canvas container
           canvasContainer.appendChild(canvas);
@@ -16158,21 +16168,50 @@ self.onmessage = function(e) {
             copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
           };
 
-          // Click to expand/collapse (overlay already rendered, disabled during search)
+          // Click to expand/collapse (re-render overlay at appropriate resolution)
           canvasContainer.addEventListener("click", function () {
             if (searchState === "running") return;
             const isExpanded = slot.classList.contains("expanded");
 
-            // Collapse any currently expanded slot
+            // Collapse any currently expanded slot and reset its overlay
             const currentlyExpanded = topResultsContainer.querySelector(
               ".result-slot.expanded",
             );
             if (currentlyExpanded && currentlyExpanded !== slot) {
               currentlyExpanded.classList.remove("expanded");
+              // Re-render collapsed overlay at module resolution
+              const collapsedOverlay = currentlyExpanded.querySelector(".result-overlay");
+              if (collapsedOverlay) {
+                const mc = parseInt(collapsedOverlay.dataset.moduleCount);
+                const qrData = JSON.parse(collapsedOverlay.dataset.qrModuleData);
+                const painted = JSON.parse(collapsedOverlay.dataset.paintedPixels);
+                const ver = parseInt(collapsedOverlay.dataset.version);
+                const fm = createFunctionPatternMask(ver);
+                renderErrorOverlay(collapsedOverlay, qrData, mc, painted, fm, null, false);
+              }
             }
 
             // Toggle expanded state
-            slot.classList.toggle("expanded", !isExpanded);
+            const willExpand = !isExpanded;
+            slot.classList.toggle("expanded", willExpand);
+            
+            // Re-render overlay at appropriate resolution
+            const overlay = canvasContainer.querySelector(".result-overlay");
+            if (overlay) {
+              const mc = parseInt(overlay.dataset.moduleCount);
+              const qrData = JSON.parse(overlay.dataset.qrModuleData);
+              const painted = JSON.parse(overlay.dataset.paintedPixels);
+              const ver = parseInt(overlay.dataset.version);
+              const fm = createFunctionPatternMask(ver);
+              
+              if (willExpand) {
+                // Expanded: render at same size as paint canvas with borders
+                renderErrorOverlay(overlay, qrData, mc, painted, fm, CANVAS_DISPLAY_SIZE, true);
+              } else {
+                // Collapsed: render at module resolution, no borders
+                renderErrorOverlay(overlay, qrData, mc, painted, fm, null, false);
+              }
+            }
           });
 
           actions.appendChild(downloadBtn);
