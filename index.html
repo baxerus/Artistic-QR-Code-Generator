@@ -14151,6 +14151,30 @@
       function updateVersionDropdown(minVersion) {
         const dropdown = document.getElementById("version-select");
         const previousValue = dropdown.value ? parseInt(dropdown.value) : null;
+
+        // Check BEFORE modifying dropdown: would this require a version bump with pattern?
+        if (previousValue !== null && !isNaN(previousValue) && previousValue < minVersion) {
+          // Previous version too small - would need auto-bump
+          // SAFE-05: Warn if pattern exists (URL-forced version change)
+          if (hasPattern()) {
+            const confirmed = confirm(
+              "This URL requires a larger QR version (" +
+                minVersion +
+                ") and will clear your painted pattern. Continue?",
+            );
+
+            if (!confirmed) {
+              // Restore previous URL - don't modify dropdown at all
+              const urlInput = document.getElementById("url-input");
+              urlInput.value = previousValidURL;
+              // Re-validate with previous URL (this will restore dropdown to valid state)
+              updateValidationUI(previousValidURL);
+              return; // Exit without updating dropdown
+            }
+          }
+        }
+
+        // Now safe to modify dropdown
         dropdown.innerHTML = "";
         dropdown.disabled = false;
 
@@ -14170,30 +14194,9 @@
 
         // Auto-increase only: keep previous version if still valid, bump if needed
         let selectedVersion = minVersion;
-        if (previousValue !== null && !isNaN(previousValue)) {
-          if (previousValue >= minVersion) {
-            // Previous version still valid - keep it (never auto-decrease)
-            selectedVersion = previousValue;
-          } else {
-            // Previous version too small - would need auto-bump
-            // SAFE-05: Warn if pattern exists (URL-forced version change)
-            if (hasPattern()) {
-              const confirmed = confirm(
-                "This URL requires a larger QR version (" +
-                  minVersion +
-                  ") and will clear your painted pattern. Continue?",
-              );
-
-              if (!confirmed) {
-                // Restore previous URL
-                const urlInput = document.getElementById("url-input");
-                urlInput.value = previousValidURL;
-                updateValidationUI(previousValidURL);
-                return; // Exit without updating dropdown
-              }
-            }
-            selectedVersion = minVersion;
-          }
+        if (previousValue !== null && !isNaN(previousValue) && previousValue >= minVersion) {
+          // Previous version still valid - keep it (never auto-decrease)
+          selectedVersion = previousValue;
         }
 
         dropdown.value = selectedVersion;
