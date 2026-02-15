@@ -13817,6 +13817,9 @@
       const MIN_QR_VERSION = 2;
       const MAX_QR_VERSION = 10;
 
+      // Top results configuration
+      const TOP_RESULTS_COUNT = 10;
+
       // QR capacity table for error correction level H, byte mode (versions 1-10)
       const CAPACITIES_H_BYTE = [
         { version: 1, capacity: 7 },
@@ -15360,9 +15363,9 @@ function updateTopResults(result) {
     return a.pixelDiff - b.pixelDiff;
   });
 
-  // Keep only top 5
-  if (topResults.length > 5) {
-    topResults = topResults.slice(0, 5);
+  // Keep only top results
+  if (topResults.length > searchConfig.topResultsCount) {
+    topResults = topResults.slice(0, searchConfig.topResultsCount);
   }
 }
 
@@ -15687,6 +15690,7 @@ self.onmessage = function(e) {
           timeout: timeout,
           progressInterval: PROGRESS_INTERVAL,
           existingTopResults: currentTopResults,
+          topResultsCount: TOP_RESULTS_COUNT,
         };
 
         console.log(
