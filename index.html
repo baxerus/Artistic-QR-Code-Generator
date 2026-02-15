@@ -716,11 +716,8 @@
         transition: opacity 0.1s ease;
       }
 
-      .result-slot.expanded .result-overlay {
-        opacity: 1;
-      }
-
-      .result-slot:hover .result-overlay {
+      .result-slot:hover .result-overlay,
+      .result-slot.expanded:hover .result-overlay {
         opacity: 1;
       }
 
@@ -15896,8 +15893,8 @@ self.onmessage = function(e) {
       function renderProtectedBordersOverlay(canvas, moduleCount, functionMask) {
         const ctx = canvas.getContext("2d");
         ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
-        ctx.lineWidth = 0.15; // Thin line for module-scale canvas
-        ctx.setLineDash([0.5, 0.25]); // Scaled dashes for module resolution
+        ctx.lineWidth = 0.5; // Thicker line for visible dashed borders
+        ctx.setLineDash([2, 1]); // Larger dash pattern for visibility
 
         for (let y = 0; y < moduleCount; y++) {
           for (let x = 0; x < moduleCount; x++) {
