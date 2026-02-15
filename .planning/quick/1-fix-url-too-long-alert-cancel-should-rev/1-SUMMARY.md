@@ -3,7 +3,7 @@ type: quick
 task: 1
 slug: fix-url-too-long-alert-cancel-should-rev
 date: 2026-02-15
-commits: [59c41c5, 652b352]
+commits: [59c41c5, e68b31d, 01090c3, 9ae4bac]
 ---
 
 # Quick Task 1: Fix URL Too Long Alert Cancel Behavior
@@ -16,7 +16,14 @@ commits: [59c41c5, 652b352]
    - **Before:** `dropdown.innerHTML = ""` cleared options, then showed confirm dialog. Cancel couldn't properly restore state.
    - **After:** Check if version bump needed + pattern exists FIRST. Show dialog. Only modify dropdown if confirmed or no pattern.
 
-2. Added `saveURL(previousValidURL)` call when cancel is clicked to restore localStorage immediately (overriding the debounced save of the rejected URL).
+2. Made `updateValidationUI()` and `updateVersionDropdown()` return boolean indicating acceptance:
+   - Input handler only saves to localStorage if URL was accepted
+   - Prevents rejected URL from ever being saved (even via debounced save)
+
+3. Track `previousValidURL` on each accepted keystroke:
+   - **Before:** Only updated when Generate was clicked
+   - **After:** Updated every time URL passes validation
+   - Cancel now reverts to last valid char, not last generated URL
 
 ## Verification
 
@@ -24,10 +31,12 @@ commits: [59c41c5, 652b352]
 2. Edit URL to make it longer (requiring higher version)
 3. Confirm dialog appears
 4. Click "Cancel"
-5. URL reverts to previous value, version dropdown unchanged
-6. Refresh page - previous URL is restored (localStorage correct)
+5. URL reverts to last valid character (not start of edit)
+6. Refresh page - correct URL restored from localStorage
 
 ## Commits
 
 - `59c41c5` - fix: cancel URL change when version bump is rejected
-- `652b352` - fix: also restore localStorage URL when version bump cancelled
+- `e68b31d` - fix: use debounced save to cancel pending save
+- `01090c3` - fix: only save URL to localStorage if validation accepted
+- `9ae4bac` - fix: track previousValidURL on each accepted keystroke
