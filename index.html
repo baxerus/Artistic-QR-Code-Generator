@@ -14027,7 +14027,7 @@
        * Calculate minimum QR version needed for URL
        * Returns version number (MIN_QR_VERSION-MAX_QR_VERSION) or -1 if too long
        */
-      const HASH_CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789";
+      const HASH_CHARSET = "abcdefghijklmnopqrstuvwxyz";
       const MIN_HASH_LENGTH = 4;
       const HASH_OVERHEAD = 1 + MIN_HASH_LENGTH; // '#' + minimum hash chars
 
@@ -14050,11 +14050,12 @@
       function calculateDynamicHashLength(url, version) {
         const urlBytes = new Blob([url]).size;
         const hashPrefixBytes = 1; // '#'
-        const capacity = CAPACITIES_H_BYTE.find(e => e.version === version)?.capacity || 0;
-        
+        const capacity =
+          CAPACITIES_H_BYTE.find((e) => e.version === version)?.capacity || 0;
+
         // Available bytes for hash = capacity - url bytes - '#'
         const availableBytes = capacity - urlBytes - hashPrefixBytes;
-        
+
         // Return at least MIN_HASH_LENGTH, at most available bytes
         return Math.max(MIN_HASH_LENGTH, availableBytes);
       }
@@ -14172,7 +14173,11 @@
         const previousValue = dropdown.value ? parseInt(dropdown.value) : null;
 
         // Check BEFORE modifying dropdown: would this require a version bump with pattern?
-        if (previousValue !== null && !isNaN(previousValue) && previousValue < minVersion) {
+        if (
+          previousValue !== null &&
+          !isNaN(previousValue) &&
+          previousValue < minVersion
+        ) {
           // Previous version too small - would need auto-bump
           // SAFE-05: Warn if pattern exists (URL-forced version change)
           if (hasPattern()) {
@@ -14213,7 +14218,11 @@
 
         // Auto-increase only: keep previous version if still valid, bump if needed
         let selectedVersion = minVersion;
-        if (previousValue !== null && !isNaN(previousValue) && previousValue >= minVersion) {
+        if (
+          previousValue !== null &&
+          !isNaN(previousValue) &&
+          previousValue >= minVersion
+        ) {
           // Previous version still valid - keep it (never auto-decrease)
           selectedVersion = previousValue;
         }
@@ -14231,11 +14240,11 @@
           dropdown.classList.add("green-highlight");
           setTimeout(() => dropdown.classList.remove("green-highlight"), 600);
         }
-        
+
         // Track this URL as the last valid one (for reverting cancelled version bumps)
         const urlInput = document.getElementById("url-input");
         previousValidURL = urlInput.value.trim();
-        
+
         return true; // URL was accepted
       }
 
@@ -15658,8 +15667,13 @@ self.onmessage = function(e) {
         createWorkerPool();
 
         // Calculate dynamic hash length to fill QR capacity
-        const hashLength = calculateDynamicHashLength(currentURL, currentVersion);
-        console.log(`Using dynamic hash length: ${hashLength} (version ${currentVersion}, URL ${currentURL.length} bytes)`);
+        const hashLength = calculateDynamicHashLength(
+          currentURL,
+          currentVersion,
+        );
+        console.log(
+          `Using dynamic hash length: ${hashLength} (version ${currentVersion}, URL ${currentURL.length} bytes)`,
+        );
 
         const message = {
           type: "START_OPTIMIZATION",
