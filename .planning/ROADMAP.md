@@ -50,7 +50,7 @@
 **Plans:** 1 plan
 
 Plans:
-- [ ] 11-01-PLAN.md — Dynamic hash length calculation and worker integration
+- [x] 11-01-PLAN.md — Dynamic hash length calculation and worker integration (completed 2026-02-15)
 
 **Success Criteria:**
 1. Hash length is calculated dynamically based on QR version capacity minus URL byte length
@@ -65,10 +65,10 @@ Plans:
 | 1-4 | v1.0 | 8/8 | Complete | 2026-02-09 |
 | 5-9 | v1.1 | 8/8 | Complete | 2026-02-14 |
 | 10 | v1.2 | 3/3 | Complete | 2026-02-15 |
-| 11 | v1.3 | 0/1 | Active | — |
+| 11 | v1.3 | 1/1 | Complete | 2026-02-15 |
 
 **Total:** 11 phases, 20 plans across 4 milestones (3 shipped, 1 active)
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-15 (v1.3 Phase 11 planned)*
+*Last updated: 2026-02-15 (v1.3 Phase 11 complete)*
