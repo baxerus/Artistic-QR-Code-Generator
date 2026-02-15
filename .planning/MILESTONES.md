@@ -46,16 +46,47 @@
 ---
 
 **Total Project Stats:**
-- 2 milestones shipped
-- 9 phases, 17 plans, 75 commits
-- 9 days total development
+- 4 milestones shipped
+- 11 phases, 20 plans
+- 10 days total development (2026-02-06 → 2026-02-15)
 
 ## v1.2 Visual Consistency & Result Inspection (Shipped: 2026-02-15)
 
-**Phases completed:** 10 phases, 19 plans, 0 tasks
+**Delivered:** Visual polish for paint canvas protected areas and result card hover interactions for error visualization inspection.
+
+**Phases completed:** 10 (3 plans)
 
 **Key accomplishments:**
-- (none recorded)
+- Protected area borders on paint canvas use blue instead of red (avoiding confusion with error colors)
+- Scaled result cards show plain QR by default (cleaner default view)
+- Hover over result cards reveals error visualization with blue dashed borders
+
+**Stats:**
+- 1 file (index.html) modified
+- 1 phase, 3 plans
+- 2 days (2026-02-14 → 2026-02-15)
+
+---
+
+
+## v1.3 Hash Capacity Optimization (Shipped: 2026-02-15)
+
+**Delivered:** Dynamic hash length calculation that fills available QR capacity, giving the optimization search more data area variation for better painted pattern alignment.
+
+**Phases completed:** 11 (1 plan, 3 tasks)
+
+**Key accomplishments:**
+- Dynamic hash length calculation based on QR version capacity minus URL byte length
+- Renamed HASH_LENGTH to MIN_HASH_LENGTH to clarify it's a floor, not fixed value
+- Worker integration receives hashLength dynamically via message protocol
+- Longer hashes create more variation in QR data regions for better optimization candidates
+
+**Stats:**
+- 1 file (index.html) modified
+- 1 phase, 1 plan, 4 commits
+- Same day (2026-02-15)
+
+**Git range:** `5d1d771` → `8c0e210`
 
 ---
 
