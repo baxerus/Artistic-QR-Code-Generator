@@ -15222,7 +15222,7 @@ let lastProgressTime = 0;
 
 // Random hash generator (injected from main thread)
 const HASH_CHARSET = '${HASH_CHARSET}';
-const HASH_LENGTH = ${HASH_LENGTH};
+// Hash length will be set from searchConfig (dynamic per optimization run)
 
 function generateRandomHash(length) {
   const values = new Uint8Array(length);
@@ -15397,7 +15397,7 @@ function runBatch(timeoutEnd) {
         sendComplete();
         return;
       }
-      const hash = generateRandomHash(HASH_LENGTH);
+      const hash = generateRandomHash(searchConfig.hashLength);
       const result = evaluateCandidate(hash);
       if (result !== null) {
         updateTopResults(result);
@@ -15416,7 +15416,7 @@ function runBatch(timeoutEnd) {
       return;
     }
 
-    const hash = generateRandomHash(HASH_LENGTH);
+    const hash = generateRandomHash(searchConfig.hashLength);
     const result = evaluateCandidate(hash);
     if (result !== null) {
       updateTopResults(result);
