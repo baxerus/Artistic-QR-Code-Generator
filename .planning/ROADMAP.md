@@ -5,6 +5,7 @@
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-02-09) → [archive](milestones/v1-ROADMAP.md)
 - ✅ **v1.1 UX Overhaul & Optimization** — Phases 5-9 (shipped 2026-02-14) → [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Visual Consistency & Result Inspection** — Phase 10 (shipped 2026-02-15) → [archive](milestones/v1.2-ROADMAP.md)
+- 🔄 **v1.3 Hash Capacity Optimization** — Phase 11 (active)
 
 ## Phases
 
@@ -36,6 +37,22 @@
 
 </details>
 
+### v1.3 Hash Capacity Optimization (Phase 11) — ACTIVE
+
+#### Phase 11: Dynamic Hash Capacity
+
+**Goal:** Hash fragment length fills available QR capacity, maximizing data area variation for better pattern alignment.
+
+**Dependencies:** None (builds on existing hash optimization from v1.0/v1.1)
+
+**Requirements:** HASH-01, HASH-02, HASH-03
+
+**Success Criteria:**
+1. Hash length is calculated dynamically based on QR version capacity minus URL byte length
+2. MIN_HASH_LENGTH constant exists (renamed from HASH_LENGTH) clarifying minimum, not fixed
+3. Generated hashes expand to fill remaining byte capacity of selected QR version
+4. Longer hashes produce more data area variation during optimization search
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -43,9 +60,10 @@
 | 1-4 | v1.0 | 8/8 | Complete | 2026-02-09 |
 | 5-9 | v1.1 | 8/8 | Complete | 2026-02-14 |
 | 10 | v1.2 | 3/3 | Complete | 2026-02-15 |
+| 11 | v1.3 | 0/? | Active | — |
 
-**Total:** 10 phases, 19 plans across 3 milestones (all shipped)
+**Total:** 11 phases, 19 plans across 4 milestones (3 shipped, 1 active)
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-15 (v1.2 archived)*
+*Last updated: 2026-02-15 (v1.3 Phase 11 added)*
