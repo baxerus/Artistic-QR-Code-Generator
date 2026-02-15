@@ -14147,6 +14147,7 @@
       /**
        * Update version dropdown with valid versions for current URL
        * Only shows versions >= minimum required version
+       * @returns {boolean} true if URL was accepted, false if user cancelled
        */
       function updateVersionDropdown(minVersion) {
         const dropdown = document.getElementById("version-select");
@@ -14167,14 +14168,9 @@
               // Restore previous URL - don't modify dropdown at all
               const urlInput = document.getElementById("url-input");
               urlInput.value = previousValidURL;
-              // Cancel pending debounced save and schedule correct URL save
-              // (calling debounced function cancels previous pending call)
-              if (window.debouncedSaveURL) {
-                window.debouncedSaveURL(previousValidURL);
-              }
               // Re-validate with previous URL (this will restore dropdown to valid state)
               updateValidationUI(previousValidURL);
-              return; // Exit without updating dropdown
+              return false; // URL was rejected
             }
           }
         }
@@ -14217,6 +14213,8 @@
           dropdown.classList.add("green-highlight");
           setTimeout(() => dropdown.classList.remove("green-highlight"), 600);
         }
+        
+        return true; // URL was accepted
       }
 
       /**
@@ -14288,6 +14286,7 @@
 
       /**
        * Update validation UI state
+       * @returns {boolean} true if URL was accepted, false if rejected/invalid
        */
       function updateValidationUI(url) {
         const input = document.getElementById("url-input");
@@ -14305,7 +14304,7 @@
           dropdown.innerHTML =
             '<option value="" disabled selected>Enter URL first</option>';
           dropdown.disabled = true;
-          return;
+          return false;
         }
 
         // SAFE-01: Check for hash fragment before other validation
@@ -14323,7 +14322,7 @@
           dropdown.innerHTML =
             '<option value="" disabled selected>Enter URL first</option>';
           dropdown.disabled = true;
-          return;
+          return false;
         }
 
         // Clear any previous error
@@ -14346,7 +14345,7 @@
             dropdown.innerHTML =
               '<option value="" disabled selected>Enter URL first</option>';
             dropdown.disabled = true;
-            return;
+            return false;
           }
 
           // Valid and fits
@@ -14355,7 +14354,8 @@
           icon.classList.remove("invalid");
           icon.classList.add("valid");
           button.disabled = false;
-          updateVersionDropdown(minVersion);
+          // updateVersionDropdown returns false if user cancelled version bump
+          return updateVersionDropdown(minVersion);
         } else {
           // Invalid URL
           input.classList.remove("valid");
@@ -14368,6 +14368,7 @@
           dropdown.innerHTML =
             '<option value="" disabled selected>Enter URL first</option>';
           dropdown.disabled = true;
+          return false;
         }
       }
 
@@ -16410,8 +16411,11 @@ self.onmessage = function(e) {
         // URL input event - validate as user types
         urlInput.addEventListener("input", function () {
           const url = this.value.trim();
-          updateValidationUI(url);
-          window.debouncedSaveURL(url);
+          const accepted = updateValidationUI(url);
+          // Only save to localStorage if URL was accepted (not cancelled by user)
+          if (accepted) {
+            window.debouncedSaveURL(url);
+          }
         });
 
         // Generate button click
