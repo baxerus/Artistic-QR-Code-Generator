@@ -14167,8 +14167,11 @@
               // Restore previous URL - don't modify dropdown at all
               const urlInput = document.getElementById("url-input");
               urlInput.value = previousValidURL;
-              // Also restore in localStorage (cancel the debounced save)
-              saveURL(previousValidURL);
+              // Cancel pending debounced save and schedule correct URL save
+              // (calling debounced function cancels previous pending call)
+              if (window.debouncedSaveURL) {
+                window.debouncedSaveURL(previousValidURL);
+              }
               // Re-validate with previous URL (this will restore dropdown to valid state)
               updateValidationUI(previousValidURL);
               return; // Exit without updating dropdown
@@ -16401,14 +16404,14 @@ self.onmessage = function(e) {
           }
         }
 
-        // Create debounced save function for URL input
-        const debouncedSaveURL = debounce(saveURL, 500);
+        // Create debounced save function for URL input (global for cancel access)
+        window.debouncedSaveURL = debounce(saveURL, 500);
 
         // URL input event - validate as user types
         urlInput.addEventListener("input", function () {
           const url = this.value.trim();
           updateValidationUI(url);
-          debouncedSaveURL(url);
+          window.debouncedSaveURL(url);
         });
 
         // Generate button click
