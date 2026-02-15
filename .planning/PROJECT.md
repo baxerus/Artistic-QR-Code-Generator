@@ -8,26 +8,28 @@ A single-file HTML tool (16,353 lines) for creating artistic QR codes by embeddi
 
 The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art, not the other way around. Even if it means the QR code won't scan, the pattern survives at 100%.
 
-## Current Milestone: v1.2 Visual Consistency & Result Inspection
+## Current Milestone: v1.3 Hash Capacity Optimization
 
-**Goal:** Unify protected area visualization (blue everywhere) and make scaled results easier to inspect by hiding overlays until hover.
+**Goal:** Maximize hash fragment length to fill available QR capacity, giving more data area variation for better pattern alignment.
 
 **Target features:**
-- Blue dashed borders for protected areas (paint canvas + results)
-- Scaled results show plain QR by default
-- Error visualization appears on hover
+- Dynamic hash length based on QR version capacity
+- Hash fills remaining bytes after URL
+- Rename HASH_LENGTH to MIN_HASH_LENGTH to clarify behavior
+- More variation in data area = better chance of finding pattern-aligned encodings
 
 ## Current State
 
-**Shipped:** v1.1 UX Overhaul & Optimization (2026-02-14)
+**Shipped:** v1.2 Visual Consistency & Result Inspection (2026-02-15)
 
-**Codebase:** 16,353 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (inlined), multi-worker optimization via Blob URLs.
+**Codebase:** ~16,500 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (inlined), multi-worker optimization via Blob URLs.
 
 **Milestones Complete:**
 - v1.0 MVP — 4 phases, 8 plans, 59 commits (2026-02-09)
 - v1.1 UX Overhaul — 5 phases, 8 plans, 16 commits (2026-02-14)
+- v1.2 Visual Consistency — 1 phase, 3 plans (2026-02-15)
 
-**Total:** 9 phases, 17 plans, 75 commits over 9 days
+**Total:** 10 phases, 19 plans across 3 milestones
 
 ## Requirements
 
@@ -59,12 +61,17 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - ✓ QR version range expanded to Version 10 — v1.1
 - ✓ MAX_QR_VERSION as named constant — v1.1
 
+**v1.2 Visual Consistency & Result Inspection:**
+- ✓ Protected area borders use blue (not red) on paint canvas — v1.2
+- ✓ Scaled results show plain QR by default (no overlay) — v1.2
+- ✓ Scaled results show error visualization + blue dashed borders on hover — v1.2
+
 ### Active
 
-**v1.2 Visual Consistency & Result Inspection:**
-- [ ] Protected area borders use blue (not red) on paint canvas
-- [ ] Scaled results show plain QR by default (no overlay)
-- [ ] Scaled results show error visualization + blue dashed borders on hover
+**v1.3 Hash Capacity Optimization:**
+- [ ] Dynamic hash length fills available QR capacity
+- [ ] MIN_HASH_LENGTH constant (renamed from HASH_LENGTH)
+- [ ] Hash expands to use remaining bytes after URL
 
 ### Out of Scope
 
@@ -120,4 +127,4 @@ Based on v1.1 development, potential future work:
 - High-resolution export (300+ DPI for print)
 
 ---
-*Last updated: 2026-02-15 after v1.2 milestone start*
+*Last updated: 2026-02-15 after v1.3 milestone start*

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-15)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Planning next milestone
+**Current focus:** v1.3 Hash Capacity Optimization
 
 ## Current Position
 
-Phase: None (between milestones)
-Plan: N/A
-Status: v1.2 shipped
-Last activity: 2026-02-15 — Completed v1.2 milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-15 — Milestone v1.3 started
 
-Progress: All milestones shipped ✓
+Progress: Defining requirements
 
 ## Milestones
 
