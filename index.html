@@ -14214,6 +14214,10 @@
           setTimeout(() => dropdown.classList.remove("green-highlight"), 600);
         }
         
+        // Track this URL as the last valid one (for reverting cancelled version bumps)
+        const urlInput = document.getElementById("url-input");
+        previousValidURL = urlInput.value.trim();
+        
         return true; // URL was accepted
       }
 
