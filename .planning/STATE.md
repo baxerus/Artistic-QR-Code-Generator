@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 ## Current Position
 
 Phase: 10 - Visual Polish & Result Inspection
-Plan: 01 (complete)
+Plan: 02 (complete)
 Status: Phase complete
-Last activity: 2026-02-14 — Completed 10-01 Visual Polish & Result Inspection
+Last activity: 2026-02-15 — Completed 10-02 UAT Gap Closure
 
 Progress: [################] 100%
 
@@ -40,7 +40,9 @@ Progress: [################] 100%
 
 - Blue (#3b82f6) for protected areas matches hover outline color on result cards
 - Hover shows overlay immediately; click still expands for larger view
-- Module-scale line width (0.15) with small dashes (0.5, 0.25) for CSS upscaling
+- Blue overlay opacity 0.25 (higher than initial 0.15) for visibility parity with red
+- Line width 0.5 + dash [2,1] for visible module-scale dashed borders
+- Legend only shown in expanded view (not on small result hover)
 
 ### Key Decisions (v1.1)
 
@@ -66,9 +68,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-14
-Stopped at: Completed 10-01-PLAN.md
-Resume: Phase 10 complete, ready for milestone completion
+Last session: 2026-02-15
+Stopped at: Completed 10-02-PLAN.md
+Resume: Phase 10 complete with UAT fixes, ready for milestone completion
 
 ---
-*Phase 10 complete: 2026-02-14. v1.2 milestone ready for completion.*
+*Phase 10 plan 02 complete: 2026-02-15. v1.2 milestone ready for completion.*
