@@ -15853,6 +15853,7 @@ self.onmessage = function(e) {
         overlayCanvas.height = moduleCount;
 
         const ctx = overlayCanvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
         ctx.clearRect(0, 0, moduleCount, moduleCount);
 
         // Iterate through all modules
