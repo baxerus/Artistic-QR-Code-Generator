@@ -15893,9 +15893,10 @@ self.onmessage = function(e) {
        */
       function renderProtectedBordersOverlay(canvas, moduleCount, functionMask) {
         const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
         ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
-        ctx.lineWidth = 0.5; // Thicker line for visible dashed borders
-        ctx.setLineDash([2, 1]); // Larger dash pattern for visibility
+        ctx.lineWidth = 1; // Full pixel width for visibility when CSS-scaled
+        ctx.setLineDash([0.5, 0.25]); // Sub-module dashes visible after CSS scaling
 
         for (let y = 0; y < moduleCount; y++) {
           for (let x = 0; x < moduleCount; x++) {
