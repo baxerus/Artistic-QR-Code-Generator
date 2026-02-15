@@ -582,7 +582,7 @@
           max-width 0.4s ease,
           padding 0.4s ease,
           box-shadow 0.3s ease;
-        flex: 1 1 0;
+        flex: 0 0 calc(20% - 8px);
         min-width: 0;
         max-width: 160px;
         overflow: hidden;
@@ -15519,7 +15519,7 @@ self.onmessage = function(e) {
 
             // OPT-01: Check auto-stop condition after merge
             if (checkAutoStopCondition(currentTopResults)) {
-              console.log("Auto-stop triggered: 5 perfect results found");
+              console.log(`Auto-stop triggered: ${TOP_RESULTS_COUNT} perfect results found`);
               stopAllWorkers();
               handleSearchComplete({
                 attempts: totalAttemptsSoFar,
@@ -15547,10 +15547,10 @@ self.onmessage = function(e) {
       }
 
       /**
-       * Merge results from all workers into single top-5 (OPT-02)
+       * Merge results from all workers into single top results (OPT-02)
        * Deduplicates by hash, sorts by decodable then pixelDiff
        * @param {Array<Array>} buffers - Per-worker result arrays
-       * @returns {Array} Merged and sorted top-5 results
+       * @returns {Array} Merged and sorted top results
        */
       function mergeWorkerResults(buffers) {
         // Flatten all worker results
@@ -15571,7 +15571,7 @@ self.onmessage = function(e) {
           return a.pixelDiff - b.pixelDiff;
         });
 
-        return unique.slice(0, 5);
+        return unique.slice(0, TOP_RESULTS_COUNT);
       }
 
       /**
@@ -15739,21 +15739,19 @@ self.onmessage = function(e) {
       let totalAttempts = 0;
       let totalDecodableCount = 0;
 
-      const PERFECT_RESULT_THRESHOLD = 5; // OPT-01: Auto-stop when this many 0-error results found
-
       /**
        * Check if auto-stop condition is met (OPT-01)
        * @param {Array} topResults - Current merged top results
-       * @returns {boolean} True if 5+ results have 0 pixel errors AND are decodable
+       * @returns {boolean} True if TOP_RESULTS_COUNT results have 0 pixel errors AND are decodable
        */
       function checkAutoStopCondition(topResults) {
-        if (!topResults || topResults.length < PERFECT_RESULT_THRESHOLD) {
+        if (!topResults || topResults.length < TOP_RESULTS_COUNT) {
           return false;
         }
         const perfectCount = topResults.filter(
           (r) => r.decodable && r.pixelDiff === 0,
         ).length;
-        return perfectCount >= PERFECT_RESULT_THRESHOLD;
+        return perfectCount >= TOP_RESULTS_COUNT;
       }
 
       /**
