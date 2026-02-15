@@ -6,29 +6,6 @@
 - ✅ **v1.1 UX Overhaul & Optimization** — Phases 5-9 (shipped 2026-02-14) → [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Visual Consistency & Result Inspection** — Phase 10 (shipped 2026-02-15) → [archive](milestones/v1.2-ROADMAP.md)
 
-## v1.2 Visual Consistency & Result Inspection
-
-**Goal:** Unify protected area visualization (blue everywhere) and make scaled results easier to inspect by showing plain QR codes by default with overlays appearing on hover.
-
-### Phase 10: Visual Polish & Result Inspection
-
-**Goal:** Users can clearly identify protected areas (blue borders) and inspect scaled results without visual clutter.
-
-**Dependencies:** None — builds on existing v1.1 rendering
-
-**Requirements:**
-- VIS-01: Protected area borders on paint canvas use blue instead of red
-- VIS-02: Scaled results show blue dashed borders around protected areas on hover
-- INSP-01: Scaled results display plain QR code by default (no overlay colors)
-- INSP-02: Scaled results show error visualization overlay on hover
-
-**Success Criteria:**
-1. Paint canvas shows blue dashed borders around finder patterns, timing patterns, and alignment patterns (not red)
-2. Scaled results in Top 5 list display clean black/white QR codes without colored overlays
-3. Hovering over a scaled result reveals error visualization (red/green pixels showing conflicts)
-4. Hovering over a scaled result shows blue dashed borders around protected areas
-5. Moving mouse away from scaled result returns it to plain QR view
-
 ## Phases
 
 <details>
@@ -56,9 +33,6 @@
 <summary>✅ v1.2 Visual Consistency & Result Inspection (Phase 10) — SHIPPED 2026-02-15</summary>
 
 - [x] Phase 10: Visual Polish & Result Inspection (3/3 plans) — completed 2026-02-15
-  - [x] 10-01-PLAN.md — Visual consistency and hover-based result inspection
-  - [x] 10-02-PLAN.md — UAT gap closure: overlay visibility and hover fixes
-  - [x] 10-03-PLAN.md — UAT revalidation gap closure: overlay anti-aliasing and border visibility
 
 </details>
 
@@ -66,19 +40,12 @@
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
-| 1. Foundation & QR Generation | v1.0 | 2/2 | Complete | 2026-02-07 |
-| 2. Pixel Painting & Corruption | v1.0 | 2/2 | Complete | 2026-02-07 |
-| 3. Hash Optimization Loop | v1.0 | 2/2 | Complete | 2026-02-09 |
-| 4. Results & Export | v1.0 | 2/2 | Complete | 2026-02-09 |
-| 5. Configuration Constants | v1.1 | 1/1 | Complete | 2026-02-10 |
-| 6. State Persistence | v1.1 | 1/1 | Complete | 2026-02-10 |
-| 7. Painting Overhaul | v1.1 | 2/2 | Complete | 2026-02-13 |
-| 8. Generation Safety | v1.1 | 2/2 | Complete | 2026-02-14 |
-| 9. Optimization Upgrades | v1.1 | 2/2 | Complete | 2026-02-14 |
-| 10. Visual Polish & Result Inspection | v1.2 | 3/3 | Complete | 2026-02-15 |
+| 1-4 | v1.0 | 8/8 | Complete | 2026-02-09 |
+| 5-9 | v1.1 | 8/8 | Complete | 2026-02-14 |
+| 10 | v1.2 | 3/3 | Complete | 2026-02-15 |
 
-**Total:** 10 phases across 3 milestones (3 shipped)
+**Total:** 10 phases, 19 plans across 3 milestones (all shipped)
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-15 (v1.2 shipped)*
+*Last updated: 2026-02-15 (v1.2 archived)*

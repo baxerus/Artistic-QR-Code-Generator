@@ -13584,7 +13584,7 @@
       const PROTECTED_OUTLINE_COLOR = "#3b82f6";
       const PROTECTED_OVERLAY_COLOR = "rgba(59, 130, 246, 0.25)"; // Blue overlay for protected areas (0.25 for visibility)
       const PAINTED_BORDER_COLOR = "#22c55e"; // Green border around painted regions
-      
+
       // Canvas size constant - used for both paint canvas and expanded results
       const CANVAS_DISPLAY_SIZE = 600;
 
@@ -15855,13 +15855,15 @@ self.onmessage = function(e) {
         includeBorders,
       ) {
         // Render at specified display resolution
-        const cellSize = displaySize ? Math.floor(displaySize / moduleCount) : 1;
+        const cellSize = displaySize
+          ? Math.floor(displaySize / moduleCount)
+          : 1;
         // Canvas size must match actual rendered size (cellSize * moduleCount) for alignment
         const canvasSize = cellSize * moduleCount;
-        
+
         overlayCanvas.width = canvasSize;
         overlayCanvas.height = canvasSize;
-        
+
         const ctx = overlayCanvas.getContext("2d");
         ctx.clearRect(0, 0, canvasSize, canvasSize);
 
@@ -15894,7 +15896,7 @@ self.onmessage = function(e) {
             // Unset data pixels have no overlay color
           }
         }
-        
+
         // Draw dashed borders only if requested (for expanded view)
         if (includeBorders && displaySize) {
           ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
@@ -15917,7 +15919,10 @@ self.onmessage = function(e) {
                 ctx.stroke();
               }
               // Bottom edge
-              if (y === moduleCount - 1 || !functionMask[(y + 1) * moduleCount + x]) {
+              if (
+                y === moduleCount - 1 ||
+                !functionMask[(y + 1) * moduleCount + x]
+              ) {
                 ctx.beginPath();
                 ctx.moveTo(px, py + cellSize);
                 ctx.lineTo(px + cellSize, py + cellSize);
@@ -15931,7 +15936,10 @@ self.onmessage = function(e) {
                 ctx.stroke();
               }
               // Right edge
-              if (x === moduleCount - 1 || !functionMask[y * moduleCount + (x + 1)]) {
+              if (
+                x === moduleCount - 1 ||
+                !functionMask[y * moduleCount + (x + 1)]
+              ) {
                 ctx.beginPath();
                 ctx.moveTo(px + cellSize, py);
                 ctx.lineTo(px + cellSize, py + cellSize);
@@ -16104,13 +16112,15 @@ self.onmessage = function(e) {
             result.moduleCount,
             paintGrid.cells,
             functionMask,
-            null,  // module resolution
+            null, // module resolution
             false, // no borders for small view
           );
-          
+
           // Store data for re-rendering when expanded
           overlayCanvas.dataset.moduleCount = result.moduleCount;
-          overlayCanvas.dataset.qrModuleData = JSON.stringify(result.qrModuleData);
+          overlayCanvas.dataset.qrModuleData = JSON.stringify(
+            result.qrModuleData,
+          );
           overlayCanvas.dataset.paintedPixels = JSON.stringify(paintGrid.cells);
           overlayCanvas.dataset.version = currentVersion;
 
@@ -16180,21 +16190,34 @@ self.onmessage = function(e) {
             if (currentlyExpanded && currentlyExpanded !== slot) {
               currentlyExpanded.classList.remove("expanded");
               // Re-render collapsed overlay at module resolution
-              const collapsedOverlay = currentlyExpanded.querySelector(".result-overlay");
+              const collapsedOverlay =
+                currentlyExpanded.querySelector(".result-overlay");
               if (collapsedOverlay) {
                 const mc = parseInt(collapsedOverlay.dataset.moduleCount);
-                const qrData = JSON.parse(collapsedOverlay.dataset.qrModuleData);
-                const painted = JSON.parse(collapsedOverlay.dataset.paintedPixels);
+                const qrData = JSON.parse(
+                  collapsedOverlay.dataset.qrModuleData,
+                );
+                const painted = JSON.parse(
+                  collapsedOverlay.dataset.paintedPixels,
+                );
                 const ver = parseInt(collapsedOverlay.dataset.version);
                 const fm = createFunctionPatternMask(ver);
-                renderErrorOverlay(collapsedOverlay, qrData, mc, painted, fm, null, false);
+                renderErrorOverlay(
+                  collapsedOverlay,
+                  qrData,
+                  mc,
+                  painted,
+                  fm,
+                  null,
+                  false,
+                );
               }
             }
 
             // Toggle expanded state
             const willExpand = !isExpanded;
             slot.classList.toggle("expanded", willExpand);
-            
+
             // Re-render overlay at appropriate resolution
             const overlay = canvasContainer.querySelector(".result-overlay");
             if (overlay) {
@@ -16203,13 +16226,29 @@ self.onmessage = function(e) {
               const painted = JSON.parse(overlay.dataset.paintedPixels);
               const ver = parseInt(overlay.dataset.version);
               const fm = createFunctionPatternMask(ver);
-              
+
               if (willExpand) {
                 // Expanded: render at same size as paint canvas with borders
-                renderErrorOverlay(overlay, qrData, mc, painted, fm, CANVAS_DISPLAY_SIZE, true);
+                renderErrorOverlay(
+                  overlay,
+                  qrData,
+                  mc,
+                  painted,
+                  fm,
+                  CANVAS_DISPLAY_SIZE,
+                  true,
+                );
               } else {
                 // Collapsed: render at module resolution, no borders
-                renderErrorOverlay(overlay, qrData, mc, painted, fm, null, false);
+                renderErrorOverlay(
+                  overlay,
+                  qrData,
+                  mc,
+                  painted,
+                  fm,
+                  null,
+                  false,
+                );
               }
             }
           });
