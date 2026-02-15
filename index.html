@@ -713,7 +713,7 @@
       .result-overlay {
         pointer-events: none;
         opacity: 0;
-        transition: opacity 0.3s ease 0.3s;
+        transition: opacity 0.1s ease;
       }
 
       .result-slot.expanded .result-overlay {
@@ -722,10 +722,6 @@
 
       .result-slot:hover .result-overlay {
         opacity: 1;
-      }
-
-      .result-slot:hover .overlay-legend {
-        display: flex;
       }
 
       .results-disabled .result-slot:hover .result-overlay {
@@ -13587,7 +13583,7 @@
       const PAINTED_WHITE = "#d0d0d0";
       const PAINTED_BLACK = "#404040";
       const PROTECTED_OUTLINE_COLOR = "#3b82f6";
-      const PROTECTED_OVERLAY_COLOR = "rgba(59, 130, 246, 0.15)"; // Faint blue overlay for protected areas
+      const PROTECTED_OVERLAY_COLOR = "rgba(59, 130, 246, 0.25)"; // Blue overlay for protected areas (0.25 for visibility)
       const PAINTED_BORDER_COLOR = "#22c55e"; // Green border around painted regions
 
       /**
