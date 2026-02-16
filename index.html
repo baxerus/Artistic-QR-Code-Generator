@@ -16196,13 +16196,15 @@ self.onmessage = function(e) {
             // Correction burden line (RS corrections needed by scanner)
             const correctionSpan = document.createElement("span");
             correctionSpan.className = "errors";
+            correctionSpan.title = "Number of Reed-Solomon error corrections the QR scanner needed. Lower is better — 0 means the QR scans perfectly without any error correction.";
             const rsDisplay = result.rsCorrections === Infinity ? "-" : result.rsCorrections;
-            correctionSpan.textContent = `Corrections: ${rsDisplay}`;
+            correctionSpan.innerHTML = `Corrections: <b>${rsDisplay}</b>`;
 
             // Pixel errors line
             const pixelSpan = document.createElement("span");
             pixelSpan.className = "errors";
-            pixelSpan.textContent = `Pixel errors: ${result.pixelDiff}`;
+            pixelSpan.title = "Number of pixels where your painted pattern differs from the QR code's ideal pattern. These differences are handled by the QR's error correction.";
+            pixelSpan.innerHTML = `Pixel errors: <b>${result.pixelDiff}</b>`;
 
             label.appendChild(statusSpan);
             label.appendChild(document.createElement("br"));
@@ -16231,7 +16233,14 @@ self.onmessage = function(e) {
                 result.moduleData,
                 result.moduleCount,
               );
-              downloadCanvasAsPNG(exportCanvas, `qr-${result.hash}`);
+              // Sanitize URL for filename (safe for Windows, macOS, Linux)
+              const fullUrl = `${currentURL}#${result.hash}`;
+              const sanitizedUrl = fullUrl
+                .replace(/^https?:\/\//, '')  // Remove protocol
+                .replace(/[<>:"/\\|?*]/g, '_')  // Replace invalid chars
+                .replace(/_{2,}/g, '_')  // Collapse multiple underscores
+                .slice(0, 200);  // Limit length
+              downloadCanvasAsPNG(exportCanvas, sanitizedUrl);
             };
 
             // Copy URL button
