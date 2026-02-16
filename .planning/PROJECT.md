@@ -69,7 +69,12 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Active
 
-(None — all milestones shipped. Run `/gsd-new-milestone` to plan next features.)
+**v1.4 RS Error Measurement:**
+
+- [ ] Measure actual Reed-Solomon error correction burden, not just pixel mismatch
+- [ ] Display both RS correction count and pixel diff on result cards
+- [ ] Sort results by RS corrections (primary), pixel diff (secondary)
+- [ ] Auto-stop on 5 results with both RS=0 and pixel diff=0
 
 ### Out of Scope
 
@@ -123,6 +128,16 @@ Based on v1.1 development, potential future work:
 
 - SVG export format
 
+## Current Milestone: v1.4 RS Error Measurement
+
+**Goal:** Replace pixel-only error counting with actual Reed-Solomon correction burden to measure true QR scan reliability margin.
+
+**Target features:**
+- Extract RS correction count from jsQR (or alternative browser decoder if needed)
+- Display both RS corrections and pixel diff in UI
+- Rank results by RS corrections (lower = better), pixel diff as tiebreaker
+- Redefine "perfect result" as both metrics at zero
+
 ---
 
-_Last updated: 2026-02-15 after v1.3 shipped_
+_Last updated: 2026-02-16 after v1.4 milestone started_
