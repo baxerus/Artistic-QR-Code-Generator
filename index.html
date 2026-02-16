@@ -616,11 +616,6 @@
         color: #666;
       }
 
-      .result-label .perfect-rs {
-        color: #10b981;
-        font-weight: 600;
-      }
-
       @keyframes green-highlight {
         0% {
           box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
@@ -16198,17 +16193,22 @@ self.onmessage = function(e) {
               ? "Decodable"
               : "Not decodable";
 
-            const errorsSpan = document.createElement("span");
-            errorsSpan.className = "errors";
+            // Correction burden line (RS corrections needed by scanner)
+            const correctionSpan = document.createElement("span");
+            correctionSpan.className = "errors";
             const rsDisplay = result.rsCorrections === Infinity ? "-" : result.rsCorrections;
-            errorsSpan.textContent = `RS: ${rsDisplay} | Pixels: ${result.pixelDiff}`;
-            if (result.rsCorrections === 0) {
-              errorsSpan.classList.add("perfect-rs");
-            }
+            correctionSpan.textContent = `Corrections: ${rsDisplay}`;
+
+            // Pixel errors line
+            const pixelSpan = document.createElement("span");
+            pixelSpan.className = "errors";
+            pixelSpan.textContent = `Pixel errors: ${result.pixelDiff}`;
 
             label.appendChild(statusSpan);
             label.appendChild(document.createElement("br"));
-            label.appendChild(errorsSpan);
+            label.appendChild(correctionSpan);
+            label.appendChild(document.createElement("br"));
+            label.appendChild(pixelSpan);
 
             // Add hash fragment
             const hashSpan = document.createElement("span");
