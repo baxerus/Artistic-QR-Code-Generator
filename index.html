@@ -16103,239 +16103,260 @@ self.onmessage = function(e) {
 
         topResultsContainer.style.display = "flex";
 
-        // Get current hashes for highlight detection
-        const currentHashes = topResults.map((r) => r.hash);
+        // Map existing slots by hash for incremental updates
+        const existingSlots = new Map();
+        for (const slot of topResultsContainer.children) {
+          existingSlots.set(slot.dataset.hash, slot);
+        }
 
-        // Clear and rebuild slots
-        topResultsContainer.innerHTML = "";
+        // Get new hashes for comparison
+        const newHashes = new Set(topResults.map((r) => r.hash));
 
+        // Remove slots that are no longer in top results
+        for (const [hash, slot] of existingSlots) {
+          if (!newHashes.has(hash)) {
+            slot.remove();
+            existingSlots.delete(hash);
+          }
+        }
+
+        // Build or update slots in order
         topResults.forEach((result, index) => {
-          const slot = document.createElement("div");
-          slot.className = "result-slot";
+          let slot = existingSlots.get(result.hash);
+          const isNew = !slot;
 
-          // Store hash for potential future use
-          slot.dataset.hash = result.hash;
-
-          // Store result data for overlay rendering
-          slot._resultData = result;
-
-          // Check if this is a new result
-          const isNew = !previousTopHashes.includes(result.hash);
           if (isNew) {
+            // Create new slot
+            slot = document.createElement("div");
+            slot.className = "result-slot";
+            slot.dataset.hash = result.hash;
+            slot._resultData = result;
+
+            // Add green-highlight for new results
             slot.classList.add("green-highlight");
-            // Remove animation class after it completes
             setTimeout(() => slot.classList.remove("green-highlight"), 600);
-          }
 
-          // Create rank number
-          const rank = document.createElement("div");
-          rank.className = "result-rank";
-          rank.textContent = `#${index + 1}`;
+            // Create rank number
+            const rank = document.createElement("div");
+            rank.className = "result-rank";
+            rank.textContent = `#${index + 1}`;
 
-          // Create canvas container for QR preview and overlay
-          const canvasContainer = document.createElement("div");
-          canvasContainer.className = "result-canvas-container";
+            // Create canvas container for QR preview and overlay
+            const canvasContainer = document.createElement("div");
+            canvasContainer.className = "result-canvas-container";
 
-          // Create canvas for QR preview
-          const canvas = document.createElement("canvas");
-          canvas.className = "result-slot-canvas";
-          const moduleCount = result.moduleCount;
-          canvas.width = moduleCount;
-          canvas.height = moduleCount;
+            // Create canvas for QR preview
+            const canvas = document.createElement("canvas");
+            canvas.className = "result-slot-canvas";
+            const moduleCount = result.moduleCount;
+            canvas.width = moduleCount;
+            canvas.height = moduleCount;
 
-          // Draw module data to canvas
-          const ctx = canvas.getContext("2d");
-          const imageData = ctx.createImageData(moduleCount, moduleCount);
-          for (let i = 0; i < result.moduleData.length; i++) {
-            const color = result.moduleData[i] === 1 ? 0 : 255;
-            imageData.data[i * 4] = color;
-            imageData.data[i * 4 + 1] = color;
-            imageData.data[i * 4 + 2] = color;
-            imageData.data[i * 4 + 3] = 255;
-          }
-          ctx.putImageData(imageData, 0, 0);
+            // Draw module data to canvas
+            const ctx = canvas.getContext("2d");
+            const imageData = ctx.createImageData(moduleCount, moduleCount);
+            for (let i = 0; i < result.moduleData.length; i++) {
+              const color = result.moduleData[i] === 1 ? 0 : 255;
+              imageData.data[i * 4] = color;
+              imageData.data[i * 4 + 1] = color;
+              imageData.data[i * 4 + 2] = color;
+              imageData.data[i * 4 + 3] = 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
 
-          // Create overlay canvas (rendered at module resolution, CSS scales with pixelated)
-          const overlayCanvas = document.createElement("canvas");
-          overlayCanvas.className = "result-overlay";
+            // Create overlay canvas (rendered at module resolution, CSS scales with pixelated)
+            const overlayCanvas = document.createElement("canvas");
+            overlayCanvas.className = "result-overlay";
 
-          // Render overlay at module resolution (no borders for small view)
-          const functionMask = createFunctionPatternMask(currentVersion);
-          renderErrorOverlay(
-            overlayCanvas,
-            result.qrModuleData,
-            result.moduleCount,
-            paintGrid.cells,
-            functionMask,
-            null, // module resolution
-            false, // no borders for small view
-          );
-
-          // Store data for re-rendering when expanded
-          overlayCanvas.dataset.moduleCount = result.moduleCount;
-          overlayCanvas.dataset.qrModuleData = JSON.stringify(
-            result.qrModuleData,
-          );
-          overlayCanvas.dataset.paintedPixels = JSON.stringify(paintGrid.cells);
-          overlayCanvas.dataset.version = currentVersion;
-
-          // Assemble canvas container
-          canvasContainer.appendChild(canvas);
-          canvasContainer.appendChild(overlayCanvas);
-
-          // Create label with status and errors
-          const label = document.createElement("div");
-          label.className = "result-label";
-
-          const statusSpan = document.createElement("span");
-          statusSpan.className = `status ${result.decodable ? "decodable" : "not-decodable"}`;
-          statusSpan.textContent = result.decodable
-            ? "Decodable"
-            : "Not decodable";
-
-          const errorsSpan = document.createElement("span");
-          errorsSpan.className = "errors";
-          errorsSpan.textContent = `${result.pixelDiff} errors`;
-
-          label.appendChild(statusSpan);
-          label.appendChild(document.createElement("br"));
-          label.appendChild(errorsSpan);
-
-          // Add hash fragment
-          const hashSpan = document.createElement("span");
-          hashSpan.className = "result-hash";
-          hashSpan.textContent = `#${result.hash}`;
-          label.appendChild(document.createElement("br"));
-          label.appendChild(hashSpan);
-
-          // Create action buttons
-          const actions = document.createElement("div");
-          actions.className = "result-actions";
-
-          // Download PNG button
-          const isRunning = searchState === "running";
-          const downloadBtn = document.createElement("button");
-          downloadBtn.textContent = "Download PNG";
-          downloadBtn.disabled = isRunning;
-          downloadBtn.onclick = () => {
-            const exportCanvas = renderResultToCanvas(
-              result.moduleData,
+            // Render overlay at module resolution (no borders for small view)
+            const functionMask = createFunctionPatternMask(currentVersion);
+            renderErrorOverlay(
+              overlayCanvas,
+              result.qrModuleData,
               result.moduleCount,
+              paintGrid.cells,
+              functionMask,
+              null, // module resolution
+              false, // no borders for small view
             );
-            downloadCanvasAsPNG(exportCanvas, `qr-${result.hash}`);
-          };
 
-          // Copy URL button
-          const copyBtn = document.createElement("button");
-          copyBtn.textContent = "Copy URL";
-          copyBtn.disabled = isRunning;
-          copyBtn.onclick = () => {
-            copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
-          };
-
-          // Click to expand/collapse (re-render overlay at appropriate resolution)
-          canvasContainer.addEventListener("click", function () {
-            if (searchState === "running") return;
-            const isExpanded = slot.classList.contains("expanded");
-
-            // Collapse any currently expanded slot and reset its overlay
-            const currentlyExpanded = topResultsContainer.querySelector(
-              ".result-slot.expanded",
+            // Store data for re-rendering when expanded
+            overlayCanvas.dataset.moduleCount = result.moduleCount;
+            overlayCanvas.dataset.qrModuleData = JSON.stringify(
+              result.qrModuleData,
             );
-            if (currentlyExpanded && currentlyExpanded !== slot) {
-              currentlyExpanded.classList.remove("expanded");
-              // Re-render collapsed overlay at module resolution
-              const collapsedOverlay =
-                currentlyExpanded.querySelector(".result-overlay");
-              if (collapsedOverlay) {
-                const mc = parseInt(collapsedOverlay.dataset.moduleCount);
-                const qrData = JSON.parse(
-                  collapsedOverlay.dataset.qrModuleData,
-                );
-                const painted = JSON.parse(
-                  collapsedOverlay.dataset.paintedPixels,
-                );
-                const ver = parseInt(collapsedOverlay.dataset.version);
+            overlayCanvas.dataset.paintedPixels = JSON.stringify(
+              paintGrid.cells,
+            );
+            overlayCanvas.dataset.version = currentVersion;
+
+            // Assemble canvas container
+            canvasContainer.appendChild(canvas);
+            canvasContainer.appendChild(overlayCanvas);
+
+            // Create label with status and errors
+            const label = document.createElement("div");
+            label.className = "result-label";
+
+            const statusSpan = document.createElement("span");
+            statusSpan.className = `status ${result.decodable ? "decodable" : "not-decodable"}`;
+            statusSpan.textContent = result.decodable
+              ? "Decodable"
+              : "Not decodable";
+
+            const errorsSpan = document.createElement("span");
+            errorsSpan.className = "errors";
+            errorsSpan.textContent = `${result.pixelDiff} errors`;
+
+            label.appendChild(statusSpan);
+            label.appendChild(document.createElement("br"));
+            label.appendChild(errorsSpan);
+
+            // Add hash fragment
+            const hashSpan = document.createElement("span");
+            hashSpan.className = "result-hash";
+            hashSpan.textContent = `#${result.hash}`;
+            label.appendChild(document.createElement("br"));
+            label.appendChild(hashSpan);
+
+            // Create action buttons
+            const actions = document.createElement("div");
+            actions.className = "result-actions";
+
+            // Download PNG button
+            const isRunning = searchState === "running";
+            const downloadBtn = document.createElement("button");
+            downloadBtn.textContent = "Download PNG";
+            downloadBtn.disabled = isRunning;
+            downloadBtn.onclick = () => {
+              const exportCanvas = renderResultToCanvas(
+                result.moduleData,
+                result.moduleCount,
+              );
+              downloadCanvasAsPNG(exportCanvas, `qr-${result.hash}`);
+            };
+
+            // Copy URL button
+            const copyBtn = document.createElement("button");
+            copyBtn.textContent = "Copy URL";
+            copyBtn.disabled = isRunning;
+            copyBtn.onclick = () => {
+              copyToClipboard(`${currentURL}#${result.hash}`, copyBtn);
+            };
+
+            // Click to expand/collapse (re-render overlay at appropriate resolution)
+            canvasContainer.addEventListener("click", function () {
+              if (searchState === "running") return;
+              const isExpanded = slot.classList.contains("expanded");
+
+              // Collapse any currently expanded slot and reset its overlay
+              const currentlyExpanded = topResultsContainer.querySelector(
+                ".result-slot.expanded",
+              );
+              if (currentlyExpanded && currentlyExpanded !== slot) {
+                currentlyExpanded.classList.remove("expanded");
+                // Re-render collapsed overlay at module resolution
+                const collapsedOverlay =
+                  currentlyExpanded.querySelector(".result-overlay");
+                if (collapsedOverlay) {
+                  const mc = parseInt(collapsedOverlay.dataset.moduleCount);
+                  const qrData = JSON.parse(
+                    collapsedOverlay.dataset.qrModuleData,
+                  );
+                  const painted = JSON.parse(
+                    collapsedOverlay.dataset.paintedPixels,
+                  );
+                  const ver = parseInt(collapsedOverlay.dataset.version);
+                  const fm = createFunctionPatternMask(ver);
+                  renderErrorOverlay(
+                    collapsedOverlay,
+                    qrData,
+                    mc,
+                    painted,
+                    fm,
+                    null,
+                    false,
+                  );
+                }
+              }
+
+              // Toggle expanded state
+              const willExpand = !isExpanded;
+              slot.classList.toggle("expanded", willExpand);
+
+              // Re-render overlay at appropriate resolution
+              const overlay = canvasContainer.querySelector(".result-overlay");
+              if (overlay) {
+                const mc = parseInt(overlay.dataset.moduleCount);
+                const qrData = JSON.parse(overlay.dataset.qrModuleData);
+                const painted = JSON.parse(overlay.dataset.paintedPixels);
+                const ver = parseInt(overlay.dataset.version);
                 const fm = createFunctionPatternMask(ver);
-                renderErrorOverlay(
-                  collapsedOverlay,
-                  qrData,
-                  mc,
-                  painted,
-                  fm,
-                  null,
-                  false,
-                );
+
+                if (willExpand) {
+                  // Expanded: render at same size as paint canvas with borders
+                  renderErrorOverlay(
+                    overlay,
+                    qrData,
+                    mc,
+                    painted,
+                    fm,
+                    CANVAS_DISPLAY_SIZE,
+                    true,
+                  );
+                } else {
+                  // Collapsed: render at module resolution, no borders
+                  renderErrorOverlay(
+                    overlay,
+                    qrData,
+                    mc,
+                    painted,
+                    fm,
+                    null,
+                    false,
+                  );
+                }
               }
-            }
+            });
 
-            // Toggle expanded state
-            const willExpand = !isExpanded;
-            slot.classList.toggle("expanded", willExpand);
+            actions.appendChild(downloadBtn);
+            actions.appendChild(copyBtn);
 
-            // Re-render overlay at appropriate resolution
-            const overlay = canvasContainer.querySelector(".result-overlay");
-            if (overlay) {
-              const mc = parseInt(overlay.dataset.moduleCount);
-              const qrData = JSON.parse(overlay.dataset.qrModuleData);
-              const painted = JSON.parse(overlay.dataset.paintedPixels);
-              const ver = parseInt(overlay.dataset.version);
-              const fm = createFunctionPatternMask(ver);
+            // Create legend (visible only when expanded)
+            const legend = document.createElement("div");
+            legend.className = "overlay-legend";
+            legend.innerHTML = [
+              ["rgba(0, 200, 0, 0.3)", "Match"],
+              ["rgba(255, 0, 0, 0.45)", "Conflict"],
+              ["rgba(0, 100, 255, 0.35)", "Function"],
+            ]
+              .map(
+                ([bg, text]) =>
+                  `<div class="overlay-legend-item"><div class="overlay-legend-swatch" style="background:${bg}"></div><span>${text}</span></div>`,
+              )
+              .join("");
 
-              if (willExpand) {
-                // Expanded: render at same size as paint canvas with borders
-                renderErrorOverlay(
-                  overlay,
-                  qrData,
-                  mc,
-                  painted,
-                  fm,
-                  CANVAS_DISPLAY_SIZE,
-                  true,
-                );
-              } else {
-                // Collapsed: render at module resolution, no borders
-                renderErrorOverlay(
-                  overlay,
-                  qrData,
-                  mc,
-                  painted,
-                  fm,
-                  null,
-                  false,
-                );
-              }
-            }
-          });
+            // Assemble slot
+            slot.appendChild(rank);
+            slot.appendChild(canvasContainer);
+            slot.appendChild(legend);
+            slot.appendChild(label);
+            slot.appendChild(actions);
+          } else {
+            // Update existing slot
+            slot._resultData = result;
 
-          actions.appendChild(downloadBtn);
-          actions.appendChild(copyBtn);
+            // Update rank number if position changed
+            const rankEl = slot.querySelector(".result-rank");
+            if (rankEl) rankEl.textContent = `#${index + 1}`;
+          }
 
-          // Create legend (visible only when expanded)
-          const legend = document.createElement("div");
-          legend.className = "overlay-legend";
-          legend.innerHTML = [
-            ["rgba(0, 200, 0, 0.3)", "Match"],
-            ["rgba(255, 0, 0, 0.45)", "Conflict"],
-            ["rgba(0, 100, 255, 0.35)", "Function"],
-          ]
-            .map(
-              ([bg, text]) =>
-                `<div class="overlay-legend-item"><div class="overlay-legend-swatch" style="background:${bg}"></div><span>${text}</span></div>`,
-            )
-            .join("");
-
-          // Assemble slot
-          slot.appendChild(rank);
-          slot.appendChild(canvasContainer);
-          slot.appendChild(legend);
-          slot.appendChild(label);
-          slot.appendChild(actions);
+          // Append in order (moves existing elements to correct position)
           topResultsContainer.appendChild(slot);
         });
 
-        // Update previous hashes for next comparison
-        previousTopHashes = currentHashes;
+        // Update previous hashes for next comparison (kept for compatibility)
+        previousTopHashes = [...newHashes];
       }
 
       /**
