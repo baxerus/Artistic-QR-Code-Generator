@@ -74,7 +74,7 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - [ ] Measure actual Reed-Solomon error correction burden, not just pixel mismatch
 - [ ] Display both RS correction count and pixel diff on result cards
 - [ ] Sort results by RS corrections (primary), pixel diff (secondary)
-- [ ] Auto-stop on 5 results with both RS=0 and pixel diff=0
+- [ ] Redefine "perfect result" as RS=0
 
 ### Out of Scope
 

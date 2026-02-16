@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements
-Last activity: 2026-02-16 — Milestone v1.4 started
+Last activity: 2026-02-16 — Milestone v1.4 requirements definition
 
 Progress: 4 milestones shipped (v1.0, v1.1, v1.2, v1.3), v1.4 in planning
 
