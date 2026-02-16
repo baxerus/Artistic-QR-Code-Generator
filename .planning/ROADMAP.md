@@ -49,7 +49,7 @@
 <summary>🚧 v1.4 RS Error Measurement (Phases 12-13) — IN PROGRESS</summary>
 
 - [ ] Phase 12: RS Measurement Integration (3 plans)
-  - [ ] 12-01-PLAN.md — Modify jsQR to expose RS correction count
+  - [x] 12-01-PLAN.md — Modify jsQR to expose RS correction count
   - [ ] 12-02-PLAN.md — Worker captures and returns RS data
   - [ ] 12-03-PLAN.md — Main thread RS-aware result merging
 - [ ] Phase 13: Results Ranking & Display — RS metrics in UI, ranking by RS
@@ -101,7 +101,7 @@
 | 5-9 | v1.1 | 8/8 | Complete | 2026-02-14 |
 | 10 | v1.2 | 3/3 | Complete | 2026-02-15 |
 | 11 | v1.3 | 1/1 | Complete | 2026-02-15 |
-| 12 | v1.4 | 3 | Planned | — |
+| 12 | v1.4 | 1/3 | In progress | — |
 | 13 | v1.4 | — | Planned | — |
 
 **Total:** 13 phases planned (11 shipped, 2 in v1.4)
@@ -110,4 +110,4 @@
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-16 (Phase 12 planned - 3 plans)*
+*Last updated: 2026-02-16 (Phase 12 Plan 01 complete)*
