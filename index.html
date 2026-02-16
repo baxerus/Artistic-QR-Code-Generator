@@ -16120,7 +16120,8 @@ self.onmessage = function(e) {
           }
         }
 
-        // Build or update slots in order
+        // Build slots array in correct order, tracking which need animation
+        const slotsInOrder = [];
         topResults.forEach((result, index) => {
           let slot = existingSlots.get(result.hash);
           const isNew = !slot;
@@ -16131,10 +16132,7 @@ self.onmessage = function(e) {
             slot.className = "result-slot";
             slot.dataset.hash = result.hash;
             slot._resultData = result;
-
-            // Add green-highlight for new results
-            slot.classList.add("green-highlight");
-            setTimeout(() => slot.classList.remove("green-highlight"), 600);
+            slot._needsHighlight = true; // Mark for animation after DOM insertion
 
             // Create rank number
             const rank = document.createElement("div");
@@ -16351,9 +16349,34 @@ self.onmessage = function(e) {
             if (rankEl) rankEl.textContent = `#${index + 1}`;
           }
 
-          // Append in order (moves existing elements to correct position)
-          topResultsContainer.appendChild(slot);
+          slotsInOrder.push(slot);
         });
+
+        // Reorder DOM only where necessary, avoiding moves that restart animations
+        // Strategy: iterate through desired order, only move elements that are out of place
+        for (let i = 0; i < slotsInOrder.length; i++) {
+          const slot = slotsInOrder[i];
+          const currentAtIndex = topResultsContainer.children[i];
+          
+          if (currentAtIndex !== slot) {
+            // Slot is not at correct position, insert it there
+            if (currentAtIndex) {
+              topResultsContainer.insertBefore(slot, currentAtIndex);
+            } else {
+              topResultsContainer.appendChild(slot);
+            }
+          }
+          
+          // Apply highlight animation AFTER DOM positioning is complete
+          if (slot._needsHighlight) {
+            delete slot._needsHighlight;
+            // Use requestAnimationFrame to ensure DOM is settled before animation
+            requestAnimationFrame(() => {
+              slot.classList.add("green-highlight");
+              setTimeout(() => slot.classList.remove("green-highlight"), 600);
+            });
+          }
+        }
 
         // Update previous hashes for next comparison (kept for compatibility)
         previousTopHashes = [...newHashes];
