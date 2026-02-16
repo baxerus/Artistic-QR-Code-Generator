@@ -15734,14 +15734,14 @@ self.onmessage = function(e) {
       /**
        * Check if auto-stop condition is met (OPT-01)
        * @param {Array} topResults - Current merged top results
-       * @returns {boolean} True if TOP_RESULTS_COUNT results have 0 pixel errors AND are decodable
+       * @returns {boolean} True if TOP_RESULTS_COUNT results have RS=0 (perfect QR reliability)
        */
       function checkAutoStopCondition(topResults) {
         if (!topResults || topResults.length < TOP_RESULTS_COUNT) {
           return false;
         }
         const perfectCount = topResults.filter(
-          (r) => r.decodable && r.pixelDiff === 0,
+          (r) => r.decodable && r.rsCorrections === 0,
         ).length;
         return perfectCount >= TOP_RESULTS_COUNT;
       }
@@ -16195,7 +16195,11 @@ self.onmessage = function(e) {
 
             const errorsSpan = document.createElement("span");
             errorsSpan.className = "errors";
-            errorsSpan.textContent = `${result.pixelDiff} errors`;
+            const rsDisplay = result.rsCorrections === Infinity ? "-" : result.rsCorrections;
+            errorsSpan.textContent = `RS: ${rsDisplay} | Pixels: ${result.pixelDiff}`;
+            if (result.rsCorrections === 0) {
+              errorsSpan.classList.add("perfect-rs");
+            }
 
             label.appendChild(statusSpan);
             label.appendChild(document.createElement("br"));
