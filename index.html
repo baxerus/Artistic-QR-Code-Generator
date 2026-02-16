@@ -15303,7 +15303,7 @@ function evaluateCandidate(hash) {
       qrModuleData[idx] = qrDark ? 1 : 0;
 
       let dark;
-      if (!isFunctionPattern && paintedState !== 0) {
+      if (paintedState !== 0) {
         dark = (paintedState === 2);
       } else {
         dark = qrDark;
