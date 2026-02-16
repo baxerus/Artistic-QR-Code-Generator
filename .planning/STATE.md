@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** v1.4 RS Error Measurement
+**Current focus:** v1.4 RS Error Measurement — Phase 12 planning
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 12 — RS Measurement Integration
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-16 — Milestone v1.4 requirements definition
+Status: Ready for planning
+Last activity: 2026-02-16 — v1.4 roadmap created
 
-Progress: 4 milestones shipped (v1.0, v1.1, v1.2, v1.3), v1.4 in planning
+Progress: 4 milestones shipped (v1.0-v1.3), v1.4 phases 12-13 defined
 
 ## Milestones
 
@@ -42,15 +42,29 @@ Progress: 4 milestones shipped (v1.0, v1.1, v1.2, v1.3), v1.4 in planning
 - Timeline: Same day (2026-02-15)
 - Archive: `.planning/milestones/v1.3-ROADMAP.md`
 
-**Total:** 11 phases, 20 plans, 4 milestones shipped
+**v1.4 RS Error Measurement (in progress):**
+- Phases: 12-13
+- Requirements: 7 (RS-01, RS-02, RS-03, RSLT-01, RSLT-02, RSLT-03, RSLT-04)
+- Roadmap: Defined
+
+**Total:** 13 phases planned, 11 shipped
 
 ## Accumulated Context
 
 Key decisions archived in milestone summaries. See `.planning/MILESTONES.md`.
 
+### Phase 12: RS Measurement Integration
+Goal: Workers extract and return Reed-Solomon correction count for each candidate QR
+Requirements: RS-01, RS-02, RS-03
+
+### Phase 13: Results Ranking & Display  
+Goal: Results displayed with RS metrics and ranked by QR reliability
+Requirements: RSLT-01, RSLT-02, RSLT-03, RSLT-04
+
 ### Pending Todos
 
-None — ready for next milestone planning.
+- Plan Phase 12: RS Measurement Integration
+- Plan Phase 13: Results Ranking & Display
 
 ### Blockers/Concerns
 
@@ -59,7 +73,7 @@ None.
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
+|---|---|---|---|---|
 | 1 | Fix URL too long alert - cancel should revert URL change | 2026-02-15 | 9ae4bac | [1-fix-url-too-long-alert-cancel-should-rev](./quick/1-fix-url-too-long-alert-cancel-should-rev/) |
 | 2 | Show top 10 results instead of top 5 | 2026-02-15 | 3e22ec6 | [2-instead-of-top-5-results-show-the-top-10](./quick/2-instead-of-top-5-results-show-the-top-10/) |
 | 3 | Fix green-highlight animation to play full duration | 2026-02-16 | 54fcae9 | [3-fix-green-highlight-animation-to-play-fu](./quick/3-fix-green-highlight-animation-to-play-fu/) |
@@ -68,8 +82,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Defining v1.4 requirements
-Resume: Continue with requirements definition and roadmap creation
+Stopped at: v1.4 roadmap created
+Resume: `/gsd-plan-phase 12` to begin Phase 12 planning
 
 ---
 *v1.4 started: 2026-02-16. RS Error Measurement milestone.*

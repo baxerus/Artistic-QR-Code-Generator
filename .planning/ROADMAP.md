@@ -6,6 +6,7 @@
 - ✅ **v1.1 UX Overhaul & Optimization** — Phases 5-9 (shipped 2026-02-14) → [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Visual Consistency & Result Inspection** — Phase 10 (shipped 2026-02-15) → [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 Hash Capacity Optimization** — Phase 11 (shipped 2026-02-15) → [archive](milestones/v1.3-ROADMAP.md)
+- 🚧 **v1.4 RS Error Measurement** — Phases 12-13 (in progress)
 
 ## Phases
 
@@ -44,6 +45,51 @@
 
 </details>
 
+<details>
+<summary>🚧 v1.4 RS Error Measurement (Phases 12-13) — IN PROGRESS</summary>
+
+- [ ] Phase 12: RS Measurement Integration — RS error extraction in workers
+- [ ] Phase 13: Results Ranking & Display — RS metrics in UI, ranking by RS
+
+</details>
+
+## Phase 12: RS Measurement Integration
+
+**Goal:** Workers extract and return Reed-Solomon correction count for each candidate QR during optimization search.
+
+**Dependencies:** Phase 11 (Dynamic Hash Capacity)
+
+**Requirements:**
+- RS-01: Worker extracts Reed-Solomon correction count from each candidate QR during optimization search
+- RS-02: RS extraction works with jsQR library or alternative browser decoder if jsQR doesn't expose RS data
+- RS-03: RS correction count is returned alongside pixel diff for each candidate result
+
+**Success Criteria:**
+1. Worker code extracts RS correction count from decoded QR candidates (not just pixel diff)
+2. RS extraction works reliably with jsQR or fallback decoder when jsQR doesn't expose RS data
+3. Each optimization result includes both pixel diff and RS correction count in worker message
+4. Search continues to function with RS data integrated (no performance degradation)
+
+---
+
+## Phase 13: Results Ranking & Display
+
+**Goal:** Results are displayed with RS metrics and ranked by actual QR scan reliability margin.
+
+**Dependencies:** Phase 12 (RS Measurement Integration)
+
+**Requirements:**
+- RSLT-01: Result cards display both RS corrections and pixel diff metrics
+- RSLT-02: Results are ranked by RS corrections (primary, ascending), pixel diff (secondary, ascending)
+- RSLT-03: "Perfect result" is redefined as RS=0 (regardless of pixel diff)
+- RSLT-04: Auto-stop triggers when TOP_RESULTS_COUNT results with RS=0 are found
+
+**Success Criteria:**
+1. Each result card shows both RS corrections count and pixel diff in the UI
+2. Results are sorted by RS corrections ascending (fewer = better), with pixel diff as tiebreaker
+3. "Perfect result" indicator displays when RS=0, even if pixel diff is non-zero
+4. Search automatically stops when TOP_RESULTS_COUNT results with RS=0 are collected
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -52,9 +98,13 @@
 | 5-9 | v1.1 | 8/8 | Complete | 2026-02-14 |
 | 10 | v1.2 | 3/3 | Complete | 2026-02-15 |
 | 11 | v1.3 | 1/1 | Complete | 2026-02-15 |
+| 12 | v1.4 | — | Planned | — |
+| 13 | v1.4 | — | Planned | — |
 
-**Total:** 11 phases, 20 plans across 4 milestones (all shipped)
+**Total:** 13 phases planned (11 shipped, 2 in v1.4)
+
+**Coverage:** 7/7 v1.4 requirements mapped ✓
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-15 (v1.3 shipped)*
+*Last updated: 2026-02-16 (v1.4 roadmap created)*

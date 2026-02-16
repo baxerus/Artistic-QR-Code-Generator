@@ -16,7 +16,7 @@
 - [ ] **RSLT-01**: Result cards display both RS corrections and pixel diff metrics
 - [ ] **RSLT-02**: Results are ranked by RS corrections (primary, ascending), pixel diff (secondary, ascending)
 - [ ] **RSLT-03**: "Perfect result" is redefined as RS=0 (regardless of pixel diff)
-- [ ] **RSLT-04**: Auto-stop triggers when 5 results with RS=0 are found
+- [ ] **RSLT-04**: Auto-stop triggers when TOP_RESULTS_COUNT results with RS=0 are found
 
 ## Traceability
 
@@ -37,4 +37,4 @@
 
 ---
 *Requirements defined: 2026-02-16*
-*Last updated: 2026-02-16 after milestone planning*
+*Last updated: 2026-02-16 after roadmap creation*
