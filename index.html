@@ -3211,28 +3211,34 @@
                 }, 0);
                 var resultBytes = new Uint8ClampedArray(totalBytes);
                 var resultIndex = 0;
+                var totalCorrectionCount = 0;
                 for (
                   var _i = 0, dataBlocks_3 = dataBlocks;
                   _i < dataBlocks_3.length;
                   _i++
                 ) {
                   var dataBlock = dataBlocks_3[_i];
-                  var correctedBytes = reedsolomon_1.decode(
+                  var rsResult = reedsolomon_1.decode(
                     dataBlock.codewords,
                     dataBlock.codewords.length - dataBlock.numDataCodewords,
                   );
-                  if (!correctedBytes) {
+                  if (!rsResult) {
                     return null;
                   }
+                  totalCorrectionCount += rsResult.correctionCount;
                   for (var i = 0; i < dataBlock.numDataCodewords; i++) {
-                    resultBytes[resultIndex++] = correctedBytes[i];
+                    resultBytes[resultIndex++] = rsResult.bytes[i];
                   }
                 }
                 try {
-                  return decodeData_1.decode(
+                  var decoded = decodeData_1.decode(
                     resultBytes,
                     version.versionNumber,
                   );
+                  if (decoded) {
+                    decoded.correctionCount = totalCorrectionCount;
+                  }
+                  return decoded;
                 } catch (_a) {
                   return null;
                 }
