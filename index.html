@@ -10769,7 +10769,7 @@
                   }
                 }
                 if (!error) {
-                  return outputBytes;
+                  return { bytes: outputBytes, correctionCount: 0 };
                 }
                 var syndrome = new GenericGFPoly_1.default(
                   field,
@@ -10804,7 +10804,7 @@
                     errorMagnitudes[i],
                   );
                 }
-                return outputBytes;
+                return { bytes: outputBytes, correctionCount: errorLocations.length };
               }
               exports.decode = decode;
 
