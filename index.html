@@ -15285,13 +15285,15 @@ function evaluateCandidate(hash) {
     }
   }
 
-  // Decode with jsQR
+  // Decode with jsQR and capture RS corrections
   let decodable = false;
+  let rsCorrections = Infinity; // Infinity = not decodable (will sort last)
   try {
     const code = jsQR(imageData.data, imageData.width, imageData.height);
     decodable = (code !== null);
     if (decodable) {
       decodableCount++;
+      rsCorrections = code.correctionCount;
     }
   } catch (err) {
     decodable = false;
@@ -15320,7 +15322,7 @@ function evaluateCandidate(hash) {
     }
   }
 
-  return { hash, pixelDiff, decodable, moduleData, qrModuleData, moduleCount };
+  return { hash, pixelDiff, decodable, rsCorrections, moduleData, qrModuleData, moduleCount };
 }
 
 // Update top results
