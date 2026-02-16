@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-15)
 Phase: —
 Plan: —
 Status: All milestones shipped
-Last activity: 2026-02-15 — Completed v1.3 milestone
+Last activity: 2026-02-16 — Completed quick task 3: Fix green-highlight animation to play fully when top-results rebuilds
 
 Progress: All 4 milestones shipped (v1.0, v1.1, v1.2, v1.3)
 
