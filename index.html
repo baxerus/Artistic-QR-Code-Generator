@@ -15508,7 +15508,7 @@ self.onmessage = function(e) {
             // OPT-01: Check auto-stop condition after merge
             if (checkAutoStopCondition(currentTopResults)) {
               console.log(
-                `Auto-stop triggered: ${TOP_RESULTS_COUNT} perfect results found`,
+                `Auto-stop triggered: ${TOP_RESULTS_COUNT} results with RS=0 found`,
               );
               stopAllWorkers();
               handleSearchComplete({
