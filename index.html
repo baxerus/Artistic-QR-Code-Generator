@@ -13262,10 +13262,10 @@
             const paintState = paintGrid ? paintGrid.get(x, y) : 0;
 
             let isDark;
-            if (!isProtected && paintState === 1) {
+            if (paintState === 1) {
               // Painted white
               isDark = false;
-            } else if (!isProtected && paintState === 2) {
+            } else if (paintState === 2) {
               // Painted black
               isDark = true;
             } else {
@@ -13312,13 +13312,8 @@
         const gridX = Math.floor(canvasX / cellSize);
         const gridY = Math.floor(canvasY / cellSize);
 
-        const protectedCell = isProtected(gridX, gridY, gridSize, functionMask);
-
-        if (protectedCell) {
-          wrapper.classList.add("blocked");
-        } else {
-          wrapper.classList.remove("blocked");
-        }
+        // Always show paintable cursor - painting is allowed everywhere
+        wrapper.classList.remove("blocked");
       }
 
       // Module-level paint canvas state
@@ -13487,15 +13482,6 @@
         // Debounce: don't repaint same cell during drag
         if (lastPaintedCell === cellKey) return;
 
-        // Check if protected - transparent to drag, just skip painting
-        if (!functionMask) {
-          functionMask = createFunctionPatternMask(currentVersion);
-        }
-        if (functionMask[y * paintGrid.size + x]) {
-          lastPaintedCell = cellKey; // Mark as visited but don't paint
-          return;
-        }
-
         // Determine paint value based on button
         const paintValue = getPaintValue(button);
         if (paintValue === null) return; // Nothing to paint
@@ -13615,8 +13601,7 @@
 
         for (let y = 0; y < gridSize; y++) {
           for (let x = 0; x < gridSize; x++) {
-            // Skip if not painted or protected
-            if (mask && mask[y * gridSize + x]) continue;
+            // Skip if not painted
             if (paintGrid.get(x, y) === 0) continue;
 
             // Use Math.round to avoid sub-pixel rendering artifacts
@@ -13627,44 +13612,28 @@
 
             // Check each edge - draw border only if neighbor is not painted
             // Top edge
-            if (
-              y === 0 ||
-              !isPainted(x, y - 1, gridSize, paintGrid) ||
-              (mask && mask[(y - 1) * gridSize + x])
-            ) {
+            if (y === 0 || !isPainted(x, y - 1, gridSize, paintGrid)) {
               ctx.beginPath();
               ctx.moveTo(px, py);
               ctx.lineTo(pxEnd, py);
               ctx.stroke();
             }
             // Bottom edge
-            if (
-              y === gridSize - 1 ||
-              !isPainted(x, y + 1, gridSize, paintGrid) ||
-              (mask && mask[(y + 1) * gridSize + x])
-            ) {
+            if (y === gridSize - 1 || !isPainted(x, y + 1, gridSize, paintGrid)) {
               ctx.beginPath();
               ctx.moveTo(px, pyEnd);
               ctx.lineTo(pxEnd, pyEnd);
               ctx.stroke();
             }
             // Left edge
-            if (
-              x === 0 ||
-              !isPainted(x - 1, y, gridSize, paintGrid) ||
-              (mask && mask[y * gridSize + (x - 1)])
-            ) {
+            if (x === 0 || !isPainted(x - 1, y, gridSize, paintGrid)) {
               ctx.beginPath();
               ctx.moveTo(px, py);
               ctx.lineTo(px, pyEnd);
               ctx.stroke();
             }
             // Right edge
-            if (
-              x === gridSize - 1 ||
-              !isPainted(x + 1, y, gridSize, paintGrid) ||
-              (mask && mask[y * gridSize + (x + 1)])
-            ) {
+            if (x === gridSize - 1 || !isPainted(x + 1, y, gridSize, paintGrid)) {
               ctx.beginPath();
               ctx.moveTo(pxEnd, py);
               ctx.lineTo(pxEnd, pyEnd);
@@ -13770,9 +13739,6 @@
         if (paintGrid) {
           for (let y = 0; y < gridSize; y++) {
             for (let x = 0; x < gridSize; x++) {
-              // Skip protected areas
-              if (mask && mask[y * gridSize + x]) continue;
-
               const state = paintGrid.get(x, y);
               if (state === 1 || state === 2) {
                 // Use Math.round to avoid sub-pixel gaps between adjacent cells
@@ -13817,7 +13783,7 @@
       const MAX_QR_VERSION = 10;
 
       // Top results configuration
-      const TOP_RESULTS_COUNT = 10;
+      const TOP_RESULTS_COUNT = 15;
 
       // QR capacity table for error correction level H, byte mode (versions 1-10)
       const CAPACITIES_H_BYTE = [
@@ -16357,7 +16323,7 @@ self.onmessage = function(e) {
         for (let i = 0; i < slotsInOrder.length; i++) {
           const slot = slotsInOrder[i];
           const currentAtIndex = topResultsContainer.children[i];
-          
+
           if (currentAtIndex !== slot) {
             // Slot is not at correct position, insert it there
             if (currentAtIndex) {
@@ -16366,7 +16332,7 @@ self.onmessage = function(e) {
               topResultsContainer.appendChild(slot);
             }
           }
-          
+
           // Apply highlight animation AFTER DOM positioning is complete
           if (slot._needsHighlight) {
             delete slot._needsHighlight;
