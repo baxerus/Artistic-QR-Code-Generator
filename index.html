@@ -16401,7 +16401,13 @@ self.onmessage = function(e) {
         optimizeBtn.textContent = "Run again";
         searchProgress.style.display = "none";
         const topResultsEl = document.getElementById("top-results");
-        if (topResultsEl) topResultsEl.classList.remove("results-disabled");
+        if (topResultsEl) {
+          topResultsEl.classList.remove("results-disabled");
+          // Re-enable all result card buttons that were disabled during search
+          topResultsEl.querySelectorAll(".result-actions button").forEach(btn => {
+            btn.disabled = false;
+          });
+        }
 
         // Store results for accumulation
         currentTopResults = data.topResults;
