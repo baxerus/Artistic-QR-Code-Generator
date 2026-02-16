@@ -52,7 +52,9 @@
   - [x] 12-01-PLAN.md — Modify jsQR to expose RS correction count
   - [x] 12-02-PLAN.md — Worker captures and returns RS data
   - [x] 12-03-PLAN.md — Main thread RS-aware result merging
-- [ ] Phase 13: Results Ranking & Display — RS metrics in UI, ranking by RS
+- [ ] Phase 13: Results Ranking & Display (2 plans)
+  - [ ] 13-01-PLAN.md — Update result card UI to display RS + pixel metrics
+  - [ ] 13-02-PLAN.md — Redefine perfect result as RS=0 for auto-stop
 
 </details>
 
