@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-16)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** v1.4 RS Error Measurement — Phase 12 complete, Phase 13 next
+**Current focus:** v1.4 RS Error Measurement — Phase 13 in progress (plan 01 complete)
 
 ## Current Position
 
-Phase: 12 — RS Measurement Integration
-Plan: 03 of 03 complete
-Status: Phase complete
-Last activity: 2026-02-16 — Completed 12-03 (main thread RS-aware sorting)
+Phase: 13 — Results Ranking & Display
+Plan: 01 of 02 complete
+Status: In progress
+Last activity: 2026-02-16 — Completed 13-01 (RS display in result cards)
 
-Progress: 4 milestones shipped (v1.0-v1.3), Phase 12 verified and complete
+Progress: 4 milestones shipped (v1.0-v1.3), Phase 13 plan 01 complete
 
 ## Milestones
 
@@ -62,9 +62,9 @@ Verification: 7/7 must-haves passed (2026-02-16)
 Goal: Results displayed with RS metrics and ranked by QR reliability
 Requirements: RSLT-01, RSLT-02, RSLT-03, RSLT-04
 
-### Pending Todos
+### Phase 13 Decisions
 
-- Plan Phase 13: Results Ranking & Display
+- **13-01**: Display format "RS: N | Pixels: M" for dual metrics; perfect-rs class for RS=0 results
 
 ### Phase 12 Decisions
 
@@ -88,8 +88,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 12-03-PLAN.md (Phase 12 complete)
-Resume: `/gsd-plan-phase 13` to plan Results Ranking & Display
+Stopped at: Completed 13-01-PLAN.md
+Resume: `/gsd-execute-phase 13` to continue with plan 02
 
 ---
 *v1.4 started: 2026-02-16. RS Error Measurement milestone.*
