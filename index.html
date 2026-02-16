@@ -15361,6 +15361,7 @@ function sendProgress() {
       hash: r.hash,
       pixelDiff: r.pixelDiff,
       decodable: r.decodable,
+      rsCorrections: r.rsCorrections,
       moduleData: Array.from(r.moduleData),
       qrModuleData: Array.from(r.qrModuleData),
       moduleCount: r.moduleCount
@@ -15438,6 +15439,7 @@ function sendComplete() {
       hash: r.hash,
       pixelDiff: r.pixelDiff,
       decodable: r.decodable,
+      rsCorrections: r.rsCorrections,
       moduleData: Array.from(r.moduleData),
       qrModuleData: Array.from(r.qrModuleData),
       moduleCount: r.moduleCount
@@ -15548,9 +15550,16 @@ self.onmessage = function(e) {
           return true;
         });
 
-        // Sort: decodable first, then by pixelDiff ascending
+        // Sort: decodable first, then by RS corrections ascending, then by pixelDiff ascending
+        // Lower RS = more reliable QR scan. Lower pixelDiff = closer to painted art.
         unique.sort((a, b) => {
+          // Decodable always beats non-decodable
           if (a.decodable !== b.decodable) return b.decodable ? 1 : -1;
+          // Among decodable: prefer lower RS corrections (fewer = more reliable)
+          const rsA = a.rsCorrections ?? Infinity;
+          const rsB = b.rsCorrections ?? Infinity;
+          if (rsA !== rsB) return rsA - rsB;
+          // Tiebreaker: prefer lower pixel diff
           return a.pixelDiff - b.pixelDiff;
         });
 
