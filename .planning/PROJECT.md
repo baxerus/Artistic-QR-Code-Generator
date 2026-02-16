@@ -10,18 +10,19 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ## Current State
 
-**Shipped:** v1.3 Hash Capacity Optimization (2026-02-15)
+**Shipped:** v1.4 RS Error Measurement (2026-02-16)
 
-**Codebase:** ~16,500 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (inlined), multi-worker optimization via Blob URLs.
+**Codebase:** ~16,500 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (modified to expose RS corrections), multi-worker optimization via Blob URLs.
 
 **Milestones Complete:**
 
-- v1.0 MVP — 4 phases, 8 plans, 59 commits (2026-02-09)
-- v1.1 UX Overhaul — 5 phases, 8 plans, 16 commits (2026-02-14)
+- v1.0 MVP — 4 phases, 8 plans (2026-02-09)
+- v1.1 UX Overhaul — 5 phases, 8 plans (2026-02-14)
 - v1.2 Visual Consistency — 1 phase, 3 plans (2026-02-15)
-- v1.3 Hash Capacity — 1 phase, 1 plan, 4 commits (2026-02-15)
+- v1.3 Hash Capacity — 1 phase, 1 plan (2026-02-15)
+- v1.4 RS Error Measurement — 2 phases, 5 plans (2026-02-16)
 
-**Total:** 11 phases, 20 plans across 4 milestones
+**Total:** 13 phases, 25 plans across 5 milestones
 
 ## Requirements
 
@@ -67,14 +68,16 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - ✓ MIN_HASH_LENGTH constant (renamed from HASH_LENGTH) — v1.3
 - ✓ Hash expands to use remaining bytes after URL — v1.3
 
-### Active
-
 **v1.4 RS Error Measurement:**
 
-- [ ] Measure actual Reed-Solomon error correction burden, not just pixel mismatch
-- [ ] Display both RS correction count and pixel diff on result cards
-- [ ] Sort results by RS corrections (primary), pixel diff (secondary)
-- [ ] Redefine "perfect result" as RS=0
+- ✓ Measure actual Reed-Solomon error correction burden, not just pixel mismatch — v1.4
+- ✓ Display both RS correction count and pixel diff on result cards — v1.4
+- ✓ Sort results by RS corrections (primary), pixel diff (secondary) — v1.4
+- ✓ Redefine "perfect result" as RS=0 — v1.4
+
+### Active
+
+(No active requirements — ready for next milestone)
 
 ### Out of Scope
 
@@ -104,7 +107,7 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 | Top 5 results instead of single best   | Aesthetic choice matters                | ✓ Good        |
 | Error correction level H               | Maximum error tolerance for art         | ✓ Good        |
 | Everything in single HTML file         | Simplicity, portability                 | ✓ Good        |
-| Pixel diff instead of RS errors        | Practical proxy, jsQR doesn't expose RS | ✓ Good        |
+| RS corrections as primary metric       | True scan reliability, jsQR modified    | ✓ Good — v1.4 |
 | Web Workers via Blob URL               | Non-blocking search in single-file      | ✓ Good        |
 | MAX_QR_VERSION as constant             | Easy to expand version range            | ✓ Good — v1.1 |
 | Legend-based painting                  | Natural UI for drag painting            | ✓ Good — v1.1 |
@@ -128,16 +131,10 @@ Based on v1.1 development, potential future work:
 
 - SVG export format
 
-## Current Milestone: v1.4 RS Error Measurement
+## Next Milestone
 
-**Goal:** Replace pixel-only error counting with actual Reed-Solomon correction burden to measure true QR scan reliability margin.
-
-**Target features:**
-- Extract RS correction count from jsQR (or alternative browser decoder if needed)
-- Display both RS corrections and pixel diff in UI
-- Rank results by RS corrections (lower = better), pixel diff as tiebreaker
-- Redefine "perfect result" as both metrics at zero
+Ready for `/gsd-new-milestone` to define next goals.
 
 ---
 
-_Last updated: 2026-02-16 after v1.4 milestone started_
+_Last updated: 2026-02-16 after v1.4 milestone completed_
