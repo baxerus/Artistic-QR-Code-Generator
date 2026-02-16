@@ -6,7 +6,7 @@
 - ✅ **v1.1 UX Overhaul & Optimization** — Phases 5-9 (shipped 2026-02-14) → [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Visual Consistency & Result Inspection** — Phase 10 (shipped 2026-02-15) → [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 Hash Capacity Optimization** — Phase 11 (shipped 2026-02-15) → [archive](milestones/v1.3-ROADMAP.md)
-- 🚧 **v1.4 RS Error Measurement** — Phases 12-13 (in progress)
+- ✅ **v1.4 RS Error Measurement** — Phases 12-13 (shipped 2026-02-16)
 
 ## Phases
 
@@ -46,15 +46,15 @@
 </details>
 
 <details>
-<summary>🚧 v1.4 RS Error Measurement (Phases 12-13) — IN PROGRESS</summary>
+<summary>✅ v1.4 RS Error Measurement (Phases 12-13) — SHIPPED 2026-02-16</summary>
 
 - [x] Phase 12: RS Measurement Integration (3/3 plans) — completed 2026-02-16
   - [x] 12-01-PLAN.md — Modify jsQR to expose RS correction count
   - [x] 12-02-PLAN.md — Worker captures and returns RS data
   - [x] 12-03-PLAN.md — Main thread RS-aware result merging
-- [ ] Phase 13: Results Ranking & Display (2 plans)
-  - [ ] 13-01-PLAN.md — Update result card UI to display RS + pixel metrics
-  - [ ] 13-02-PLAN.md — Redefine perfect result as RS=0 for auto-stop
+- [x] Phase 13: Results Ranking & Display (2/2 plans) — completed 2026-02-16
+  - [x] 13-01-PLAN.md — Update result card UI to display RS + pixel metrics
+  - [x] 13-02-PLAN.md — Redefine perfect result as RS=0 for auto-stop
 
 </details>
 
@@ -104,12 +104,12 @@
 | 10 | v1.2 | 3/3 | Complete | 2026-02-15 |
 | 11 | v1.3 | 1/1 | Complete | 2026-02-15 |
 | 12 | v1.4 | 3/3 | Complete | 2026-02-16 |
-| 13 | v1.4 | — | Planned | — |
+| 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
 
-**Total:** 13 phases planned (11 shipped, 2 in v1.4)
+**Total:** 13 phases planned (13 shipped)
 
 **Coverage:** 7/7 v1.4 requirements mapped ✓
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-16 (Phase 12 complete)*
+*Last updated: 2026-02-16 (v1.4 milestone complete)*
