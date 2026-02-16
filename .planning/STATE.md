@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 ## Current Position
 
 Phase: 12 — RS Measurement Integration
-Plan: 01 of 03 complete
-Status: In progress
-Last activity: 2026-02-16 — Completed 12-01 (jsQR correctionCount exposure)
+Plan: 03 of 03 complete
+Status: Phase complete
+Last activity: 2026-02-16 — Completed 12-03 (main thread RS-aware sorting)
 
-Progress: 4 milestones shipped (v1.0-v1.3), Phase 12 Plan 01 complete
+Progress: 4 milestones shipped (v1.0-v1.3), Phase 12 complete
 
 ## Milestones
 
@@ -63,13 +63,13 @@ Requirements: RSLT-01, RSLT-02, RSLT-03, RSLT-04
 
 ### Pending Todos
 
-- Execute Phase 12 Plan 02: Worker Integration for RS Reporting
-- Execute Phase 12 Plan 03: Tests/Validation
 - Plan Phase 13: Results Ranking & Display
 
 ### Phase 12 Decisions
 
 - **12-01**: jsQR correctionCount exposed via object return pattern { bytes, correctionCount }
+- **12-02**: Worker rsCorrections field tracks correction count per candidate
+- **12-03**: Main thread mergeWorkerResults sorts by RS corrections with nullish coalescing fallback
 
 ### Blockers/Concerns
 
@@ -87,8 +87,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-16
-Stopped at: Completed 12-01-PLAN.md
-Resume: `/gsd-execute-phase 12` to continue with Plan 02
+Stopped at: Completed 12-03-PLAN.md (Phase 12 complete)
+Resume: `/gsd-plan-phase 13` to plan Results Ranking & Display
 
 ---
 *v1.4 started: 2026-02-16. RS Error Measurement milestone.*
