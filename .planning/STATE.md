@@ -63,7 +63,7 @@ None.
 | 1 | Fix URL too long alert - cancel should revert URL change | 2026-02-15 | 9ae4bac | [1-fix-url-too-long-alert-cancel-should-rev](./quick/1-fix-url-too-long-alert-cancel-should-rev/) |
 | 2 | Show top 10 results instead of top 5 | 2026-02-15 | 3e22ec6 | [2-instead-of-top-5-results-show-the-top-10](./quick/2-instead-of-top-5-results-show-the-top-10/) |
 | 3 | Fix green-highlight animation to play full duration | 2026-02-16 | 54fcae9 | [3-fix-green-highlight-animation-to-play-fu](./quick/3-fix-green-highlight-animation-to-play-fu/) |
-| 4 | Allow painting into functional patterns | 2026-02-16 | f8842f4 | [4-allow-painting-into-functional-patterns](./quick/4-allow-painting-into-functional-patterns/) |
+| 4 | Allow painting into functional patterns | 2026-02-16 | ccc913c | [4-allow-painting-into-functional-patterns](./quick/4-allow-painting-into-functional-patterns/) |
 
 ## Session Continuity
 

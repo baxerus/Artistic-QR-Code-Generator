@@ -44,6 +44,13 @@ Updated `evaluateCandidate()` in the web worker:
 1. **Pixel diff calculation**: Removed `|| isFunctionPattern` from skip condition
 2. **QR render for decode**: Removed `!isFunctionPattern &&` from painted pixel application
 
+### Task 2b: Fix moduleData output (ccc913c)
+
+Fixed the worker's moduleData generation to include painted functional patterns in the final QR output:
+
+- Changed `if (!isFunctionPattern && paintedState !== 0)` to `if (paintedState !== 0)`
+- Now painted pixels in functional areas appear in downloaded QR images and result previews
+
 ## Technical Impact
 
 - **Before**: Functional patterns were read-only "protected zones" with red overlay
@@ -65,6 +72,7 @@ All success criteria met:
 
 ## Self-Check: PASSED
 
-- [x] index.html modified with all 6 changes
+- [x] index.html modified with all 7 changes
 - [x] Commit 0737b1d exists
 - [x] Commit f8842f4 exists
+- [x] Commit ccc913c exists (moduleData fix)
