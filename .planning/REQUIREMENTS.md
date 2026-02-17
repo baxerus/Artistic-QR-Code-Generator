@@ -20,8 +20,8 @@ Requirements for v1.5 UX & Export Enhancements. Each maps to roadmap phases.
 
 ### Paint Shortcut
 
-- [ ] **PAINT-01**: Shift+click/drag (left or right button) paints "unset" regardless of selected color or button
-- [ ] **PAINT-02**: Shift state captured at stroke start and held for entire drag
+- [x] **PAINT-01**: Shift+click/drag (left or right button) paints "unset" regardless of selected color or button
+- [x] **PAINT-02**: Shift state captured at stroke start and held for entire drag
 
 ## Future Requirements
 
@@ -44,8 +44,8 @@ Deferred to future releases:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PAINT-01 | Phase 14 | Pending |
-| PAINT-02 | Phase 14 | Pending |
+| PAINT-01 | Phase 14 | Complete |
+| PAINT-02 | Phase 14 | Complete |
 | SVG-01 | Phase 15 | Pending |
 | SVG-02 | Phase 15 | Pending |
 | SVG-03 | Phase 15 | Pending |

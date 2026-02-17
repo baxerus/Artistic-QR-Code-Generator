@@ -61,7 +61,7 @@
 
 ### v1.5 UX & Export Enhancements (Phases 14-16)
 
-- [ ] **Phase 14: Shift+Paint Shortcut** — Shift+click/drag paints "unset" for quick erasing
+- [x] **Phase 14: Shift+Paint Shortcut** — Shift+click/drag paints "unset" for quick erasing (completed 2026-02-17)
 - [ ] **Phase 15: SVG Export** — Download result cards as vector SVG files
 - [ ] **Phase 16: RS Capacity Display** — Show corrections as "X of Y" with max capacity
 
@@ -83,10 +83,10 @@
 3. Shift state at stroke start determines behavior for entire drag operation (releasing Shift mid-drag doesn't change behavior)
 4. Normal painting behavior unchanged when Shift is not held
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 14-01-PLAN.md — Shift+paint override and legend visual feedback
+- [x] 14-01-PLAN.md — Shift+paint override and legend visual feedback
 
 ---
 
@@ -140,11 +140,11 @@ Plans:
 | 11 | v1.3 | 1/1 | Complete | 2026-02-15 |
 | 12 | v1.4 | 3/3 | Complete | 2026-02-16 |
 | 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
-| 14 | v1.5 | 0/1 | Planned | - |
+| 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 0/? | Not started | - |
 | 16 | v1.5 | 0/? | Not started | - |
 
-**Total:** 16 phases (13 shipped, 3 in progress)
+**Total:** 16 phases (14 shipped, 2 remaining)
 
 **Coverage:** 7/7 v1.5 requirements mapped ✓
 
