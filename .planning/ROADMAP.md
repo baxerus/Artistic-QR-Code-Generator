@@ -107,7 +107,10 @@ Plans:
 3. SVG modules are pure black (#000) on white (#FFF) background, matching final QR output
 4. Filename matches PNG pattern with .svg extension (e.g., "qr-abc123.svg")
 
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 15-01-PLAN.md — SVG generation function and Download SVG button on result cards
 
 ---
 
