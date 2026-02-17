@@ -62,7 +62,7 @@
 ### v1.5 UX & Export Enhancements (Phases 14-16)
 
 - [x] **Phase 14: Shift+Paint Shortcut** — Shift+click/drag paints "unset" for quick erasing (completed 2026-02-17)
-- [ ] **Phase 15: SVG Export** — Download result cards as vector SVG files
+- [x] **Phase 15: SVG Export** — Download result cards as vector SVG files (completed 2026-02-17)
 - [ ] **Phase 16: RS Capacity Display** — Show corrections as "X of Y" with max capacity
 
 ## Phase Details
@@ -107,7 +107,7 @@ Plans:
 3. SVG modules are pure black (#000) on white (#FFF) background, matching final QR output
 4. Filename matches PNG pattern with .svg extension (e.g., "qr-abc123.svg")
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 15-01-PLAN.md — SVG generation function and Download SVG button on result cards
@@ -144,7 +144,7 @@ Plans:
 | 12 | v1.4 | 3/3 | Complete | 2026-02-16 |
 | 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
-| 15 | v1.5 | 0/1 | Planned | - |
+| 15 | 1/1 | Complete   | 2026-02-17 | - |
 | 16 | v1.5 | 0/? | Not started | - |
 
 **Total:** 16 phases (14 shipped, 2 remaining)
