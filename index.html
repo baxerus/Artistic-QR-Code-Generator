@@ -650,8 +650,8 @@
         display: flex;
         gap: 4px;
         margin-top: 4px;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-direction: column;
+        align-items: stretch;
       }
 
       .result-actions button {
@@ -16418,6 +16418,25 @@ self.onmessage = function(e) {
               downloadCanvasAsPNG(exportCanvas, sanitizedUrl);
             };
 
+            // Download SVG button
+            const svgBtn = document.createElement("button");
+            svgBtn.textContent = "Download SVG";
+            svgBtn.disabled = isRunning;
+            svgBtn.onclick = () => {
+              const fullUrl = `${currentURL}#${result.hash}`;
+              const sanitizedUrl = fullUrl
+                .replace(/^https?:\/\//, "")
+                .replace(/[<>:"/\\|?*]/g, "_")
+                .replace(/_{2,}/g, "_")
+                .slice(0, 200);
+              const svgString = generateSVG(
+                result.moduleData,
+                result.moduleCount,
+                fullUrl,
+              );
+              downloadSVG(svgString, sanitizedUrl);
+            };
+
             // Copy URL button
             const copyBtn = document.createElement("button");
             copyBtn.textContent = "Copy URL";
@@ -16502,6 +16521,7 @@ self.onmessage = function(e) {
             });
 
             actions.appendChild(downloadBtn);
+            actions.appendChild(svgBtn);
             actions.appendChild(copyBtn);
 
             // Create legend (visible only when expanded)
