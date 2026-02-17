@@ -16144,6 +16144,67 @@ self.onmessage = function(e) {
       }
 
       /**
+       * Generate SVG string from module data
+       * @param {boolean[]} moduleData - QR module data (row-major)
+       * @param {number} moduleCount - Module count per side
+       * @param {string} titleText - Title text for SVG
+       */
+      function generateSVG(moduleData, moduleCount, titleText) {
+        const quietZone = 4;
+        const size = moduleCount + quietZone * 2;
+        const pathParts = [];
+        const safeTitle = String(titleText ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+        for (let row = 0; row < moduleCount; row++) {
+          for (let col = 0; col < moduleCount; col++) {
+            if (moduleData[row * moduleCount + col]) {
+              pathParts.push(
+                `M${col + quietZone} ${row + quietZone}h1v1h-1z`,
+              );
+            }
+          }
+        }
+
+        const pathData = pathParts.join("");
+
+        return (
+          `<?xml version="1.0" encoding="UTF-8"?>` +
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">` +
+          `<title>${safeTitle}</title>` +
+          `<rect x="0" y="0" width="${size}" height="${size}" fill="#FFF"/>` +
+          `<path fill="#000" d="${pathData}"/>` +
+          `</svg>`
+        );
+      }
+
+      /**
+       * Download SVG string as file
+       * @param {string} svgString - SVG content
+       * @param {string} filename - Filename without extension
+       */
+      function downloadSVG(svgString, filename) {
+        if (!svgString) {
+          console.error("Invalid SVG content");
+          return;
+        }
+
+        const blob = new Blob([svgString], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${filename}.svg`;
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      /**
        * Copy text to clipboard with visual feedback
        * @param {string} text - Text to copy
        * @param {HTMLButtonElement} button - Button for feedback
