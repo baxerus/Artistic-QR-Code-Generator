@@ -15531,8 +15531,8 @@ self.onmessage = function(e) {
               0,
             );
 
-            // Update UI with merged data
-            updateSearchStats(totalAttemptsSoFar, e.data.elapsed);
+            // Update UI with merged data (use main thread time for consistent display)
+            updateSearchStats(totalAttemptsSoFar, Date.now() - searchStartTime);
             if (currentTopResults.length > 0) {
               updateTopResults(currentTopResults);
             }
