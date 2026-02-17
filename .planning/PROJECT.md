@@ -8,6 +8,15 @@ A single-file HTML tool (16,353 lines) for creating artistic QR codes by embeddi
 
 The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art, not the other way around. Even if it means the QR code won't scan, the pattern survives at 100%.
 
+## Current Milestone: v1.5 UX & Export Enhancements
+
+**Goal:** Improve result card context with correction capacity display, add SVG export, and streamline painting workflow with keyboard modifier.
+
+**Target features:**
+- Corrections capacity display (X of Y) on result cards
+- SVG download button for vector export
+- Shift+paint keyboard shortcut for quick unset
+
 ## Current State
 
 **Shipped:** v1.4 RS Error Measurement (2026-02-16)
@@ -77,7 +86,11 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Active
 
-(No active requirements — ready for next milestone)
+**v1.5 UX & Export Enhancements:**
+
+- [ ] Show corrections as "X of Y" with max capacity for QR version — v1.5
+- [ ] Download SVG button on result cards — v1.5
+- [ ] Shift+click/drag always paints "unset" regardless of selected color — v1.5
 
 ### Out of Scope
 
@@ -124,17 +137,12 @@ Based on v1.1 development, potential future work:
 **UX Enhancements:**
 
 - Save/load patterns to/from file (JSON export)
-- Keyboard shortcuts for painting tools
 - Mobile/touch support
 
 **Output Enhancements:**
 
-- SVG export format
-
-## Next Milestone
-
-Ready for `/gsd-new-milestone` to define next goals.
+- (SVG export moved to v1.5)
 
 ---
 
-_Last updated: 2026-02-16 after v1.4 milestone completed_
+_Last updated: 2026-02-17 after v1.5 milestone started_
