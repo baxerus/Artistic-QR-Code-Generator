@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-16)
 Phase: 13 — Results Ranking & Display (v1.4 final phase)
 Plan: 02 of 02 complete
 Status: Milestone v1.4 complete
-Last activity: 2026-02-17 - Completed quick task 8: Prevent page jump when results cleared during painting
+Last activity: 2026-02-17 - Completed quick task 9: Fix elapsed time jumping in progress display
 
 Progress: 5 milestones shipped (v1.0-v1.4), 13 phases, 25 plans
 
@@ -91,6 +91,7 @@ None.
 | 6 | Collapse expanded result when Run again is clicked | 2026-02-17 | bf5ed9d | [6-an-expanded-result-should-get-collapsed-](./quick/6-an-expanded-result-should-get-collapsed-/) |
 | 7 | Add X button to collapse expanded result | 2026-02-17 | 0d7935b | [7-add-x-button-to-collapse-expanded-result](./quick/7-add-x-button-to-collapse-expanded-result/) |
 | 8 | Prevent page jump when results cleared during painting | 2026-02-17 | cfdb4df | [8-prevent-page-jump-when-results-cleared-d](./quick/8-prevent-page-jump-when-results-cleared-d/) |
+| 9 | Fix elapsed time jumping in progress display | 2026-02-17 | 592bb12 | [9-fix-elapsed-time-jumping-in-progress-dis](./quick/9-fix-elapsed-time-jumping-in-progress-dis/) |
 
 ## Session Continuity
 
