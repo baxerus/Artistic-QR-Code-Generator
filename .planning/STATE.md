@@ -116,8 +116,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: v1.5 roadmap created
-Resume: `/gsd-plan-phase 14` to start Phase 14 planning
+Stopped at: Phase 14 context gathered
+Resume: `/gsd-plan-phase 14` to plan the phase
 
 ---
 *v1.5 roadmap created: 2026-02-17*
