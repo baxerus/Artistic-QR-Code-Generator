@@ -15819,6 +15819,15 @@ self.onmessage = function(e) {
         searchSummary.style.display = "none";
         const topResultsEl = document.getElementById("top-results");
         if (topResultsEl) topResultsEl.classList.add("results-disabled");
+        // Disable all result card buttons during search
+        const topResultsContainer = document.getElementById("top-results");
+        if (topResultsContainer) {
+          topResultsContainer
+            .querySelectorAll(".result-actions button")
+            .forEach((btn) => {
+              btn.disabled = true;
+            });
+        }
         document.getElementById("attempts-counter").textContent =
           `${totalAttempts.toLocaleString()} attempts`;
         document.getElementById("elapsed-counter").textContent =
