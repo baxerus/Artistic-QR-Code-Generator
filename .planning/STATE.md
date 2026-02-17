@@ -88,11 +88,12 @@ None.
 | 3 | Fix green-highlight animation to play full duration | 2026-02-16 | 54fcae9 | [3-fix-green-highlight-animation-to-play-fu](./quick/3-fix-green-highlight-animation-to-play-fu/) |
 | 4 | Allow painting into functional patterns | 2026-02-16 | ccc913c | [4-allow-painting-into-functional-patterns](./quick/4-allow-painting-into-functional-patterns/) |
 | 5 | Fix Download PNG and Copy URL buttons to disable during search | 2026-02-17 | 72e4425 | [5-fix-download-png-and-copy-url-buttons-no](./quick/5-fix-download-png-and-copy-url-buttons-no/) |
+| 6 | Collapse expanded result when Run again is clicked | 2026-02-17 | bf5ed9d | [6-an-expanded-result-should-get-collapsed-](./quick/6-an-expanded-result-should-get-collapsed-/) |
 
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Quick task 5 completed
+Stopped at: Quick task 6 completed
 Resume: `/gsd-new-milestone` to start next milestone
 
 ---
