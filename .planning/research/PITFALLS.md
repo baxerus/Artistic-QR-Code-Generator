@@ -1,407 +1,733 @@
-# Pitfalls Research
+# Domain Pitfalls: v1.5 Feature Additions
 
-**Domain:** Reed-Solomon Error Extraction for QR Code Measurement
-**Researched:** 2026-02-16
-**Confidence:** HIGH
+**Domain:** Adding correction capacity display, SVG export, and Shift+paint modifier to existing QR art tool
+**Researched:** 2026-02-17
+**Confidence:** HIGH (based on existing codebase analysis and official MDN documentation)
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: jsQR Does Not Expose RS Error Counts
+### Pitfall 1: Wrong RS Capacity Formula
 
 **What goes wrong:**
-Developers assume they can get Reed-Solomon error correction counts from jsQR's return value. The library returns only `{ data, binaryData, chunks, version, location }` — zero information about how many codewords were corrected. The RS decode function internally calculates `errorLocations.length` (the exact metric we need) but discards it, only returning corrected bytes.
+Developer calculates correction capacity using the wrong formula. Common mistakes:
+1. Using `ecCodewordsPerBlock` directly instead of `ecCodewordsPerBlock / 2`
+2. Confusing "codewords" with "bytes corrected" (they're the same, but the formula is still halved)
+3. Not accounting for multiple blocks — using single block capacity instead of summing across blocks
 
 **Why it happens:**
-jsQR is designed for decoding, not analysis. The RS decoder at line 10754 (`function decode(bytes, twoS)`) finds error locations but only uses them to fix the data — it never exposes the count. Developers don't realize library modification is required until after integration.
+Reed-Solomon can **detect** 2t errors but only **correct** t errors, where t = ecCodewordsPerBlock / 2. The QRCode library's `RS_BLOCK_TABLE` stores the total EC codewords (2t), not the correction capacity (t). Developers often use the raw table value.
 
-**How to avoid:**
-- **Accept that jsQR source modification is required** — this is unavoidable for our use case
-- Modify the RS `decode()` function (line 10754-10808) to return `{ correctedBytes, errorCount: errorLocations.length }` instead of just `correctedBytes`
-- Propagate error count up through `decodeMatrix()` → `decode()` → final return value
-- Alternatively, fork jsQR entirely and add error metrics throughout
+**Consequences:**
+- "85% capacity used" when it's actually at 170% (undecodable)
+- Users think they have room to add more artistic corruption when QR is already at limit
+- Search ranking breaks because capacity percentage is wrong
 
-**Warning signs:**
-- Searching jsQR API for "error" or "correction" returns nothing useful
-- Assuming "version" in return value contains error info (it doesn't — it's QR version number)
-- Planning to "wrap" jsQR without modifying source
+**Prevention:**
+```javascript
+// WRONG: Using raw EC codewords as capacity
+const capacity = ecCodewordsPerBlock; // This is 2t, not t!
+
+// CORRECT: Divide by 2 to get correction capacity
+const correctionCapacity = Math.floor(ecCodewordsPerBlock / 2);
+
+// For multi-block QRs, track per-block
+blocks.forEach(block => {
+  block.capacity = Math.floor(block.ecCodewords / 2);
+});
+```
+
+**Detection:**
+- Capacity shows >100% but QR still decodes
+- Test: Manually calculate Version 1-H capacity (should be 17/2 = 8 codewords, not 17)
+- Cross-check with QR spec tables
 
 **Phase to address:**
-Phase 1 (jsQR Modification) — The very first task must be modifying jsQR internals
+Phase 1 (Capacity Display) — Formula must be correct from the start
 
 ---
 
-### Pitfall 2: Confusing Module Errors with RS Codeword Errors
+### Pitfall 2: Version Table Lookup Off-by-One
 
 **What goes wrong:**
-A developer corrupts 10 QR modules and expects `errorCount: 10`. But RS correction operates on **codewords** (8-bit bytes), not modules. One module flip might corrupt zero codewords (if the module was already wrong), one codeword, or affect multiple data blocks differently. The relationship is complex, not 1:1.
+RS_BLOCK_TABLE is 0-indexed internally but QR versions are 1-indexed (Version 1 through Version 40). Developer looks up `RS_BLOCK_TABLE[version]` instead of `RS_BLOCK_TABLE[(version - 1) * 4 + ecLevelIndex]`.
 
 **Why it happens:**
-QR codes are modular (black/white pixels) but RS correction operates on codewords extracted after:
-1. Module reading (applying data mask)
-2. De-interleaving across data blocks
-3. Per-block RS decoding
+The existing codebase uses this formula in `getRsBlockTable()` (line 1745-1757):
+```javascript
+case d.H:
+  return j.RS_BLOCK_TABLE[4 * (a - 1) + 3]; // a is version, 1-indexed
+```
+Developer copying the pattern might miss the `(a - 1)` part or miscalculate the error correction level offset.
 
-A single corrupted module might affect one bit in one codeword, which RS can often correct, or it might destroy a codeword entirely, or the corruption might cancel out.
+**Consequences:**
+- Version 2 shows Version 1 capacity (off by one version)
+- Error correction level H shows Q capacity (off by one level)
+- Capacity percentages wildly wrong
+- Works for Version 1 (by luck), breaks for all others
 
-**How to avoid:**
-- **Don't promise "modules corrupted = errors"** — measure and display separately
-- Track both: `modulesCorrupted` (before decode) and `rsErrorsCorrected` (from decoder)
-- Accept that the relationship is probabilistic, not deterministic
-- UI should show: "X modules modified, Y RS corrections needed" — these are different metrics
-- Document that RS errors are per-block: a QR may have multiple blocks, each with its own correction count
+**Prevention:**
+```javascript
+// Error correction level indices
+const EC_LEVEL_INDEX = { L: 0, M: 1, Q: 2, H: 3 };
 
-**Warning signs:**
-- Tests assume `modulesCorrupted === rsErrors`
-- Confusion when 5 modules flipped causes 0, 1, or 3 RS errors
-- Not understanding why same pixel corruption pattern gives different error counts with different data
+// CORRECT formula
+const tableIndex = (version - 1) * 4 + EC_LEVEL_INDEX[level];
+const rsBlockData = RS_BLOCK_TABLE[tableIndex];
+
+// Extract total/data codewords from table entry
+// Format: [numBlocks1, total1, data1, numBlocks2?, total2?, data2?]
+```
+
+**Detection:**
+- Test with Version 3 or higher (where off-by-one is obvious)
+- Compare calculated capacity against QR spec reference table
+- Log both version and table index during development
 
 **Phase to address:**
-Phase 2 (Metrics Integration) — Clear separation of module-level vs. codeword-level metrics
+Phase 1 (Capacity Display) — Must be validated against reference table
 
 ---
 
-### Pitfall 3: Error Count Exceeds Correction Capacity But Decode "Succeeds"
+### Pitfall 3: Forgetting App Uses Level H Only
 
 **What goes wrong:**
-The RS decoder reports N errors corrected, but N exceeds the theoretical correction capacity (t = ecCodewords / 2). This happens because:
-1. The decode succeeded despite being at the edge of correctability
-2. Decoder found fewer errors than expected (error locations collided)
-3. **Critically:** A wrong decode occurred — the RS algorithm "corrected" to garbage
+Developer implements capacity display supporting all error correction levels (L/M/Q/H), but the app only generates Level H QR codes. The extra code:
+1. Adds complexity that's never used
+2. Creates potential bugs in untested code paths
+3. Confuses the implementation
 
 **Why it happens:**
-Reed-Solomon can **detect** 2t errors but only **correct** t errors. When errors exceed t, RS may:
-- Fail cleanly (return null — good)
-- "Correct" to wrong data (silent failure — very bad)
-- Correct correctly by luck (rare)
+The existing app hardcodes `errorCorrectLevel: d.H` (where d.H = 2 is the H level constant). Developer doesn't notice this constraint and over-engineers.
 
-jsQR's RS decoder returns `null` when it detects uncorrectable errors (line 10784, 10788, 10800), but edge cases slip through.
+**Consequences:**
+- Wasted development time
+- Potential bugs in L/M/Q paths never caught
+- Confusion when maintaining code
 
-**How to avoid:**
-- **Always validate decoded data** — check URL format, expected content patterns
-- Compare `rsErrorsCorrected` against theoretical max: `ecCodewordsPerBlock / 2` per block
-- Flag warning if error count approaches capacity (>75% of max)
-- Cross-check: encode the decoded result and compare codewords — any mismatch means wrong decode
-- For optimization: prefer results with LOWER error counts, not just "decodable"
+**Prevention:**
+- Check codebase constraints FIRST
+- For v1.5: Hardcode Level H capacity lookup, don't implement generic solution
+- Add comment: `// App only uses Level H; capacity formula simplified accordingly`
 
-**Warning signs:**
-- Error counts reported near or above correction capacity
-- Decoded URLs that are slightly corrupted versions of the original
-- Different decoders giving different decode results for same QR
+**Detection:**
+- Search codebase for `errorCorrectLevel` — confirms H-only usage
+- Check if version dropdown shows EC level options (it doesn't)
 
 **Phase to address:**
-Phase 2 (Metrics Integration) — Add validation layer after decode
+Phase 1 (Capacity Display) — Scope correctly from start
 
 ---
 
-### Pitfall 4: Modifying Inlined jsQR Breaks Worker
+### Pitfall 4: Displaying Codewords When User Expects Modules
 
 **What goes wrong:**
-Developer modifies the main-page jsQR to return error counts. But the Worker has its own COPY of jsQR (extracted from `document.querySelectorAll("script")[1].textContent` at line 14398). The worker's jsQR remains unmodified, so:
-- Main thread decode shows error counts
-- Worker decode shows nothing (old API)
-- Metrics disagree between main thread and workers
+Display shows "RS Corrections: 3/8" meaning 3 codewords corrected out of 8 capacity. User interprets this as "3 pixels wrong" when they've painted 50 pixels differently. The disconnect causes confusion.
 
 **Why it happens:**
-The architecture copies jsQR source as a string into each worker via Blob URL. Modifying the inlined script tag doesn't automatically propagate — the worker re-extracts the same source code position, but now the line numbers/structure may have shifted.
+RS correction operates on 8-bit codewords, not visual modules. One painted module might affect 0, 1, or multiple codewords depending on:
+- Data encoding mode
+- Position in data stream
+- Interleaving across blocks
+- Whether module is in data vs function pattern
 
-**How to avoid:**
-- **Understand the architecture:** jsQR source lives in script tag #1, worker extracts it dynamically
-- Modify jsQR in ONE place (the `<script>` tag) — the worker will get the modified version automatically
-- Verify after modification: console.log the first 200 chars of extracted jsQR in worker to confirm
-- Test worker decode path separately from main thread decode
-- If restructuring jsQR significantly, update the extraction selector (`document.querySelectorAll("script")[1]`)
+**Consequences:**
+- User thinks capacity is pixels, not codewords
+- "I only changed 3 pixels, why is capacity at 50%?" (3 pixels affected 4 codewords)
+- "I changed 50 pixels and it shows 0 corrections?" (all were function pattern)
 
-**Warning signs:**
-- Main thread shows RS errors, worker results don't
-- Worker throws "undefined" errors on new fields you added
-- `createOptimizationWorker()` still references old API
+**Prevention:**
+- UI labels must be crystal clear: "RS Corrections: 3 codewords (capacity: 8)"
+- Consider adding explanation: "Codewords are internal data units, not pixels"
+- Track both metrics: painted pixel count AND RS correction count
+- v1.4 already established this distinction — maintain consistency
+
+**Detection:**
+- User testing: Ask "what does 3/8 mean?"
+- Ensure existing pixel diff metric remains visible alongside RS metrics
 
 **Phase to address:**
-Phase 1 (jsQR Modification) — Verify worker gets modified source
+Phase 1 (Capacity Display) — Label clarity critical
 
 ---
 
-### Pitfall 5: Returning Error Count Only on Success, Not Failure
+### Pitfall 5: SVG viewBox vs Width/Height Mismatch
 
 **What goes wrong:**
-Developer modifies RS decode to return error count, but only when decode succeeds. When decode fails (too many errors), they return `null` — losing valuable information. For optimization, we need to know "how close was this to working?" even for failures.
+SVG exported with `viewBox="0 0 25 25"` (QR module count) but `width="600" height="600"` (display size). Depending on application:
+1. Some programs scale correctly
+2. Others show tiny QR in corner
+3. Others crop to 25x25 pixels
 
 **Why it happens:**
-The existing jsQR RS decoder returns `null` on failure, so developers follow the same pattern. But for optimization ranking, we want: "This pattern needed 15 corrections but capacity is 13" — that's better than one needing 50 corrections.
+SVG has two independent size specifications:
+- `viewBox`: defines the coordinate system
+- `width`/`height`: defines actual size
 
-**How to avoid:**
-- **Return rich objects, not just bytes:** `{ success: boolean, correctedBytes, errorCount, capacity, reason }`
-- On failure, still return `{ success: false, errorCount: detectedErrors, capacity: t, reason: 'exceeded' }`
-- Track failure reasons: "too many errors", "error locator failed", "invalid position"
-- For ranking: failed decodes with errorCount close to capacity beat those far over capacity
+The existing QRCode library already handles this (line 1841-1846) with:
+```javascript
+var h = g("svg", {
+  viewBox: "0 0 " + String(d) + " " + String(d),
+  width: "100%",
+  height: "100%",
+  // ...
+});
+```
 
-**Warning signs:**
-- All failed decodes reported as "errorCount: undefined" or "errorCount: 0"
-- Can't distinguish between "1 error over capacity" and "100 errors over capacity"
-- Optimization can't learn which direction moves toward success
+But if copying/modifying this for export, developer might:
+- Use fixed pixel dimensions (breaks in some apps)
+- Omit viewBox (breaks scaling)
+- Mismatch units (viewBox in modules, width/height in pixels)
+
+**Consequences:**
+- SVG appears tiny or huge depending on viewing application
+- Professional design tools (Illustrator, Figma) may misinterpret
+- Print at wrong size
+
+**Prevention:**
+```xml
+<!-- RECOMMENDED: viewBox matches modules, dimensions use viewBox for scaling -->
+<svg viewBox="0 0 25 25" width="250" height="250" ...>
+
+<!-- OR: Use percentage for responsive sizing -->
+<svg viewBox="0 0 25 25" width="100%" height="100%" ...>
+
+<!-- For fixed pixel output at 10px per module: -->
+<svg viewBox="0 0 25 25" width="250" height="250" ...>
+```
+
+**Detection:**
+- Test exported SVG in: browser, Illustrator, Figma, Inkscape
+- Check physical size when printing
 
 **Phase to address:**
-Phase 1 (jsQR Modification) — Design rich return type from the start
+Phase 2 (SVG Export) — Test in multiple applications
 
 ---
 
-### Pitfall 6: Per-Block Error Counts Lost in Aggregation
+### Pitfall 6: SVG Colors Not Matching Canvas
 
 **What goes wrong:**
-A QR code has multiple RS blocks (e.g., Version 5-H has 4 blocks). Developer sums error counts: "12 errors total." But one block had 8 errors (over its 7-error capacity = failed) while others had 4 total (fine). The aggregate "12" hides that this QR is fundamentally broken.
+Canvas uses `#000000` for black modules, SVG uses `rgb(0,0,0)` or `black`. These are equivalent, but other colors diverge:
+1. Painted regions use `#404040` and `#d0d0d0` — must match in SVG
+2. Protected areas have overlay color — should these export?
+3. Green painted borders — should these export?
 
 **Why it happens:**
-Line 3214-3229 in jsQR loops through `dataBlocks` calling `reedsolomon_1.decode()` per block. Developers sum errors across blocks, losing per-block information critical for understanding failure modes.
+The canvas rendering code in `renderQRWithOverlay()` uses specific color constants:
+```javascript
+const PAINTED_WHITE = "#d0d0d0";
+const PAINTED_BLACK = "#404040";
+const PAINTED_BORDER_COLOR = "#22c55e";
+const PROTECTED_OVERLAY_COLOR = "rgba(59, 130, 246, 0.25)";
+```
 
-**How to avoid:**
-- **Track per-block metrics:** `{ blocks: [{ errorCount, capacity }...], totalErrors, minBlockCapacity }`
-- Check EACH block's error count against its capacity
-- Display "Block 1: 3/7, Block 2: 5/7, Block 3: 8/7 (FAILED)"
-- For optimization: a QR with all blocks under 50% capacity is better than one with one block at 99%
+SVG export might not use the same constants, or might try to export UI overlays that shouldn't be in final output.
 
-**Warning signs:**
-- Only seeing aggregate error count
-- "12 errors total" when max capacity is 28 (seems fine, but one block is over)
-- Can't explain why QR with "fewer total errors" fails while one with "more" succeeds
+**Consequences:**
+- SVG looks different from canvas preview
+- Professional designers can't match brand colors
+- UI elements (borders, overlays) pollute export
+
+**Prevention:**
+- **Export ONLY the QR data**, not UI overlays
+- Use same color constants for SVG as canvas
+- Decide: painted regions export as intended final color (black/white) or as preview color (gray)?
+- Most likely: Export painted regions as the actual QR color (not gray preview)
+
+**Detection:**
+- Visual comparison: screenshot canvas vs exported SVG
+- Check exported SVG source for unexpected colors
 
 **Phase to address:**
-Phase 2 (Metrics Integration) — Preserve block-level granularity
+Phase 2 (SVG Export) — Define export color spec before implementing
 
 ---
 
-### Pitfall 7: Minified jsQR Breaks Modification
+### Pitfall 7: SVG File Naming Creates Downloads Folder Clutter
 
 **What goes wrong:**
-The inlined jsQR is a webpack bundle with preserved structure (modules 0-12), but modifying one section causes cascading issues:
-- Variable names are minified (`__webpack_require__`, `exports.default`)
-- Module boundaries must be preserved
-- Adding new fields to return objects breaks downstream consumers
+User clicks "Download SVG" multiple times while iterating. Each download is named `qr-code.svg`, overwriting previous or (worse) creating `qr-code (1).svg`, `qr-code (2).svg`, etc.
 
 **Why it happens:**
-jsQR was webpack-bundled before inlining. The source is readable but fragile. Developers modify `decode()` return value but forget to update callers in other modules.
+Simple download implementation uses hardcoded filename:
+```javascript
+link.download = "qr-code.svg"; // Same name every time
+```
 
-**How to avoid:**
-- **Trace the full call chain before modifying:**
-  1. `reedsolomon_1.decode()` (module 9, line 10754) — returns correctedBytes
-  2. `decodeMatrix()` (module 5, line 3190) — calls RS decode per block
-  3. `decode(matrix)` (module 5, line 3240) — returns result or null
-  4. `scan()` (module 3, line 2474) — returns final result object
-  5. `jsQR()` (module 3, line 2521) — public API
-- Update EVERY level to propagate new fields
-- Test module boundaries: each `__webpack_require__` is a separate module
-- Consider adding new fields as OPTIONAL to avoid breaking existing code
+**Consequences:**
+- User's Downloads folder fills with identically-named files
+- Can't tell which version is which
+- Accidental overwrites lose work
 
-**Warning signs:**
-- "TypeError: Cannot read property 'errorCount' of undefined"
-- Only innermost function returns error count, outer layers don't
-- `jsQR()` return value unchanged despite internal modifications
+**Prevention:**
+Include distinguishing info in filename:
+```javascript
+// Option 1: Timestamp
+const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+link.download = `qr-${timestamp}.svg`;
+
+// Option 2: URL-based (sanitized)
+const urlSlug = new URL(encodedUrl).hostname.replace(/\./g, '-');
+link.download = `qr-${urlSlug}.svg`;
+
+// Option 3: Version + hash
+link.download = `qr-v${version}-${shortHash}.svg`;
+```
+
+**Detection:**
+- Test downloading twice in a row
+- Check Downloads folder for naming pattern
 
 **Phase to address:**
-Phase 1 (jsQR Modification) — Map complete call chain first
+Phase 2 (SVG Export) — Define naming convention
 
 ---
 
-### Pitfall 8: Worker Message Serialization Loses Error Details
+### Pitfall 8: Shift Key State Not Detected in MouseEvent
 
 **What goes wrong:**
-Worker calculates RS error counts, but when posting results via `postMessage()`, complex objects get flattened or lost. Developer expects `result.rsErrors` in main thread, gets `undefined`.
+Developer adds Shift+click handling but reads `shiftKey` from the wrong event type or timing:
+1. Using `keydown` listener instead of reading `event.shiftKey` from click event
+2. Not checking `shiftKey` on `pointerdown` (the existing event type)
+3. State race: user releases Shift during drag
 
 **Why it happens:**
-`postMessage()` uses structured clone algorithm. Most objects survive, but:
-- Function properties are stripped
-- Symbol keys are lost
-- Circular references fail
-- Uint8ClampedArray serializes fine, but if nested in complex objects, issues arise
+The existing painting code uses `pointerdown`/`pointermove` events (line 13559-13598). These events have a `shiftKey` property (inherited from MouseEvent) that indicates Shift state at event time.
 
-Current worker message format (line 15373+) posts simple objects like `{ type, data, decodable, pixelDiff }`. Adding nested error info may require format changes.
+Developer might:
+- Add separate `keydown`/`keyup` listeners creating state management bugs
+- Check `shiftKey` on wrong event
+- Not handle Shift state changes during drag
 
-**How to avoid:**
-- **Use flat message structures:** `{ rsErrors: 5, rsCapacity: 10, blockErrors: [3, 2] }`
-- Avoid nested objects deeper than 2 levels in messages
-- Convert Uint8ClampedArray to regular Array before posting if issues arise
-- Log message on both sides during development to verify serialization
-- Update message handler (`createWorkerMessageHandler`, line 15458) to expect new fields
+**Consequences:**
+- Shift+click does nothing (event not checked)
+- Modifier state gets "stuck" (separate key listener out of sync)
+- Inconsistent behavior during drag
 
-**Warning signs:**
-- Worker console shows correct error count, main thread shows undefined
-- `postMessage` silently drops fields
-- "DataCloneError" in console
+**Prevention:**
+```javascript
+container.addEventListener("pointerdown", function (e) {
+  // CORRECT: Check shiftKey directly on the pointer event
+  const isShiftHeld = e.shiftKey;
+  
+  // Store for use during drag
+  currentPaintModifier = isShiftHeld ? 'shift' : 'none';
+  
+  // Use modifier in paintAt logic
+  paintAt(coords.x, coords.y, currentPaintButton, currentPaintModifier);
+});
+
+// During drag, check current event's shiftKey
+container.addEventListener("pointermove", function (e) {
+  // Could update modifier during drag if desired:
+  // currentPaintModifier = e.shiftKey ? 'shift' : 'none';
+});
+```
+
+**Detection:**
+- Test: Hold Shift, click, release Shift, click again (behavior should differ)
+- Test: Start click, then press/release Shift during drag
+- Log `e.shiftKey` to confirm it's being read
 
 **Phase to address:**
-Phase 3 (Worker Integration) — Design message format before implementation
+Phase 3 (Shift+Paint) — Use event.shiftKey, not separate listener
 
 ---
 
-### Pitfall 9: Syndrome Calculation Shows "0 Errors" for Corrupted QR
+### Pitfall 9: Shift+Click Conflicts with Browser/OS
 
 **What goes wrong:**
-A corrupted QR decodes successfully, RS reports 0 errors corrected. Developer assumes "0 errors = no corruption." But the syndrome check (line 10761-10769) only detects errors that cause syndrome non-zero. Some corruption patterns affect modules but not codewords (cancel out via masking), or the syndrome happens to evaluate to zero anyway.
+Shift+click has existing browser behaviors:
+1. **Text selection**: Shift+click extends selection (not relevant for canvas)
+2. **Open in new window**: Shift+click on links opens new window
+3. **macOS**: Shift+click can trigger accessibility features
+4. **Firefox**: Shift+right-click shows context menu even if `contextmenu` is prevented
 
 **Why it happens:**
-RS syndrome is calculated as polynomial evaluation. If `poly.evaluateAt(generator^s) == 0` for all s, no error is detected — even if modules were physically changed. This happens when:
-- Changed modules were in function patterns (not data)
-- Changes canceled out in codeword extraction
-- By pure mathematical coincidence (extremely rare for large changes)
+Shift is a common modifier with pre-existing meanings. The app already prevents `contextmenu` for right-click painting, but Shift+right-click in Firefox bypasses this.
 
-**How to avoid:**
-- **Track module-level changes separately** — don't rely solely on RS error count
-- UI: "X modules changed, Y RS errors detected" — both numbers matter
-- For optimization: use module diff as primary metric, RS errors as secondary validation
-- Remember: RS error count of 0 doesn't mean "no corruption," it means "no codeword-level impact"
+**Consequences:**
+- Firefox: Shift+right-click shows context menu instead of painting
+- macOS: Potential accessibility interference
+- Edge cases where browser captures event before app
 
-**Warning signs:**
-- Corrupting 50 modules shows "0 RS errors" because they were all function patterns
-- Assuming RS errors = pixels changed
-- Not understanding why "working" QRs show 0 errors even with visible changes
+**Prevention:**
+```javascript
+// Already in codebase (line 13601-13603):
+container.addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+});
+
+// This should work, but test Firefox specifically
+// For Firefox Shift+right-click: may need additional handling
+
+// Also prevent text selection during painting:
+container.style.userSelect = 'none';
+```
+
+**Detection:**
+- Test Shift+right-click in Firefox
+- Test on macOS with accessibility features enabled
+- Test with browser extensions that use Shift modifier
 
 **Phase to address:**
-Phase 2 (Metrics Integration) — Keep module diff metric alongside RS errors
+Phase 3 (Shift+Paint) — Test cross-browser
 
 ---
 
-### Pitfall 10: Testing Only Happy Path (Decode Success)
+### Pitfall 10: Shift+Paint Behavior Conflicts with Existing Right-Click
 
 **What goes wrong:**
-All tests verify RS error extraction when decode succeeds. Edge cases untested:
-- Decode fails (too many errors) — does error count propagate?
-- Decode returns null early (malformed QR) — no error count available
-- Single-block vs multi-block QRs behave differently
+Existing painting behavior:
+- Left-click: Paint selected color
+- Right-click: Paint opposite color
+
+Adding Shift modifier:
+- Shift+Left-click: Paint opposite (like right-click currently does)
+
+This creates redundant functionality and potential confusion:
+- Right-click already does what Shift+left-click would do
+- What should Shift+right-click do?
 
 **Why it happens:**
-"It works" testing: developers test one QR version/size/corruption level, confirm it works, move on. RS edge cases require testing near capacity limits.
+The existing `getPaintValue()` function (line 13469-13482) already maps right-click to opposite color:
+```javascript
+} else if (button === 2) {
+  // Right click: paint opposite color
+  if (selectedColor === "black") return 1; // white
+  if (selectedColor === "white") return 2; // black
+}
+```
 
-**How to avoid:**
-- **Test matrix:**
-  | Scenario | Expected Behavior |
-  |----------|-------------------|
-  | Perfect QR | errorCount: 0 |
-  | 1 error | errorCount: 1, success |
-  | 50% capacity errors | errorCount: N, success |
-  | 99% capacity errors | errorCount: N, success |
-  | 101% capacity errors | errorCount: N, success: false |
-  | Far over capacity | success: false, reason: 'exceeded' |
-  | Invalid QR structure | null (no RS phase reached) |
-- Test multiple QR versions (single-block v1-v2, multi-block v3+)
-- Test all error correction levels (L/M/Q/H have different capacities)
+Adding Shift as a modifier creates overlapping functionality.
 
-**Warning signs:**
-- Only testing with QR Version 1 (single block, simple case)
-- Never testing failure cases
-- "Works in demo" but fails with real-world varied QRs
+**Consequences:**
+- Two ways to paint opposite (redundant)
+- Shift+right-click behavior undefined
+- User confusion about which method to use
+
+**Prevention:**
+**Option A: Shift+left replaces right-click entirely**
+- Remove right-click opposite behavior
+- Shift+left paints opposite
+- Right-click reserved for future features
+
+**Option B: Keep both, document as equivalent**
+- Right-click and Shift+left-click both paint opposite
+- Accessibility benefit: laptop trackpads without right-click
+- Shift+right-click = Shift+left-click = right-click (all opposite)
+
+**Option C: Make Shift do something different**
+- Instead of "opposite color", Shift could mean "toggle" (if black, make white, if white, make black)
+- Or Shift = "force unset" regardless of selection
+
+**Recommendation:** Option B — keep both as equivalent. Some users prefer keyboard modifiers, others prefer mouse buttons. Document that they're equivalent.
 
 **Phase to address:**
-Phase 1 (jsQR Modification) — Build test suite covering edge cases
+Phase 3 (Shift+Paint) — Define behavior before implementing
 
 ---
 
-## Technical Debt Patterns
+### Pitfall 11: Not Updating `lastPaintedCell` for Shift State Changes
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcoding error extraction for single block | Faster initial implementation | Breaks on QR version 3+ (multi-block) | Never — multi-block support is required |
-| Returning aggregate error count only | Simpler API | Loses per-block detail needed for optimization | MVP only if single-block QRs guaranteed |
-| Modifying jsQR without upstream tracking | No fork maintenance | Can't upgrade jsQR, bugs harder to track | Acceptable if jsQR is "frozen" dependency |
-| Using console.log for error tracking | Fast debugging | Production code with debug noise, breaks workers | Development only |
-| Skipping failure case metrics | Less code | Can't rank failed attempts for optimization | Never — failure ranking is critical for search |
-| Copying jsQR extraction code instead of abstracting | Works immediately | Two places to update when jsQR changes | Never — creates sync bugs |
+**What goes wrong:**
+Existing drag-painting debounces by tracking `lastPaintedCell` to avoid repainting the same cell. If user:
+1. Starts painting cell (1,1) with left-click
+2. Presses Shift during drag
+3. Moves back to (1,1)
+
+The cell (1,1) should be repainted with opposite color, but debounce blocks it.
+
+**Why it happens:**
+Current debounce check (line 13518-13522):
+```javascript
+const cellKey = `${x},${y}`;
+// Debounce: don't repaint same cell during drag
+if (lastPaintedCell === cellKey) return;
+```
+
+This doesn't account for modifier changes during stroke.
+
+**Consequences:**
+- Shift press during drag doesn't affect already-painted cells
+- User has to release and restart stroke to repaint
+
+**Prevention:**
+Include modifier state in debounce key:
+```javascript
+const modifierState = currentPaintModifier; // or e.shiftKey
+const cellKey = `${x},${y}:${modifierState}`;
+if (lastPaintedCell === cellKey) return;
+```
+
+**Or:** Clear `lastPaintedCell` when modifier changes:
+```javascript
+if (previousShiftState !== e.shiftKey) {
+  lastPaintedCell = null;
+  previousShiftState = e.shiftKey;
+}
+```
+
+**Detection:**
+- Test: Start painting, press Shift during drag, move back to earlier cells
+
+**Phase to address:**
+Phase 3 (Shift+Paint) — Consider during implementation
+
+---
+
+### Pitfall 12: Touch Devices Can't Use Shift Modifier
+
+**What goes wrong:**
+Touch device users have no physical Shift key. If Shift+click is the ONLY way to access a feature, touch users are excluded.
+
+**Why it happens:**
+Keyboard modifiers are desktop-centric. The existing app uses `pointerdown` for touch compatibility, but Shift modifier won't work.
+
+**Consequences:**
+- Touch users can't access Shift-modified functionality
+- Feature parity broken between desktop and mobile
+
+**Prevention:**
+Since v1.5 feature is specifically "Shift+paint", it's a desktop enhancement. Ensure:
+1. Right-click opposite painting still works (currently exists)
+2. Touch users aren't worse off — they just don't get the shortcut
+3. Consider future: long-press for modifier on touch?
+
+**For v1.5:** Document that Shift+paint is keyboard shortcut only, touch users use the existing color selector buttons.
+
+**Phase to address:**
+Phase 3 (Shift+Paint) — Document as keyboard shortcut
+
+---
+
+## Moderate Pitfalls
+
+### Pitfall 13: Capacity Display Updates Not Synchronized with Decode Result
+
+**What goes wrong:**
+RS error count and capacity display are separate UI elements. When a new QR is generated or optimization runs:
+- Capacity display updates immediately
+- Error count updates after decode
+- Brief moment of mismatch
+
+**Prevention:**
+- Update both metrics atomically in single render pass
+- Or: Hide/gray error count until decode complete
+- Ensure same decode result populates both fields
+
+**Phase to address:**
+Phase 1 (Capacity Display)
+
+---
+
+### Pitfall 14: SVG Export Button Enabled Before QR Generated
+
+**What goes wrong:**
+Export button is enabled when no QR code exists, or when showing stale QR from previous session. Click produces:
+- Empty SVG
+- SVG of wrong QR
+- Error
+
+**Prevention:**
+- Disable export button when `qrModel` is null
+- Tie button state to same conditions as paint section visibility
+- Show tooltip: "Generate a QR code first"
+
+**Phase to address:**
+Phase 2 (SVG Export)
+
+---
+
+### Pitfall 15: Large QR Versions Create Huge SVG Files
+
+**What goes wrong:**
+Version 40 QR has 177x177 = 31,329 modules. If each module is an SVG `<rect>` element:
+- 31,329 elements × ~50 bytes each = ~1.5MB SVG
+- Slow to open in browsers
+- Design tools may choke
+
+**Why it happens:**
+Naive SVG generation creates one element per module:
+```xml
+<rect x="0" y="0" width="1" height="1"/>
+<rect x="1" y="0" width="1" height="1"/>
+<!-- ... 31,327 more -->
+```
+
+**Prevention:**
+Option A: Use `<use>` with template (existing code does this):
+```xml
+<rect id="template" width="1" height="1"/>
+<use href="#template" x="0" y="0"/>
+<use href="#template" x="1" y="0"/>
+```
+Still many elements, but smaller file size.
+
+Option B: Consolidate runs of dark modules:
+```xml
+<rect x="0" y="0" width="3" height="1"/> <!-- 3 consecutive dark modules -->
+```
+Complex to implement, significant size reduction.
+
+Option C: Use a path with all modules as one element:
+```xml
+<path d="M0,0h1v1h-1z M1,0h1v1h-1z ..."/>
+```
+Single element, reasonable size.
+
+For v1.5: Option A (existing pattern) is acceptable. Add optimization if file size becomes issue.
+
+**Phase to address:**
+Phase 2 (SVG Export) — Monitor file sizes
+
+---
+
+### Pitfall 16: Modifier Key State Persists After Window Blur
+
+**What goes wrong:**
+User holds Shift, clicks outside app window (blur), releases Shift. Returns to app — the `shiftKey` state from last event is stale.
+
+**Why it happens:**
+If storing modifier state in variable rather than reading from each event:
+```javascript
+let isShiftHeld = false;
+document.addEventListener('keydown', e => { if (e.key === 'Shift') isShiftHeld = true; });
+document.addEventListener('keyup', e => { if (e.key === 'Shift') isShiftHeld = false; });
+// Misses keyup when window unfocused
+```
+
+**Prevention:**
+Read `event.shiftKey` from each mouse/pointer event, don't maintain separate state:
+```javascript
+container.addEventListener("pointerdown", function (e) {
+  // Fresh read every event
+  const isShift = e.shiftKey;
+  paintAt(coords.x, coords.y, e.button, isShift);
+});
+```
+
+**Phase to address:**
+Phase 3 (Shift+Paint)
+
+---
+
+## Minor Pitfalls
+
+### Pitfall 17: SVG Download Opens in New Tab (Safari)
+
+**What goes wrong:**
+Safari sometimes opens data URIs in new tab instead of downloading. User expects file download, gets new tab with raw SVG.
+
+**Prevention:**
+Use Blob URL instead of data URI:
+```javascript
+const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+const url = URL.createObjectURL(blob);
+link.href = url;
+link.click();
+URL.revokeObjectURL(url); // Clean up
+```
+
+**Phase to address:**
+Phase 2 (SVG Export)
+
+---
+
+### Pitfall 18: Capacity Percentage Shows "Infinity%" for Zero Capacity
+
+**What goes wrong:**
+If capacity calculation returns 0 (shouldn't happen with valid QR), percentage calculation divides by zero:
+```javascript
+const percentage = (errors / capacity) * 100; // NaN or Infinity if capacity=0
+```
+
+**Prevention:**
+```javascript
+const percentage = capacity > 0 ? (errors / capacity) * 100 : 0;
+```
+
+**Phase to address:**
+Phase 1 (Capacity Display)
+
+---
+
+### Pitfall 19: Painted Regions Don't Export to SVG
+
+**What goes wrong:**
+User paints a pattern, exports SVG, painted regions are missing because export only includes base QR structure.
+
+**Why it matters:**
+If user intends to share their artistic QR, the painted pattern IS the art.
+
+**Prevention:**
+When exporting, render the QR as it appears on canvas:
+- Modules with paintState=1 (white paint) → white fill
+- Modules with paintState=2 (black paint) → black fill
+- Modules with paintState=0 → QR's natural state
+
+**Phase to address:**
+Phase 2 (SVG Export) — Must include painted regions
+
+---
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| jsQR RS decoder modification | Only modifying `decode()`, not updating callers | Trace full chain: RS decode → decodeMatrix → decode → scan → jsQR |
-| Worker jsQR extraction | Assuming worker automatically gets changes | Verify: log extracted source in worker to confirm modifications present |
-| postMessage with error metrics | Nesting error data deeply | Use flat structure: `{ rsErrors, rsCapacity, blockDetails: [...] }` |
-| Multi-block QR handling | Summing errors without checking per-block capacity | Track per-block: `blocks: [{ count, capacity, success }]` |
-| Return type modification | Adding fields to existing returns | Wrap in new structure: `{ originalReturn, errorMetrics }` to avoid breaking existing code |
+| Capacity from RS_BLOCK_TABLE | Using raw value as capacity | Divide by 2: `capacity = ecCodewords / 2` |
+| Version lookup | Using version directly as index | Use `(version - 1) * 4 + ecLevelIndex` |
+| SVG export colors | Using different constants than canvas | Share color constants: `PAINTED_WHITE`, `PAINTED_BLACK` |
+| Shift detection | Adding keydown/keyup listeners | Use `event.shiftKey` from pointer events |
+| Painted region export | Exporting base QR only | Include paint state in export rendering |
 
-## Performance Traps
+## Phase-Specific Warnings
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Logging error details on every decode | Worker slow, console flooded | Log only on RESULT messages or summary, not per-attempt | >100 decodes/second |
-| Creating new error tracking objects per decode | Memory growth, GC pauses | Reuse tracking structure, reset values | >10,000 optimization iterations |
-| Deep cloning error arrays for postMessage | High serialization overhead | Send primitive counts, not full arrays | Large multi-block QRs (version 20+) |
-| Storing full error history | Memory exhaustion | Store only top N results, discard rest | Long-running optimization (>30 seconds) |
-
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Exposing internal RS state in UI | Information leakage about QR structure | Only show user-relevant metrics (error count, capacity percentage) |
-| Not validating decoded data after RS | RS may "correct" to garbage | Validate decoded content format matches expected pattern |
-| Trusting worker-reported error counts | Worker could be manipulated | Not a real risk for browser-local tool, but don't trust for server-side |
-
-## UX Pitfalls
-
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Showing raw error count without context | "5 errors" means nothing without knowing capacity | Show "5/10 errors used (50%)" |
-| Not indicating multi-block breakdown | User doesn't understand why "low total errors" QR fails | Show per-block health bars or breakdown |
-| RS errors only on success | User can't understand failed attempts | Show "Failed: 15 errors detected, capacity is 10" |
-| Hiding module diff vs RS error distinction | User confuses two different concepts | Clearly label: "Pixels changed: 50" vs "RS corrections: 3" |
+| Phase | Topic | Likely Pitfall | Mitigation |
+|-------|-------|----------------|------------|
+| 1 | Capacity Display | Wrong formula (not dividing by 2) | Test against spec table |
+| 1 | Capacity Display | Off-by-one version lookup | Test version 2+ explicitly |
+| 2 | SVG Export | Colors don't match canvas | Use same color constants |
+| 2 | SVG Export | Painted regions missing | Include paint state in render |
+| 2 | SVG Export | viewBox/size mismatch | Test in multiple apps |
+| 3 | Shift+Paint | Separate key listener stale state | Use event.shiftKey |
+| 3 | Shift+Paint | Conflicts with right-click | Define relationship clearly |
+| 3 | Shift+Paint | Debounce blocks modifier change | Include modifier in debounce key |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **RS error extraction:** Often only extracts on success — verify failure cases return error count too
-- [ ] **Multi-block handling:** Often tested only on Version 1 — verify Version 5+ QRs work correctly
-- [ ] **Worker propagation:** Often main thread works but worker doesn't — test worker decode path explicitly
-- [ ] **Call chain complete:** Often only innermost function modified — verify jsQR() public API returns errors
-- [ ] **Message serialization:** Often fields lost in postMessage — log both sides to confirm
-- [ ] **Capacity calculation:** Often hardcoded — verify capacity is dynamic based on QR version/level
-- [ ] **Error count validation:** Often trusts decoder completely — verify against theoretical capacity
-
-## Recovery Strategies
-
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| jsQR modification incomplete (missing call chain) | LOW | Map call chain, update remaining functions, re-test |
-| Worker not getting modified jsQR | LOW | Fix extraction selector, verify with console log |
-| Aggregate-only error count (no per-block) | MEDIUM | Refactor return type throughout chain, update callers |
-| Message format doesn't include errors | LOW | Update message structure, update handler |
-| Only success cases return error count | MEDIUM | Refactor RS decode to always return metrics, handle in callers |
-| Tests missing edge cases | LOW | Add test cases, may find existing bugs |
-
-## Pitfall-to-Phase Mapping
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| jsQR doesn't expose RS errors | Phase 1 (jsQR Modification) | jsQR() return includes errorCount field |
-| Module vs codeword confusion | Phase 2 (Metrics Integration) | UI shows both metrics separately |
-| Error count exceeds capacity | Phase 2 (Metrics Integration) | Validation warns when errors approach limit |
-| Worker doesn't get modified jsQR | Phase 1 (jsQR Modification) | Worker decode returns error count |
-| Only success returns error count | Phase 1 (jsQR Modification) | Failed decodes include error metrics |
-| Per-block info lost | Phase 2 (Metrics Integration) | Block-level breakdown available |
-| Minified jsQR breaks | Phase 1 (jsQR Modification) | All call chain points updated |
-| Message serialization loses data | Phase 3 (Worker Integration) | postMessage includes error metrics |
-| Syndrome shows 0 for changed QR | Phase 2 (Metrics Integration) | Module diff tracked separately |
-| Only testing happy path | Phase 1 (jsQR Modification) | Test suite covers failure cases |
+- [ ] **Capacity formula:** Divides EC codewords by 2, not using raw value
+- [ ] **Version lookup:** Tested with Version 2+ (catches off-by-one)
+- [ ] **Level H hardcoded:** Not over-engineering for L/M/Q
+- [ ] **SVG colors:** Match canvas exactly
+- [ ] **SVG painted regions:** Included in export
+- [ ] **SVG file naming:** Includes timestamp or identifier
+- [ ] **Shift detection:** Using event.shiftKey, not separate listener
+- [ ] **Shift + right-click:** Behavior defined
+- [ ] **Touch fallback:** Documented that Shift is desktop-only shortcut
 
 ## Sources
 
-**jsQR Source Analysis:**
-- Inlined jsQR library in `/workspace/index.html` lines 2079-13147
-- RS decoder function: lines 10754-10808
-- `decodeMatrix()`: lines 3190-3238
-- `decode(matrix)`: lines 3240-3258
-- Public `jsQR()`: lines 2521-2552
-- Worker extraction: lines 14396-14400
+**MDN Documentation (authoritative):**
+- [KeyboardEvent.shiftKey](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/shiftKey) — "Widely available since July 2015"
+- [MouseEvent.shiftKey](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey) — Inherited by PointerEvent
+- [SVG Tutorial: Getting Started](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorials/SVG_from_scratch/Getting_started)
+- [Element: contextmenu event](https://developer.mozilla.org/en-US/docs/Web/API/Element/contextmenu_event) — Firefox Shift+right-click note
 
-**Reed-Solomon Theory:**
-- [Reed-Solomon codes for coders - Wikiversity](https://en.wikiversity.org/wiki/Reed%E2%80%93Solomon_codes_for_coders)
-- [Error detection and correction - Wikipedia](https://en.wikipedia.org/wiki/Error_detection_and_correction)
-- Correction capacity: t = ecCodewordsPerBlock / 2 (can correct t codewords)
+**QR Code RS Specification:**
+- [Thonky QR Tutorial: Error Correction](https://www.thonky.com/qr-code-tutorial/error-correction-coding)
+- RS_BLOCK_TABLE structure: `/workspace/index.html` lines 1568-1729
+- Correction capacity formula: `t = ecCodewordsPerBlock / 2`
 
-**QR Code Structure:**
-- QR version info structure: lines 10817-13147
-- Error correction levels: L=0, M=1, Q=2, H=3 (mapped in FORMAT_INFO_TABLE)
-- Multi-block structure: Version 3+ uses multiple RS blocks
-
-**Worker Architecture:**
-- Worker code generation: `createOptimizationWorker()` line 14396
-- Blob URL creation: line 15556-15557
-- Message handler: `createWorkerMessageHandler()` line 15458
+**Existing Codebase Analysis:**
+- Paint event handling: `/workspace/index.html` lines 13553-13604
+- `getPaintValue()` function: lines 13469-13482
+- Color constants: lines 13606-13611
+- QRCode library SVG generation: lines 1820-1878
+- Version table lookup: lines 1745-1758
 
 ---
-*Pitfalls research for: Reed-Solomon Error Extraction for QR Code Measurement*
-*Researched: 2026-02-16*
+*Pitfalls research for: v1.5 Feature Additions (Capacity Display, SVG Export, Shift+Paint)*
+*Researched: 2026-02-17*

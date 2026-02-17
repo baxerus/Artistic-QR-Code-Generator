@@ -1,3 +1,409 @@
+# Architecture Research: v1.5 Feature Integration
+
+**Domain:** QR Art Tool - Feature Integration for v1.5
+**Researched:** 2026-02-17 (updated from 2026-02-16)
+**Confidence:** HIGH
+**Scope:** Integration points for corrections capacity display, SVG export, and Shift+paint shortcut
+
+---
+
+## Executive Summary (v1.5 Features)
+
+All three v1.5 features integrate cleanly with the existing single-file architecture. Each feature has clear integration points, minimal code changes, and no cross-feature dependencies—enabling parallel development.
+
+| Feature | Integration Point | New Code | Modified Code | Complexity |
+|---------|-------------------|----------|---------------|------------|
+| Corrections Capacity | Result card label | ~40 lines | 3-5 lines | LOW |
+| SVG Export | Action buttons | ~60 lines | 1-2 lines | LOW |
+| Shift+Paint | Event handlers | ~30 lines | 5-8 lines | LOW |
+
+---
+
+# Feature 1: Corrections Capacity Display
+
+## The Question
+"Where to calculate/store max corrections capacity (needs QR version context)?"
+
+## Answer: Calculate On-Demand from VERSIONS Table
+
+**Key insight:** The `VERSIONS` table (lines 10856-12800) already contains all data needed to compute max corrections capacity. No additional storage required—compute when rendering the label.
+
+### Data Flow
+
+```
+Result Card Created
+    ↓
+updateTopResults() called with result containing:
+  - rsCorrections (current count)
+  - moduleCount → derive version
+    ↓
+Compute maxCapacity from VERSIONS[version-1].errorCorrectionLevels[3]
+    ↓
+Display: "Corrections: 5 / 17"
+```
+
+### Integration Points
+
+#### Location 1: VERSIONS Table Access (READ-ONLY)
+
+The VERSIONS table at line 10856 in the jsQR decoder module is the authoritative source:
+
+```javascript
+// Line 10856-10878 (Version 1 example)
+exports.VERSIONS = [
+  {
+    versionNumber: 1,
+    errorCorrectionLevels: [
+      // Index 0: L level
+      { ecCodewordsPerBlock: 7, ecBlocks: [{ numBlocks: 1, ... }] },
+      // Index 1: M level  
+      { ecCodewordsPerBlock: 10, ... },
+      // Index 2: Q level
+      { ecCodewordsPerBlock: 13, ... },
+      // Index 3: H level (used by this app)
+      { ecCodewordsPerBlock: 17, ecBlocks: [{ numBlocks: 1, ... }] }
+    ]
+  },
+  // ... versions 2-40
+];
+```
+
+**Max correction capacity formula:**
+```
+maxCapacity = sum(ecBlocks.map(b => b.numBlocks * ecCodewordsPerBlock)) / 2
+```
+
+The `/2` is because RS can correct up to half the EC codewords.
+
+#### Location 2: Result Label Creation (MODIFY)
+
+**File:** `index.html`  
+**Function:** `updateTopResults()` (line 16163)  
+**Specific location:** Lines 16269-16277 where correctionSpan is created
+
+**Current code:**
+```javascript
+// Lines 16269-16276
+const correctionSpan = document.createElement("span");
+correctionSpan.className = "errors";
+correctionSpan.title = "Number of Reed-Solomon error corrections...";
+const rsDisplay = result.rsCorrections === Infinity ? "-" : result.rsCorrections;
+correctionSpan.innerHTML = `Corrections: <b>${rsDisplay}</b>`;
+```
+
+**Modified approach:**
+```javascript
+// NEW: Add helper function (near line 15930, with other utility functions)
+function getMaxCorrectionsCapacity(version) {
+  const versionInfo = jsQR._VERSIONS ? jsQR._VERSIONS[version - 1] : null;
+  if (!versionInfo) return null;
+  
+  // Error correction level 3 = H (hardcoded in this app)
+  const ecInfo = versionInfo.errorCorrectionLevels[3];
+  
+  // Sum total EC codewords and compute max corrections
+  let totalEcCodewords = 0;
+  for (const block of ecInfo.ecBlocks) {
+    totalEcCodewords += block.numBlocks * ecInfo.ecCodewordsPerBlock;
+  }
+  return Math.floor(totalEcCodewords / 2);
+}
+
+// MODIFY: Line 16274-16276
+const maxCapacity = getMaxCorrectionsCapacity(currentVersion);
+const rsDisplay = result.rsCorrections === Infinity ? "-" : result.rsCorrections;
+const capacityDisplay = maxCapacity ? ` / ${maxCapacity}` : "";
+correctionSpan.innerHTML = `Corrections: <b>${rsDisplay}${capacityDisplay}</b>`;
+```
+
+#### Location 3: Expose VERSIONS (ONE-TIME SETUP)
+
+The VERSIONS table is inside the jsQR webpack bundle. Need to expose it at end of jsQR section (~line 12805):
+
+```javascript
+// Expose VERSIONS for capacity calculation
+jsQR._VERSIONS = exports.VERSIONS;
+```
+
+### Build Order
+This feature is **self-contained**. Can be built independently.
+
+---
+
+# Feature 2: SVG Export
+
+## The Question
+"Where to add SVG generation (parallel to PNG export)?"
+
+## Answer: Add Alongside Existing PNG Export Functions
+
+### Data Flow
+
+```
+"Download SVG" button clicked
+    ↓
+renderResultToSVG(moduleData, moduleCount)  // NEW function
+    ↓
+Generate SVG string from module data
+    ↓
+downloadAsFile(svgString, filename, 'image/svg+xml')
+```
+
+### Integration Points
+
+#### Location 1: New SVG Render Function (ADD)
+
+**Insert near:** Line 15957 (after `renderResultToCanvas`)
+
+```javascript
+/**
+ * Render result's moduleData to an SVG string
+ * @param {Uint8Array|Array} moduleData - Module data (0=white, 1=black)
+ * @param {number} moduleCount - QR code dimensions
+ * @returns {string} SVG markup string
+ */
+function renderResultToSVG(moduleData, moduleCount) {
+  // Use path with move commands for smaller file
+  let pathData = '';
+  for (let y = 0; y < moduleCount; y++) {
+    for (let x = 0; x < moduleCount; x++) {
+      if (moduleData[y * moduleCount + x] === 1) {
+        pathData += `M${x},${y}h1v1h-1z`;
+      }
+    }
+  }
+  
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${moduleCount} ${moduleCount}">`,
+    `<rect width="${moduleCount}" height="${moduleCount}" fill="white"/>`,
+    `<path d="${pathData}" fill="black"/>`,
+    '</svg>'
+  ].join('');
+}
+```
+
+#### Location 2: Generic Download Helper (ADD)
+
+```javascript
+/**
+ * Download data as file
+ * @param {string|Blob} data - File content
+ * @param {string} filename - Filename with extension
+ * @param {string} mimeType - MIME type for string data
+ */
+function downloadAsFile(data, filename, mimeType) {
+  const blob = typeof data === 'string' 
+    ? new Blob([data], { type: mimeType })
+    : data;
+  
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+```
+
+#### Location 3: Add SVG Button to Result Cards (MODIFY)
+
+**Function:** `updateTopResults()` (line 16163)  
+**Location:** Lines 16300-16320 where action buttons are created
+
+```javascript
+// After downloadBtn creation, add SVG button
+const svgBtn = document.createElement("button");
+svgBtn.textContent = "Download SVG";
+svgBtn.disabled = isRunning;
+svgBtn.onclick = () => {
+  const svg = renderResultToSVG(result.moduleData, result.moduleCount);
+  downloadAsFile(svg, `${sanitizedUrl}.svg`, 'image/svg+xml');
+};
+
+actions.appendChild(downloadBtn);
+actions.appendChild(svgBtn);  // NEW
+actions.appendChild(copyBtn);
+```
+
+### Build Order
+This feature is **self-contained**. Can be built independently.
+
+---
+
+# Feature 3: Shift+Paint Shortcut
+
+## The Question
+"Where to intercept Shift key in painting flow?"
+
+## Answer: Modify `setupPaintingEvents()` and `getPaintValue()`
+
+### Data Flow
+
+```
+User holds Shift + clicks/drags
+    ↓
+pointerdown fires with event.shiftKey = true
+    ↓
+Capture shiftKey state for the stroke
+    ↓
+getPaintValue() receives shiftKey flag
+    ↓
+Returns inverted color (Shift inverts black↔white)
+```
+
+### Integration Points
+
+#### Location 1: Add State Variable (ADD)
+
+**Near existing state variables** (around line 13364):
+```javascript
+let currentShiftState = false;  // Track Shift during paint stroke
+```
+
+#### Location 2: setupPaintingEvents (MODIFY)
+
+**Function:** `setupPaintingEvents()` (line 13555)
+
+**Modify pointerdown handler** (lines 13559-13575):
+```javascript
+container.addEventListener("pointerdown", function (e) {
+  // ... existing checks ...
+  
+  currentShiftState = e.shiftKey;  // Capture Shift state at stroke start
+  
+  // ... rest of handler ...
+  paintAt(coords.x, coords.y, currentPaintButton, currentShiftState);
+});
+```
+
+**Modify pointermove handler** (lines 13577-13585):
+```javascript
+container.addEventListener("pointermove", function (e) {
+  if (!isPainting) return;
+  
+  const canvas = container.querySelector("canvas");
+  if (canvas) {
+    const coords = getGridCoordinates(canvas, e);
+    paintAt(coords.x, coords.y, currentPaintButton, currentShiftState);
+  }
+});
+```
+
+#### Location 3: paintAt (MODIFY)
+
+**Function:** `paintAt()` (line 13509)
+
+Change signature:
+```javascript
+function paintAt(x, y, button, shiftKey = false) {
+```
+
+Update call:
+```javascript
+const paintValue = getPaintValue(button, shiftKey);
+```
+
+#### Location 4: getPaintValue (MODIFY)
+
+**Function:** `getPaintValue()` (line 13469)
+
+```javascript
+function getPaintValue(button, shiftKey = false) {
+  let paintValue;
+  
+  if (button === 0) {
+    if (selectedColor === "black") paintValue = 2;
+    else if (selectedColor === "white") paintValue = 1;
+    else paintValue = 0;
+  } else if (button === 2) {
+    if (selectedColor === "unset") paintValue = 0;
+    else if (selectedColor === "black") paintValue = 1;
+    else paintValue = 2;
+  } else {
+    return null;
+  }
+  
+  // Shift inverts black↔white, unset stays unset
+  if (shiftKey && paintValue !== 0) {
+    paintValue = paintValue === 1 ? 2 : 1;
+  }
+  
+  return paintValue;
+}
+```
+
+### Design Decision: Capture Shift at Stroke Start
+
+**Why capture at pointerdown, not check on each move?**
+1. **Consistent stroke behavior** - Once started, stroke paints consistently
+2. **Matches right-click behavior** - Right-click locks in opposite for whole stroke
+3. **Prevents accidents** - Can't accidentally switch colors mid-stroke
+
+### Build Order
+This feature is **self-contained**. Can be built independently.
+
+---
+
+# Architecture Summary
+
+## New Functions to Add
+
+| Function | Lines | Purpose |
+|----------|-------|---------|
+| `getMaxCorrectionsCapacity(version)` | ~15 | Compute max RS capacity from VERSIONS |
+| `renderResultToSVG(moduleData, moduleCount)` | ~20 | Generate SVG from module data |
+| `downloadAsFile(data, filename, mimeType)` | ~15 | Generic file download helper |
+
+## Existing Functions to Modify
+
+| Function | Lines Changed | Modification |
+|----------|---------------|--------------|
+| `updateTopResults()` | ~5 | Add capacity to label, add SVG button |
+| `paintAt()` | 2 | Add shiftKey parameter |
+| `getPaintValue()` | ~10 | Add shiftKey parameter, invert logic |
+| `setupPaintingEvents()` | 4 | Track and pass shiftKey |
+
+## No Changes Needed To
+
+- Worker code (results already have rsCorrections)
+- QR generation (version context already exists via currentVersion)
+- jsQR decoder (RS modifications already done in Milestone 2)
+- CSS (existing styles handle additional button via flex-wrap)
+
+---
+
+# Build Order Recommendations
+
+## Parallel Build (Preferred)
+
+All three features have **zero dependencies** on each other. They can be built in parallel or any order.
+
+## Sequential Build (If Needed)
+
+If building sequentially, suggested order by risk:
+
+1. **Shift+Paint** (lowest risk) - Purely UI, can't break anything
+2. **SVG Export** (low risk) - Additive, parallel to PNG
+3. **Corrections Capacity** (low risk) - Read-only from existing data
+
+## Testing Strategy
+
+| Feature | Test Approach |
+|---------|---------------|
+| Corrections Capacity | Verify display format, check values against QR spec for known versions |
+| SVG Export | Open in browser, compare visually to PNG, test with scanner apps |
+| Shift+Paint | Manual test: hold Shift while painting, verify inverted color |
+
+---
+
+# APPENDIX: Original RS Integration Research (Milestone 2)
+
+*The following is the original architecture research for RS error correction count integration, preserved for reference.*
+
+---
+
 # Architecture Research: RS Error Correction Integration
 
 **Domain:** QR Code optimization with Reed-Solomon error correction metrics

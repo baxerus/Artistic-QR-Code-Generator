@@ -1,247 +1,387 @@
-# Feature Research: RS Error Correction Exposure
+# Feature Research: v1.5 UX & Export Enhancements
 
-**Domain:** QR Error Measurement for Artistic QR Code Generator
-**Researched:** 2026-02-16
-**Confidence:** HIGH (based on jsQR source code analysis + QR standard documentation)
+**Domain:** QR Art Tool UX improvements
+**Researched:** 2026-02-17
+**Confidence:** HIGH (based on existing codebase analysis, MDN documentation, standard UX patterns)
 
 ## Context
 
-This is milestone-specific research for adding Reed-Solomon error correction count display to an existing Artistic QR Code Generator. The app already has:
-- Hash optimization search across multiple workers
-- Pixel diff error counting (comparing painted vs generated QR modules)
-- Top 10 results display with error visualization
-- Auto-stop when 5 perfect results found (currently: 0 pixel errors)
+This is milestone-specific research for v1.5 features being added to an existing Artistic QR Code Generator. The app already has:
+- RS correction count display ("Corrections: N")
+- PNG download button per result card
+- Left-click/right-click painting with legend-based color selection
+- Drag painting support with pointer capture
 
-**Goal:** Measure actual RS correction burden so users know how much error correction headroom remains.
+**Goal:** Add three UX enhancements:
+1. "X of Y" capacity indicator for RS corrections
+2. SVG export button alongside existing PNG export
+3. Shift+paint keyboard shortcut for opposite color painting
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+### Feature 1: RS Corrections Capacity Indicator
 
-Features users assume exist when a tool claims to measure RS errors.
+#### Table Stakes (Users Expect These)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| RS correction count displayed | Core promised feature; "how many bytes did the decoder correct?" | MEDIUM | Requires modifying jsQR decode function to expose `errorLocations.length` |
-| RS count visible on result cards | Consistency with existing pixel diff display | LOW | Add to existing result card UI pattern |
-| Clear labeling ("RS corrections" or "Codewords corrected") | Users need to understand what the number means | LOW | Terminology should match QR spec ("codewords") or be user-friendly |
-| Sortable/ranked by RS corrections | Users want best results first; RS is primary quality metric | LOW | Already have sorting logic; add RS as primary key |
-| Zero RS = truly perfect | Perfect result means both pixel diff=0 AND RS corrections=0 | LOW | Update auto-stop condition to check both metrics |
+| Show current RS corrections | Already have ("Corrections: N") | DONE | Existing implementation |
+| Show maximum capacity | Users want to know "how much headroom remains" | LOW | Requires lookup table by version+EC level |
+| Clear "X of Y" or "X/Y" format | Standard UX pattern for capacity | LOW | Match existing label style |
 
-### Differentiators (Competitive Advantage)
-
-Features that add value beyond basic RS exposure.
+#### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| RS capacity indicator | "X of Y possible corrections used" shows headroom remaining | MEDIUM | Requires lookup table: EC level + version -> max corrections per block |
-| Per-block RS breakdown | Show corrections per data block (QR uses multiple RS blocks) | HIGH | Would need to aggregate from each `dataBlock` decode; adds complexity |
-| Visual RS health bar | Progress bar showing 0% (perfect) to 100% (at capacity) | LOW | Simple UI addition once we have count and max |
-| RS vs pixel diff comparison | Show both metrics side-by-side for education | LOW | Already planned; helps users understand pixel!=codeword |
-| Explanation tooltip | "RS corrections measure codewords fixed, not pixels changed" | LOW | Educational; reduces confusion |
+| Visual progress bar | Quick visual assessment of headroom | MEDIUM | Optional; text is sufficient for v1.5 |
+| Color coding (green/yellow/red) | Instant "is this safe?" feedback | LOW | Nice but not essential |
+| Per-block breakdown | Technical users may want detail | HIGH | Defer - total count is sufficient |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+#### Anti-Features
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| "Exact RS error locations" visualization | "Show me exactly which bytes were corrected" | RS works at codeword level, not pixel level; byte positions don't map cleanly to visual pixels | Show pixel diff for visual conflicts; RS count for scannability margin |
-| Per-module RS attribution | "Which painted pixel caused which RS correction?" | RS corrects bytes, not modules; no 1:1 correspondence; would be misleading | Keep pixel diff for "which pixels mismatch"; RS for overall health |
-| RS success probability | "What's the chance this will scan?" | Depends on scanner implementation, viewing conditions, print quality—too many variables | RS count relative to capacity is the honest metric |
-| Force decode mode | "Decode even if RS fails" | If RS can't recover, data is corrupted; returning garbage isn't useful | Show "decode failed" clearly; that's valuable information |
-| Alternative EC level support | "Let me choose L/M/Q for higher capacity" | Artistic corruption needs H (30% tolerance); lower levels fail immediately | Document why H is required; don't offer false flexibility |
+| Feature | Why Avoid | Alternative |
+|---------|-----------|-------------|
+| Percentage display only | "75% capacity" loses precision; X/Y is clearer | Show both count and total |
+| Predicted success probability | Too many scanner-dependent variables | Show raw RS usage instead |
+
+#### Display Format Options
+
+| Format | Example | Pros | Cons |
+|--------|---------|------|------|
+| "RS: X of Y" | "RS: 3 of 30" | Clear, matches existing | Slightly longer |
+| "RS: X/Y" | "RS: 3/30" | Compact | May look like fraction |
+| "X corrections (Y max)" | "3 corrections (30 max)" | Very explicit | Verbose |
+
+**Recommendation:** `RS: X of Y` format - clear, consistent with existing "Corrections: N" label style, easily understood.
+
+#### RS Capacity Lookup
+
+QR error correction capacity depends on version and EC level. App uses EC level H exclusively.
+
+| Version | Total Codewords | EC Codewords (Level H) | Max Correctable* |
+|---------|-----------------|------------------------|------------------|
+| 1 | 26 | 17 | 8 |
+| 2 | 44 | 28 | 14 |
+| 3 | 70 | 44 | 22 |
+| 4 | 100 | 64 | 32 |
+| 5 | 134 | 88 | 44 |
+| 6 | 172 | 112 | 56 |
+| 7 | 196 | 130 | 65 |
+| 8 | 242 | 156 | 78 |
+| 9 | 292 | 192 | 96 |
+| 10 | 346 | 224 | 112 |
+
+*Max correctable = EC codewords / 2 (RS can correct t errors using 2t parity bytes)
+
+**Implementation:** Lookup table keyed by version, returns max correctable for level H.
+
+```javascript
+// RS capacity lookup for EC level H
+const RS_CAPACITY_H = {
+  1: 8, 2: 14, 3: 22, 4: 32, 5: 44,
+  6: 56, 7: 65, 8: 78, 9: 96, 10: 112,
+  // Continue for versions 11-40 if needed
+};
+
+function getRSCapacity(version) {
+  return RS_CAPACITY_H[version] || null;
+}
+```
+
+#### Dependencies on Existing Features
+
+- **Requires:** `result.rsCorrections` field (already available from Phase 12)
+- **Requires:** `currentVersion` (already tracked globally)
+- **Integrates with:** Result card display (lines 16259-16289)
+
+---
+
+### Feature 2: SVG Export Button
+
+#### Table Stakes (Users Expect These)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Download SVG button | Users expect format choice for vector vs raster | LOW | New button alongside PNG |
+| Vector-crisp output | SVG should scale infinitely | LOW | QR is grid-based, maps to rects |
+| Same filename pattern | Consistency with PNG export | LOW | Just change extension |
+| Works on all result cards | Consistency with existing PNG button | LOW | Same integration pattern |
+
+#### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Embedded metadata | URL in SVG comments | LOW | Nice for traceability |
+| Custom dimensions dialog | Let user specify output size | MEDIUM | Defer - SVG scales anyway |
+| Styled modules (rounded corners) | Artistic flair | HIGH | Out of scope for v1.5 |
+
+#### Anti-Features
+
+| Feature | Why Avoid | Alternative |
+|---------|-----------|-------------|
+| Canvas-to-SVG conversion | Rasterizes, defeats purpose | Generate SVG from moduleData directly |
+| Complex path optimization | Over-engineering for grid | Simple rect elements |
+| Inline CSS in SVG | Browser compatibility issues | Use attributes |
+
+#### SVG Generation Pattern
+
+QR codes map perfectly to SVG: each module becomes a `<rect>` element.
+
+```javascript
+function generateQRSvg(moduleData, moduleCount, pixelSize = 10) {
+  const size = moduleCount * pixelSize;
+  let rects = '';
+  
+  for (let y = 0; y < moduleCount; y++) {
+    for (let x = 0; x < moduleCount; x++) {
+      if (moduleData[y * moduleCount + x] === 1) { // Black module
+        rects += `<rect x="${x * pixelSize}" y="${y * pixelSize}" width="${pixelSize}" height="${pixelSize}" fill="black"/>`;
+      }
+    }
+  }
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  <rect width="100%" height="100%" fill="white"/>
+  ${rects}
+</svg>`;
+}
+```
+
+#### Download Pattern
+
+Use same Blob+download pattern as PNG export:
+
+```javascript
+function downloadSvg(svgString, filename) {
+  const blob = new Blob([svgString], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}.svg`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+#### Button Placement
+
+Current result card actions (line 16298-16328):
+```
+[Download PNG] [Copy URL]
+```
+
+After v1.5:
+```
+[Download PNG] [Download SVG] [Copy URL]
+```
+
+#### Dependencies on Existing Features
+
+- **Requires:** `result.moduleData` (already available)
+- **Requires:** `result.moduleCount` (already available)
+- **Integrates with:** Result actions container (line 16298)
+- **Pattern follows:** Existing `downloadCanvasAsPNG()` pattern
+
+---
+
+### Feature 3: Shift+Paint Keyboard Shortcut
+
+#### Table Stakes (Users Expect These)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Shift+click paints opposite color | Standard drawing app convention | LOW | Check `event.shiftKey` |
+| Works with drag painting | Consistent with existing drag | LOW | Check shiftKey on each event |
+| Visual feedback that Shift is held | Users know mode is active | LOW-MEDIUM | Optional cursor change or legend highlight |
+
+#### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Cursor change when Shift held | Visual confirmation | MEDIUM | CSS cursor + keydown/keyup listeners |
+| Legend indicator | Show which color will paint | LOW | Highlight opposite legend button |
+| Keyboard shortcut for colors (B/W/U) | Power user efficiency | MEDIUM | Defer to v1.6 |
+
+#### Anti-Features
+
+| Feature | Why Avoid | Alternative |
+|---------|-----------|-------------|
+| Hold-to-toggle (releases on mouseup) | Unpredictable behavior | Shift+click = discrete opposite |
+| Ctrl modifier | Reserved for zoom/pan in browsers | Use Shift |
+| Alt modifier | Reserved for browser menus | Use Shift |
+
+#### Behavior Matrix
+
+Current behavior (from `getPaintValue()` at lines 13464-13482):
+
+| Action | Selected Color | Result |
+|--------|----------------|--------|
+| Left-click | Black | Paint black |
+| Left-click | White | Paint white |
+| Left-click | Unset | Paint unset |
+| Right-click | Black | Paint white (opposite) |
+| Right-click | White | Paint black (opposite) |
+| Right-click | Unset | Paint unset |
+
+**With Shift modifier:**
+
+| Action | Selected Color | Result |
+|--------|----------------|--------|
+| Shift+Left-click | Black | Paint white (opposite) |
+| Shift+Left-click | White | Paint black (opposite) |
+| Shift+Left-click | Unset | Paint unset (no opposite) |
+| Shift+Right-click | Black | Paint black (reverts to normal) |
+| Shift+Right-click | White | Paint white (reverts to normal) |
+
+**Simplest implementation:** Treat Shift+Left-click same as Right-click.
+
+```javascript
+function getPaintValue(button, shiftKey = false) {
+  // Shift+left-click behaves like right-click (paints opposite)
+  const effectiveButton = (button === 0 && shiftKey) ? 2 : button;
+  
+  if (effectiveButton === 0) {
+    // Left click: paint selected color
+    if (selectedColor === "black") return 2;
+    if (selectedColor === "white") return 1;
+    if (selectedColor === "unset") return 0;
+  } else if (effectiveButton === 2) {
+    // Right click (or Shift+left): paint opposite
+    if (selectedColor === "unset") return 0;
+    if (selectedColor === "black") return 1;
+    if (selectedColor === "white") return 2;
+  }
+  return null;
+}
+```
+
+#### Event Handler Changes
+
+In `pointerdown` handler (line 13559):
+```javascript
+container.addEventListener("pointerdown", function (e) {
+  // ...
+  paintAt(coords.x, coords.y, currentPaintButton, e.shiftKey);
+});
+```
+
+In `pointermove` handler (line 13577):
+```javascript
+container.addEventListener("pointermove", function (e) {
+  // ...
+  paintAt(coords.x, coords.y, currentPaintButton, e.shiftKey);
+});
+```
+
+#### Visual Feedback (Optional Enhancement)
+
+Simplest: Change cursor to "crosshair" when Shift is held.
+
+```javascript
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Shift') {
+    container.style.cursor = 'crosshair';
+  }
+});
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'Shift') {
+    container.style.cursor = 'pointer';
+  }
+});
+```
+
+#### Dependencies on Existing Features
+
+- **Modifies:** `getPaintValue()` function (lines 13464-13482)
+- **Modifies:** `pointerdown`/`pointermove` handlers (lines 13559-13584)
+- **Integrates with:** Existing painting system
+- **Non-breaking:** Existing behavior preserved when Shift not held
+
+---
 
 ## Feature Dependencies
 
 ```
-[Existing Pixel Diff System]
-    └──integrates-with──> [RS Correction Count]
-                              └──requires──> [Modified jsQR decode function]
-                                                 └──exposes──> [errorLocations.length per block]
+[Existing RS Display]
+    └── extends-to ──> [RS Capacity Indicator]
+                           └── requires ──> [Version lookup table]
+                           └── requires ──> [currentVersion state]
 
-[RS Correction Count]
-    └──enables──> [Dual-metric ranking (RS primary, pixel diff secondary)]
-                      └──enables──> [Updated auto-stop condition (RS=0 AND pixelDiff=0)]
+[Existing PNG Export]
+    └── parallel-to ──> [SVG Export]
+                           └── requires ──> [moduleData from result]
+                           └── uses ──> [same download pattern]
 
-[RS Correction Count]
-    └──enables──> [RS Capacity Indicator] (optional enhancement)
-                      └──requires──> [EC capacity lookup table]
+[Existing Paint System]
+    └── extends-to ──> [Shift+Paint Shortcut]
+                           └── modifies ──> [getPaintValue() function]
+                           └── modifies ──> [pointer event handlers]
 ```
 
-### Dependency Notes
+---
 
-- **RS count requires jsQR modification:** The inlined jsQR library returns corrected bytes but discards `errorLocations.length`. We need to modify the RS decoder to return this count alongside the data.
-- **Dual-metric ranking depends on RS count:** Can't rank by RS until we have it. Existing pixel diff remains useful as tiebreaker.
-- **Auto-stop condition depends on both metrics:** "Perfect" result now means RS=0 AND pixelDiff=0, not just pixelDiff=0.
-- **RS capacity indicator is optional:** Nice to have but not required for core milestone.
+## MVP Definition (v1.5)
 
-## MVP Definition (This Milestone)
+### Launch With
 
-### Launch With (v1.4)
+- [x] RS capacity indicator showing "RS: X of Y" format
+- [x] SVG export button on result cards
+- [x] Shift+left-click paints opposite color
 
-- [x] Modify jsQR RS decoder to return correction count per block — **Essential**
-- [x] Aggregate total RS corrections across all blocks — **Essential**
-- [x] Display RS correction count on result cards — **Essential**
-- [x] Sort results by RS corrections (primary), pixel diff (secondary) — **Essential**
-- [x] Update auto-stop to require RS=0 AND pixelDiff=0 — **Essential**
-- [ ] Clear labeling distinguishing RS corrections from pixel diff — **Essential**
+### Add After Validation (v1.5.x)
 
-### Add After Validation (v1.4.x)
-
-- [ ] RS capacity indicator ("X of Y corrections used") — **Trigger**: Users ask "is this close to failing?"
-- [ ] Visual health bar for RS margin — **Trigger**: Users want quick visual assessment
-- [ ] Explanation tooltip for RS vs pixel diff — **Trigger**: Users confused by two different numbers
+- [ ] Visual health bar for RS capacity (Trigger: users want quick visual)
+- [ ] Color-coded RS capacity (Trigger: users want warning when near limit)
+- [ ] Cursor change when Shift held (Trigger: users confused about mode)
+- [ ] Keyboard shortcuts for color selection (Trigger: power user requests)
 
 ### Future Consideration (v2+)
 
-- [ ] Per-block RS breakdown display — **Why defer**: Adds UI complexity; total count is sufficient
-- [ ] RS correction trend graph — **Why defer**: Overkill for artistic QR use case
+- [ ] Per-block RS breakdown (Why defer: adds complexity, total count is sufficient)
+- [ ] Custom SVG styling options (Why defer: out of scope for utility tool)
+- [ ] Multiple modifier keys for paint modes (Why defer: complexity)
 
-## Technical Details
+---
 
-### How QR RS Error Correction Works
+## Complexity Assessment
 
-**Key insight:** RS correction happens at the *codeword* (byte) level, not pixel level.
+| Feature | Complexity | Estimated Changes | Risk |
+|---------|------------|-------------------|------|
+| RS Capacity Indicator | LOW | ~30 lines (lookup table + display update) | None |
+| SVG Export Button | LOW | ~50 lines (SVG generator + button handler) | None |
+| Shift+Paint Shortcut | LOW | ~15 lines (event handler updates) | None |
 
-1. QR data is encoded as 8-bit codewords (bytes)
-2. RS redundancy codewords are appended for each data block
-3. Decoder calculates syndromes to detect errors
-4. If syndromes are non-zero, RS algorithm locates and corrects errors
-5. **Number of corrections = `errorLocations.length`** in jsQR code
+**Total estimated changes:** ~95 lines across 3 features.
 
-**Correction capacity by EC level:**
-- Level L: ~7% of codewords correctable
-- Level M: ~15% of codewords correctable
-- Level Q: ~25% of codewords correctable
-- Level H: ~30% of codewords correctable (our hardcoded level)
-
-### jsQR RS Decoder Location
-
-In inlined jsQR (index.html lines ~10754-10808):
-
-```javascript
-function decode(bytes, twoS) {
-  // ... syndrome calculation ...
-  if (!error) {
-    return outputBytes;  // No errors, returns without count
-  }
-  // ... error location finding ...
-  var errorLocations = findErrorLocations(field, sigmaOmega[0]);
-  // errorLocations.length IS THE RS CORRECTION COUNT
-  // ... error magnitude calculation and correction ...
-  return outputBytes;  // Currently only returns bytes, not count
-}
-```
-
-**Modification needed:** Return `{ bytes: outputBytes, correctionCount: errorLocations ? errorLocations.length : 0 }` instead of just `outputBytes`.
-
-### Pixel Diff vs RS Corrections
-
-| Metric | What It Measures | Why It Matters |
-|--------|------------------|----------------|
-| **Pixel diff** | Modules where painted pattern disagrees with QR encoding | Visual conflict count; shows where art interferes with QR |
-| **RS corrections** | Codewords the decoder had to fix | Actual scannability burden; measures error correction usage |
-
-**They're not the same because:**
-- One painted pixel might cause 0 RS corrections (if it happens to match what RS would produce anyway)
-- One painted pixel might cause multiple RS corrections (if it corrupts data spanning byte boundaries)
-- Multiple painted pixels might cause 1 RS correction (if they all corrupt the same codeword)
-
-**Display strategy:** Show both metrics; RS is primary for ranking, pixel diff is supplementary for understanding.
-
-### Result Card Display Example
-
-```
-#abc123                    [Download] [Copy URL]
-RS corrections: 3          (out of max ~30 for version 4-H)
-Pixel mismatches: 12       (painted pixels that differ from QR)
-[QR Preview]               [Error Visualization]
-```
-
-### Ranking Logic
-
-```javascript
-// Sort by RS corrections (lower is better), then pixel diff (lower is better)
-results.sort((a, b) => {
-  if (a.rsCorrections !== b.rsCorrections) {
-    return a.rsCorrections - b.rsCorrections;
-  }
-  return a.pixelDiff - b.pixelDiff;
-});
-```
-
-### Auto-Stop Condition Update
-
-```javascript
-// Current: stop when 5 results have pixelDiff === 0
-// New: stop when 5 results have BOTH rsCorrections === 0 AND pixelDiff === 0
-const perfectResults = results.filter(r => r.rsCorrections === 0 && r.pixelDiff === 0);
-if (perfectResults.length >= 5) {
-  stopSearch();
-}
-```
-
-## Pitfalls to Avoid
-
-### Common Mistake: Assuming Pixel Diff = RS Corrections
-
-**Wrong:** "12 pixel mismatches means 12 RS corrections"
-**Right:** They're different metrics measuring different things
-
-### Common Mistake: Reporting "% Error Correction Used"
-
-**Careful:** RS capacity varies by block. QR codes have multiple data blocks, each with its own RS capacity. Simply dividing total corrections by total capacity may be misleading if corrections cluster in one block.
-
-**Recommendation for v1.4:** Just show raw count. Capacity indicator can come later with proper per-block accounting.
-
-### Common Mistake: Assuming RS=0 Always Possible
-
-**Reality:** Some painted patterns may be impossible to align with any URL hash—every variant might need corrections.
-**Recommendation:** Don't treat RS>0 as "failure"; it's useful information. RS=3 is perfectly scannable.
-
-### Common Mistake: Modifying jsQR in Multiple Places
-
-**Risk:** The RS decoder is called from multiple code paths (normal decode, mirrored decode).
-**Recommendation:** Modify the core `decode` function in reedsolomon module to return count. Changes propagate automatically.
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
 
-- **jsQR source code analysis** (in index.html lines 10754-10808): Direct examination of Reed-Solomon decoder implementation
-- **Thonky QR Code Tutorial - Error Correction Coding**: https://www.thonky.com/qr-code-tutorial/error-correction-coding
-- **ISO/IEC 18004:2015** (QR Code standard): Defines RS error correction for QR codes
+- **MDN Blob API**: https://developer.mozilla.org/en-US/docs/Web/API/Blob - SVG download pattern
+- **MDN SVG Tutorial**: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Getting_Started - SVG structure
+- **Existing codebase analysis**: index.html lines 13464-13604 (paint system), 16298-16328 (export buttons)
+- **QR Code spec (ISO/IEC 18004)**: EC capacity tables for RS correction limits
 
 ### Secondary (MEDIUM confidence)
 
-- **jsQR GitHub Repository**: https://github.com/cozmo/jsQR - Confirms jsQR doesn't expose RS count in public API
-- **ZXing-js Library**: https://github.com/zxing-js/library - Alternative decoder, also doesn't expose RS count by default
-- **DENSO WAVE Error Correction Feature**: https://www.qrcode.com/en/about/error_correction.html
+- **UX patterns observation**: Standard "X of Y" format used in storage indicators, progress bars, pagination
+- **Drawing tool conventions**: Shift modifier for opposite/constrain is standard (Photoshop, Figma, etc.)
 
-### Note on API Availability
-
-**Neither jsQR nor ZXing-js expose RS correction counts in their public APIs.** Both libraries return only:
-- Decoded data (string/bytes)
-- Location coordinates
-- Version number
-- Binary data
-
-To get RS correction count, we must modify the inlined jsQR library. This is acceptable because:
-1. jsQR is already inlined (bundled into index.html)
-2. Modification is localized to RS decoder
-3. No external dependency to break
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Reason |
 |------|------------|--------|
-| RS count is `errorLocations.length` | HIGH | Direct source code analysis of jsQR |
-| jsQR modification approach | HIGH | Localized change, well-understood code path |
-| Pixel diff vs RS relationship | HIGH | Follows from QR standard (byte vs module) |
-| Ranking logic (RS primary) | HIGH | Matches user goal (scannability margin) |
-| Auto-stop condition | HIGH | Logical extension of existing behavior |
-| RS capacity calculation | MEDIUM | Per-block accounting adds complexity; defer to future |
+| RS capacity lookup | HIGH | QR spec defines EC codeword counts per version |
+| SVG generation | HIGH | QR is grid-based, maps directly to rect elements |
+| Shift modifier pattern | HIGH | Standard UX convention, native browser support |
+| Integration points | HIGH | Direct codebase analysis, clear modification points |
 
 ---
-*Feature research for: RS Error Correction Exposure*
-*Milestone: v1.4 RS Error Measurement*
-*Researched: 2026-02-16*
+*Feature research for: v1.5 UX & Export Enhancements*
+*Milestone: v1.5*
+*Researched: 2026-02-17*
