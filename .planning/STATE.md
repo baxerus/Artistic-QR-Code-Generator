@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 14 (Shift+Paint Shortcut)
-Plan: —
-Status: Roadmap created, ready for planning
-Last activity: 2026-02-17 — v1.5 roadmap created
+Plan: 1/1 complete
+Status: Phase 14 complete
+Last activity: 2026-02-17 — Phase 14 executed
 
-Progress: ████████████████████░░░░░░░░░░ 5 milestones shipped (v1.0-v1.4), 13/16 phases complete
+Progress: █████████████████████░░░░░░░░░ 5 milestones shipped (v1.0-v1.4), 14/16 phases complete
 
 ## Milestones
 
@@ -59,6 +59,16 @@ Goal: Workers extract and return Reed-Solomon correction count for each candidat
 Requirements: RS-01, RS-02, RS-03
 Verification: 7/7 must-haves passed (2026-02-16)
 
+### Phase 14: Shift+Paint Shortcut ✓
+Goal: Shift+paint shortcut for quick unset painting with legend visual feedback
+Requirements: PAINT-01, PAINT-02
+Verification: Complete (2026-02-17)
+
+### Phase 14 Decisions
+
+- **14-01**: isShiftStroke captured at pointerdown only — mid-stroke Shift press/release ignored
+- **14-02**: Legend feedback uses same .active CSS class as normal selection, no distinct temporary style
+
 ### Phase 13: Results Ranking & Display ✓
 Goal: Results displayed with RS metrics and ranked by QR reliability
 Requirements: RSLT-01, RSLT-02, RSLT-03, RSLT-04
@@ -95,11 +105,11 @@ None.
 
 ## v1.5 Phases
 
-### Phase 14: Shift+Paint Shortcut
+### Phase 14: Shift+Paint Shortcut ✓
 - **Goal:** Users can quickly paint "unset" to erase painted pixels without changing legend selection
 - **Requirements:** PAINT-01, PAINT-02
 - **Risk:** LOW (standard pointer event pattern)
-- **Status:** Not started
+- **Status:** Complete (2026-02-17)
 
 ### Phase 15: SVG Export
 - **Goal:** Users can download result QR codes as scalable vector graphics
@@ -116,8 +126,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Phase 14 context gathered
-Resume: `/gsd-plan-phase 14` to plan the phase
+Stopped at: Completed 14-01-PLAN.md
+Resume: `/gsd-plan-phase 15` or `/gsd-execute-phase 15` for SVG Export
 
 ---
 *v1.5 roadmap created: 2026-02-17*
