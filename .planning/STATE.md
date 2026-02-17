@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 15 (SVG Export)
-Plan: 01
-Status: Phase 15 plan 01 complete
-Last activity: 2026-02-17 — Phase 15 plan 01 executed
+Phase: 16 (RS Capacity Display)
+Plan: —
+Status: Phase 15 complete, Phase 16 ready for planning
+Last activity: 2026-02-17 — Phase 15 verified and closed
 
-Progress: █████████████████████░░░░░░░░░ 5 milestones shipped (v1.0-v1.4), 14/16 phases complete
+Progress: ██████████████████████░░░░░░░░ 5 milestones shipped (v1.0-v1.4), 15/16 phases complete
 
 ## Milestones
 
@@ -126,8 +126,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 15-01-PLAN.md
-Resume: None
+Stopped at: Phase 15 verified and closed
+Resume: `/gsd-discuss-phase 16` to gather context for RS Capacity Display
 
 ---
 *v1.5 roadmap created: 2026-02-17*

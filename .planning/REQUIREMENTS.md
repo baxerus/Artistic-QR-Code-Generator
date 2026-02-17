@@ -14,9 +14,9 @@ Requirements for v1.5 UX & Export Enhancements. Each maps to roadmap phases.
 
 ### SVG Export
 
-- [ ] **SVG-01**: Result card has "Download SVG" button alongside existing PNG button
-- [ ] **SVG-02**: SVG contains black/white modules only (final QR, not preview colors)
-- [ ] **SVG-03**: Downloaded SVG filename follows same pattern as PNG export (different extension only)
+- [x] **SVG-01**: Result card has "Download SVG" button alongside existing PNG button
+- [x] **SVG-02**: SVG contains black/white modules only (final QR, not preview colors)
+- [x] **SVG-03**: Downloaded SVG filename follows same pattern as PNG export (different extension only)
 
 ### Paint Shortcut
 
@@ -46,9 +46,9 @@ Deferred to future releases:
 |-------------|-------|--------|
 | PAINT-01 | Phase 14 | Complete |
 | PAINT-02 | Phase 14 | Complete |
-| SVG-01 | Phase 15 | Pending |
-| SVG-02 | Phase 15 | Pending |
-| SVG-03 | Phase 15 | Pending |
+| SVG-01 | Phase 15 | Complete |
+| SVG-02 | Phase 15 | Complete |
+| SVG-03 | Phase 15 | Complete |
 | RSCAP-01 | Phase 16 | Pending |
 | RSCAP-02 | Phase 16 | Pending |
 
