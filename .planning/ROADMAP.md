@@ -144,7 +144,7 @@ Plans:
 | 12 | v1.4 | 3/3 | Complete | 2026-02-16 |
 | 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
-| 15 | v1.5 | 0/? | Not started | - |
+| 15 | v1.5 | 0/1 | Planned | - |
 | 16 | v1.5 | 0/? | Not started | - |
 
 **Total:** 16 phases (14 shipped, 2 remaining)
