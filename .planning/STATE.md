@@ -87,11 +87,12 @@ None.
 | 2 | Show top 10 results instead of top 5 | 2026-02-15 | 3e22ec6 | [2-instead-of-top-5-results-show-the-top-10](./quick/2-instead-of-top-5-results-show-the-top-10/) |
 | 3 | Fix green-highlight animation to play full duration | 2026-02-16 | 54fcae9 | [3-fix-green-highlight-animation-to-play-fu](./quick/3-fix-green-highlight-animation-to-play-fu/) |
 | 4 | Allow painting into functional patterns | 2026-02-16 | ccc913c | [4-allow-painting-into-functional-patterns](./quick/4-allow-painting-into-functional-patterns/) |
+| 5 | Fix Download PNG and Copy URL buttons to disable during search | 2026-02-17 | 72e4425 | [5-fix-download-png-and-copy-url-buttons-no](./quick/5-fix-download-png-and-copy-url-buttons-no/) |
 
 ## Session Continuity
 
-Last session: 2026-02-16
-Stopped at: v1.4 milestone completed
+Last session: 2026-02-17
+Stopped at: Quick task 5 completed
 Resume: `/gsd-new-milestone` to start next milestone
 
 ---
