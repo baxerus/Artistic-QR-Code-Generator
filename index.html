@@ -779,6 +779,36 @@
         border-radius: 2px;
         border: 1px solid #ccc;
       }
+
+      /* Close button for expanded result */
+      .result-close-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(30, 30, 30, 0.85);
+        border: none;
+        color: white;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, transform 0.15s;
+        z-index: 10;
+      }
+
+      .result-close-btn:hover {
+        background: rgba(50, 50, 50, 0.95);
+        transform: scale(1.1);
+      }
+
+      .result-slot.expanded .result-close-btn {
+        display: flex;
+      }
     </style>
   </head>
   <body>
@@ -16390,10 +16420,43 @@ self.onmessage = function(e) {
               )
               .join("");
 
+            // Create close button (visible only when expanded)
+            const closeBtn = document.createElement("button");
+            closeBtn.className = "result-close-btn";
+            closeBtn.innerHTML = "&times;";
+            closeBtn.type = "button";
+            closeBtn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              if (searchState === "running") return;
+
+              // Collapse this slot
+              slot.classList.remove("expanded");
+
+              // Re-render collapsed overlay at module resolution
+              const overlay = canvasContainer.querySelector(".result-overlay");
+              if (overlay) {
+                const mc = parseInt(overlay.dataset.moduleCount);
+                const qrData = JSON.parse(overlay.dataset.qrModuleData);
+                const painted = JSON.parse(overlay.dataset.paintedPixels);
+                const ver = parseInt(overlay.dataset.version);
+                const fm = createFunctionPatternMask(ver);
+                renderErrorOverlay(
+                  overlay,
+                  qrData,
+                  mc,
+                  painted,
+                  fm,
+                  null,
+                  false,
+                );
+              }
+            });
+
             // Assemble slot
             slot.appendChild(rank);
             slot.appendChild(canvasContainer);
             slot.appendChild(legend);
+            slot.appendChild(closeBtn);
             slot.appendChild(label);
             slot.appendChild(actions);
           } else {
