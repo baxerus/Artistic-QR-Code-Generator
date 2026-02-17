@@ -83,7 +83,10 @@
 3. Shift state at stroke start determines behavior for entire drag operation (releasing Shift mid-drag doesn't change behavior)
 4. Normal painting behavior unchanged when Shift is not held
 
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 14-01-PLAN.md — Shift+paint override and legend visual feedback
 
 ---
 
@@ -137,7 +140,7 @@
 | 11 | v1.3 | 1/1 | Complete | 2026-02-15 |
 | 12 | v1.4 | 3/3 | Complete | 2026-02-16 |
 | 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
-| 14 | v1.5 | 0/? | Not started | - |
+| 14 | v1.5 | 0/1 | Planned | - |
 | 15 | v1.5 | 0/? | Not started | - |
 | 16 | v1.5 | 0/? | Not started | - |
 
