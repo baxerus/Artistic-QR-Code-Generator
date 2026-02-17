@@ -15812,6 +15812,31 @@ self.onmessage = function(e) {
         // Collapse the paint section to focus on results
         togglePaintSection(true);
 
+        // Collapse any expanded result slots before starting new search
+        const resultsContainer = document.getElementById("top-results");
+        const expandedSlots = resultsContainer?.querySelectorAll(".result-slot.expanded");
+        expandedSlots?.forEach((slot) => {
+          slot.classList.remove("expanded");
+          // Re-render overlay at module resolution (collapsed state)
+          const collapsedOverlay = slot.querySelector(".result-overlay");
+          if (collapsedOverlay) {
+            const mc = parseInt(collapsedOverlay.dataset.moduleCount);
+            const qrData = JSON.parse(collapsedOverlay.dataset.qrModuleData);
+            const painted = JSON.parse(collapsedOverlay.dataset.paintedPixels);
+            const ver = parseInt(collapsedOverlay.dataset.version);
+            const fm = createFunctionPatternMask(ver);
+            renderErrorOverlay(
+              collapsedOverlay,
+              qrData,
+              mc,
+              painted,
+              fm,
+              null,
+              false,
+            );
+          }
+        });
+
         // Update UI state
         searchState = "running";
         optimizeBtn.textContent = "Stop";
