@@ -13465,6 +13465,39 @@
       }
 
       /**
+       * Initialize Shift key legend visual feedback
+       * Highlights "unset" button while Shift is held, restores on release
+       */
+      function initShiftLegendFeedback() {
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Shift') {
+            const buttons = document.querySelectorAll('#paint-legend .legend-btn');
+            buttons.forEach(btn => {
+              if (btn.dataset.color === 'unset') {
+                btn.classList.add('active');
+              } else {
+                btn.classList.remove('active');
+              }
+            });
+          }
+        });
+
+        document.addEventListener('keyup', function(e) {
+          if (e.key === 'Shift') {
+            // Restore the actual selectedColor highlight
+            const buttons = document.querySelectorAll('#paint-legend .legend-btn');
+            buttons.forEach(btn => {
+              if (btn.dataset.color === selectedColor) {
+                btn.classList.add('active');
+              } else {
+                btn.classList.remove('active');
+              }
+            });
+          }
+        });
+      }
+
+      /**
        * Get paint value based on mouse button and selected color
        */
       function getPaintValue(button) {
@@ -16590,6 +16623,9 @@ self.onmessage = function(e) {
 
         // Initialize legend handlers for color selection
         initLegendHandlers();
+
+        // Initialize Shift key legend visual feedback
+        initShiftLegendFeedback();
 
         // Initialize collapsible paint section
         initCollapsibleSection();
