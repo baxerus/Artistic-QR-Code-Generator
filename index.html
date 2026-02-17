@@ -13364,6 +13364,7 @@
       let isPainting = false;
       let lastPaintedCell = null;
       let currentPaintButton = 0; // Track which mouse button started painting
+      let isShiftStroke = false; // Track if Shift was held at stroke start
       const GRID_SENSITIVITY = 0.5; // Tunable constant per locked decision
 
       /**
@@ -13467,6 +13468,7 @@
        * Get paint value based on mouse button and selected color
        */
       function getPaintValue(button) {
+        if (isShiftStroke) return 0; // Shift+paint always paints "unset"
         if (button === 0) {
           // Left click: paint selected color
           if (selectedColor === "black") return 2;
@@ -13564,6 +13566,7 @@
 
           isPainting = true;
           currentPaintButton = e.button; // Remember which button started painting
+          isShiftStroke = e.shiftKey; // Capture Shift state at stroke start
           lastPaintedCell = null; // Reset for new paint stroke
           container.setPointerCapture(e.pointerId);
 
@@ -13588,6 +13591,7 @@
           isPainting = false;
           lastPaintedCell = null;
           currentPaintButton = 0;
+          isShiftStroke = false;
           container.releasePointerCapture(e.pointerId);
         });
 
@@ -13595,6 +13599,7 @@
           isPainting = false;
           lastPaintedCell = null;
           currentPaintButton = 0;
+          isShiftStroke = false;
         });
 
         // Prevent context menu on right-click
