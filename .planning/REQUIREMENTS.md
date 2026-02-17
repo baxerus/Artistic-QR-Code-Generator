@@ -44,19 +44,24 @@ Deferred to future releases:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RSCAP-01 | Phase 14 | Pending |
-| RSCAP-02 | Phase 14 | Pending |
+| PAINT-01 | Phase 14 | Pending |
+| PAINT-02 | Phase 14 | Pending |
 | SVG-01 | Phase 15 | Pending |
 | SVG-02 | Phase 15 | Pending |
 | SVG-03 | Phase 15 | Pending |
-| PAINT-01 | Phase 16 | Pending |
-| PAINT-02 | Phase 16 | Pending |
+| RSCAP-01 | Phase 16 | Pending |
+| RSCAP-02 | Phase 16 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 7 total
 - Mapped to phases: 7
 - Unmapped: 0 ✓
 
+**Phase Order Rationale:** Risk-ascending (research recommendation)
+- Phase 14: Shift+Paint (LOW risk) — standard pointer events
+- Phase 15: SVG Export (LOW risk) — well-documented patterns
+- Phase 16: RS Capacity (MEDIUM risk) — formula complexity
+
 ---
 *Requirements defined: 2026-02-17*
-*Last updated: 2026-02-17 after initial definition*
+*Last updated: 2026-02-17 after roadmap creation*

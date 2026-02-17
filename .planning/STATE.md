@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-16)
+See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
 **Current focus:** v1.5 UX & Export Enhancements
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 14 (Shift+Paint Shortcut)
 Plan: —
-Status: Defining requirements for v1.5
-Last activity: 2026-02-17 — Milestone v1.5 started
+Status: Roadmap created, ready for planning
+Last activity: 2026-02-17 — v1.5 roadmap created
 
-Progress: 5 milestones shipped (v1.0-v1.4), 13 phases, 25 plans
+Progress: ████████████████████░░░░░░░░░░ 5 milestones shipped (v1.0-v1.4), 13/16 phases complete
 
 ## Milestones
 
@@ -93,11 +93,31 @@ None.
 | 8 | Prevent page jump when results cleared during painting | 2026-02-17 | cfdb4df | [8-prevent-page-jump-when-results-cleared-d](./quick/8-prevent-page-jump-when-results-cleared-d/) |
 | 9 | Fix elapsed time jumping in progress display | 2026-02-17 | 592bb12 | [9-fix-elapsed-time-jumping-in-progress-dis](./quick/9-fix-elapsed-time-jumping-in-progress-dis/) |
 
+## v1.5 Phases
+
+### Phase 14: Shift+Paint Shortcut
+- **Goal:** Users can quickly paint "unset" to erase painted pixels without changing legend selection
+- **Requirements:** PAINT-01, PAINT-02
+- **Risk:** LOW (standard pointer event pattern)
+- **Status:** Not started
+
+### Phase 15: SVG Export
+- **Goal:** Users can download result QR codes as scalable vector graphics
+- **Requirements:** SVG-01, SVG-02, SVG-03
+- **Risk:** LOW (well-documented SVG generation)
+- **Status:** Not started
+
+### Phase 16: RS Capacity Display
+- **Goal:** Users see how close they are to QR scan failure with "X of Y" capacity display
+- **Requirements:** RSCAP-01, RSCAP-02
+- **Risk:** MEDIUM (formula complexity - divide by 2 critical)
+- **Status:** Not started
+
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Quick task 7 completed
-Resume: `/gsd-new-milestone` to start next milestone
+Stopped at: v1.5 roadmap created
+Resume: `/gsd-plan-phase 14` to start Phase 14 planning
 
 ---
-*v1.4 completed: 2026-02-16. Ready for next milestone.*
+*v1.5 roadmap created: 2026-02-17*
