@@ -17433,6 +17433,26 @@ self.onmessage = function(e) {
           savePattern(currentVersion, paintGrid.cells);
         });
 
+        document.addEventListener("keydown", function (e) {
+          if (!paintGrid || activeTool !== "move" || !hasPattern()) return;
+          if (searchState === "running") return;
+          const activeTag = document.activeElement
+            ? document.activeElement.tagName
+            : "";
+          if (["INPUT", "SELECT", "TEXTAREA"].includes(activeTag)) return;
+
+          let dx = 0;
+          let dy = 0;
+          if (e.key === "ArrowUp") dy = -1;
+          if (e.key === "ArrowDown") dy = 1;
+          if (e.key === "ArrowLeft") dx = -1;
+          if (e.key === "ArrowRight") dx = 1;
+
+          if (dx === 0 && dy === 0) return;
+          e.preventDefault();
+          commitShift(dx, dy);
+        });
+
         // Optimize button click - state machine handler
         optimizeBtn.addEventListener("click", handleOptimizeClick);
       });
