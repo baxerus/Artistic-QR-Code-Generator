@@ -13590,7 +13590,6 @@
         // Draw QR with painted pixels as actual black/white
         for (let y = 0; y < gridSize; y++) {
           for (let x = 0; x < gridSize; x++) {
-            const isProtected = functionMask && functionMask[y * gridSize + x];
             const paintState = paintGrid ? paintGrid.get(x, y) : 0;
 
             let isDark;
@@ -13612,15 +13611,31 @@
 
         const decodeResult = decodeCorruptedQR(decodeCanvas);
 
-        // Step 6: Check if any pattern exists
+        // Step 6: Check if any pattern exists and compute pixel errors
         let hasPattern = false;
+        let pixelErrors = null;
         if (paintGrid) {
-          for (let i = 0; i < paintGrid.cells.length; i++) {
-            if (paintGrid.cells[i] !== 0) {
+          const gridSize = paintGrid.size;
+          let errors = 0;
+          for (let row = 0; row < gridSize; row++) {
+            for (let col = 0; col < gridSize; col++) {
+              const paintedState = paintGrid.get(col, row);
+              if (paintedState === 0) continue;
               hasPattern = true;
-              break;
+              const paintedDark = paintedState === 2;
+              const qrDark = qrModel.isDark(row, col);
+              if (paintedDark !== qrDark) {
+                errors++;
+              }
             }
           }
+          if (hasPattern) {
+            pixelErrors = errors;
+          }
+        }
+
+        if (decodeResult && decodeResult.success) {
+          decodeResult.pixelErrors = pixelErrors;
         }
 
         // Step 7: Update decode status display
