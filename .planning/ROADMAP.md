@@ -129,7 +129,10 @@ Plans:
 2. Y value is accurate for the QR version being displayed (verified against QR spec)
 3. Display updates correctly when results change (search produces new candidates)
 
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 16-01-PLAN.md — Add RS capacity helper and update correction display
 
 ---
 
