@@ -101,7 +101,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User can select a "Move Pattern" tool from the paint tool selector alongside Black/White/Unset.
   2. User can drag to shift the full painted pattern, and every pixel retains its original value (black/white/unset) after the move.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 18-01-PLAN.md — Add Move Pattern tool with drag + arrow-key shifts
 
 ### Phase 19: QR Rotation Controls
 **Goal**: Users can rotate QR presentation and search without rotating the painted pattern.
