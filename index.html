@@ -13688,6 +13688,10 @@
         } else {
           wrapper.classList.toggle("collapsed");
         }
+
+        if (!wrapper.classList.contains("collapsed")) {
+          runCorruptionPipeline();
+        }
       }
 
       /**
@@ -13884,8 +13888,8 @@
           functionMask,
         );
 
-        // Run corruption pipeline to update QR display
-        runCorruptionPipeline();
+        // Run corruption pipeline to update decode status (debounced)
+        scheduleDecodeUpdate();
 
         // Reset optimization results
         resetOptimizationResults();
@@ -16118,6 +16122,7 @@ self.onmessage = function(e) {
       let currentTimeout = 30;
       let totalAttempts = 0;
       let totalDecodableCount = 0;
+      let decodeDebounceTimer = null;
 
       /**
        * Check if auto-stop condition is met (OPT-01)
@@ -17044,6 +17049,22 @@ self.onmessage = function(e) {
       }
 
       /**
+       * Schedule decode updates when Paint Pattern is expanded
+       */
+      function scheduleDecodeUpdate() {
+        const wrapper = document.getElementById("paint-section-wrapper");
+        if (!wrapper || wrapper.classList.contains("collapsed")) {
+          return;
+        }
+        if (decodeDebounceTimer) {
+          clearTimeout(decodeDebounceTimer);
+        }
+        decodeDebounceTimer = setTimeout(() => {
+          runCorruptionPipeline();
+        }, 400);
+      }
+
+      /**
        * Initialize application when DOM is ready
        */
       document.addEventListener("DOMContentLoaded", function () {
@@ -17172,7 +17193,7 @@ self.onmessage = function(e) {
           paintGrid.clear();
 
           // Re-run corruption pipeline to show clean QR and update decode status
-          runCorruptionPipeline();
+          scheduleDecodeUpdate();
 
           // Reset optimization results since pattern changed
           resetOptimizationResults();
