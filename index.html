@@ -194,7 +194,8 @@
         padding: 20px;
         background-color: #fafafa;
         border-radius: 8px;
-        border: 1px solid #e0e0e0;
+        border: 2px solid #e0e0e0;
+        text-align: center;
       }
 
       .paint-section h2 {
@@ -287,10 +288,6 @@
         max-height: 0;
         opacity: 0;
         padding: 0 15px;
-      }
-
-      .paint-section {
-        text-align: center;
       }
 
       .qr-canvas-container {
@@ -409,13 +406,13 @@
       }
 
       .decode-result.success {
-        border-color: #e0e0e0;
-        background-color: #fafafa;
+        border-color: #4caf50;
+        background-color: #e6fae7;
       }
 
       .decode-result.failure {
-        border-color: #e0e0e0;
-        background-color: #fafafa;
+        border-color: #e53935;
+        background-color: #f2e6e6;
       }
 
       .decode-status {
@@ -13458,7 +13455,8 @@
               success: true,
               data: code.data,
               correctionCount:
-                Number.isFinite(code.correctionCount) && code.correctionCount >= 0
+                Number.isFinite(code.correctionCount) &&
+                code.correctionCount >= 0
                   ? code.correctionCount
                   : null,
             };
@@ -13523,7 +13521,7 @@
           ? Number.isFinite(result.correctionCount)
             ? result.correctionCount
             : "—"
-          : maxDisplay;
+          : maxDisplay + 1;
         const pixelValue =
           Number.isFinite(result.pixelErrors) && result.pixelErrors !== null
             ? result.pixelErrors
