@@ -63,7 +63,7 @@
 
 - [x] **Phase 14: Shift+Paint Shortcut** — Shift+click/drag paints "unset" for quick erasing (completed 2026-02-17)
 - [x] **Phase 15: SVG Export** — Download result cards as vector SVG files (completed 2026-02-17)
-- [ ] **Phase 16: RS Capacity Display** — Show corrections as "X of Y" with max capacity
+- [x] **Phase 16: RS Capacity Display** — Show corrections as "X of Y" with max capacity (completed 2026-02-18)
 
 ## Phase Details
 
@@ -129,7 +129,7 @@ Plans:
 2. Y value is accurate for the QR version being displayed (verified against QR spec)
 3. Display updates correctly when results change (search produces new candidates)
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 16-01-PLAN.md — Add RS capacity helper and update correction display
@@ -148,7 +148,7 @@ Plans:
 | 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 1/1 | Complete | 2026-02-17 |
-| 16 | v1.5 | 0/? | Not started | - |
+| 16 | 1/1 | Complete   | 2026-02-18 | - |
 
 **Total:** 16 phases (14 shipped, 2 remaining)
 

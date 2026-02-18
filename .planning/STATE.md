@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 16 (RS Capacity Display)
-Plan: —
-Status: Phase 15 complete, Phase 16 ready for planning
-Last activity: 2026-02-17 — Phase 15 verified and closed
+Plan: 01 (complete)
+Status: Phase 16 complete
+Last activity: 2026-02-18 — Phase 16 plan 01 executed
 
-Progress: ██████████████████████░░░░░░░░ 5 milestones shipped (v1.0-v1.4), 15/16 phases complete
+Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 16/16 phases complete
 
 ## Milestones
 
@@ -121,13 +121,17 @@ None.
 - **Goal:** Users see how close they are to QR scan failure with "X of Y" capacity display
 - **Requirements:** RSCAP-01, RSCAP-02
 - **Risk:** MEDIUM (formula complexity - divide by 2 critical)
-- **Status:** Not started
+- **Status:** Complete (2026-02-18)
+
+### Phase 16 Decisions
+
+- **16-01**: Use jsQR VERSIONS metadata to compute level H correction capacity and display "Corrections: X of Y" with placeholders
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Phase 15 verified and closed
-Resume: `/gsd-discuss-phase 16` to gather context for RS Capacity Display
+Last session: 2026-02-18
+Stopped at: Completed 16-01-PLAN.md
+Resume: None
 
 ---
 *v1.5 roadmap created: 2026-02-17*
