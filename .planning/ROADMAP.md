@@ -73,7 +73,7 @@
 
 **Milestone Goal:** Improve pattern workflows with rotation-aware QR display and pattern repositioning tools.
 
-- [ ] **Phase 17: Decode Metrics Alignment** - Paint Pattern decode test matches result metrics and stable layout
+- [x] **Phase 17: Decode Metrics Alignment** - Paint Pattern decode test matches result metrics and stable layout (completed 2026-02-18)
 - [ ] **Phase 18: Move Pattern Tool** - Reposition painted pattern without altering pixel values
 - [ ] **Phase 19: QR Rotation Controls** - Rotate QR across preview, results, exports, and search
 
@@ -126,7 +126,7 @@ Plans:
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 16 | v1.5 | Complete    | 2026-02-18 | 2026-02-18 |
-| 17 | v1.6 | TBD | Not started | - |
+| 17 | 2/2 | Complete   | 2026-02-18 | - |
 | 18 | v1.6 | TBD | Not started | - |
 | 19 | v1.6 | TBD | Not started | - |
 
