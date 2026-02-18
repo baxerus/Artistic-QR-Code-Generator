@@ -405,7 +405,7 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
-        min-height: calc(1.4em * 2 + 4px);
+        min-height: calc(1.4em * 3 + 6px);
       }
 
       .decode-result.success {
@@ -436,9 +436,14 @@
         font-size: 0.875rem;
         color: #666;
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
+        flex-direction: column;
+        gap: 2px;
         line-height: 1.4;
+        min-height: calc(1.4em * 2 + 2px);
+      }
+
+      .decode-metric-line {
+        display: block;
       }
 
       /* Optimization Section */
@@ -905,8 +910,8 @@
             <div id="decode-result" class="decode-result" style="display: none">
               <div class="decode-status"></div>
               <div class="decode-metrics">
-                <span class="decode-corrections"></span>
-                <span class="decode-pixel-errors"></span>
+                <div class="decode-metric-line decode-corrections"></div>
+                <div class="decode-metric-line decode-pixel-errors"></div>
               </div>
             </div>
           </div>
@@ -13483,12 +13488,15 @@
         const pixelTooltip =
           "Number of pixels where your painted pattern differs from the QR code's ideal pattern. These differences are handled by the QR's error correction.";
 
+        correctionSpan.className = "decode-metric-line decode-corrections";
+        pixelSpan.className = "decode-metric-line decode-pixel-errors";
+        correctionSpan.title = correctionsTooltip;
+        pixelSpan.title = pixelTooltip;
+
         if (!hasPattern) {
           resultDiv.className = "decode-result";
           statusDiv.textContent = "Decode: No pattern applied";
           metricsDiv.style.visibility = "hidden";
-          correctionSpan.textContent = "";
-          pixelSpan.textContent = "";
           return;
         }
 
@@ -13496,8 +13504,6 @@
           resultDiv.className = "decode-result";
           statusDiv.textContent = "Decode: Neutral";
           metricsDiv.style.visibility = "hidden";
-          correctionSpan.textContent = "";
-          pixelSpan.textContent = "";
           return;
         }
 
@@ -13523,11 +13529,7 @@
             ? result.pixelErrors
             : "—";
 
-        correctionSpan.className = "decode-corrections";
-        correctionSpan.title = correctionsTooltip;
         correctionSpan.innerHTML = `Corrections: <b>${correctionsValue}</b> of <b>${maxDisplay}</b>`;
-        pixelSpan.className = "decode-pixel-errors";
-        pixelSpan.title = pixelTooltip;
         pixelSpan.innerHTML = `Pixel errors: <b>${pixelValue}</b>`;
         metricsDiv.style.visibility = "visible";
       }
