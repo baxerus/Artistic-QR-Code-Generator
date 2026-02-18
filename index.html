@@ -16410,9 +16410,13 @@ self.onmessage = function(e) {
             correctionSpan.className = "errors";
             correctionSpan.title =
               "Number of Reed-Solomon error corrections the QR scanner needed. Lower is better — 0 means the QR scans perfectly without any error correction. The max value is the correction capacity for this QR version at level H.";
-            const rsDisplay =
-              result.rsCorrections === Infinity ? "-" : result.rsCorrections;
-            correctionSpan.innerHTML = `Corrections: <b>${rsDisplay}</b>`;
+            const rsValue = Number.isFinite(result.rsCorrections)
+              ? result.rsCorrections
+              : null;
+            const maxCapacity = getMaxCorrectionsCapacity(currentVersion);
+            const rsDisplay = rsValue === null ? "-" : rsValue;
+            const maxDisplay = maxCapacity && maxCapacity > 0 ? maxCapacity : "-";
+            correctionSpan.innerHTML = `Corrections: <b>${rsDisplay}</b> of <b>${maxDisplay}</b>`;
 
             // Pixel errors line
             const pixelSpan = document.createElement("span");
