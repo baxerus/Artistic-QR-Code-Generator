@@ -8,18 +8,9 @@ A single-file HTML tool (16,353 lines) for creating artistic QR codes by embeddi
 
 The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art, not the other way around. Even if it means the QR code won't scan, the pattern survives at 100%.
 
-## Current Milestone: v1.5 UX & Export Enhancements
-
-**Goal:** Improve result card context with correction capacity display, add SVG export, and streamline painting workflow with keyboard modifier.
-
-**Target features:**
-- Corrections capacity display (X of Y) on result cards
-- SVG download button for vector export
-- Shift+paint keyboard shortcut for quick unset
-
 ## Current State
 
-**Shipped:** v1.4 RS Error Measurement (2026-02-16)
+**Shipped:** v1.5 UX & Export Enhancements (2026-02-18)
 
 **Codebase:** ~16,500 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (modified to expose RS corrections), multi-worker optimization via Blob URLs.
 
@@ -31,7 +22,21 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - v1.3 Hash Capacity — 1 phase, 1 plan (2026-02-15)
 - v1.4 RS Error Measurement — 2 phases, 5 plans (2026-02-16)
 
-**Total:** 13 phases, 25 plans across 5 milestones
+**Total:** 16 phases, 28 plans across 6 milestones
+
+<details>
+<summary>✅ v1.5 Milestone Context (archived)</summary>
+
+## Current Milestone: v1.5 UX & Export Enhancements
+
+**Goal:** Improve result card context with correction capacity display, add SVG export, and streamline painting workflow with keyboard modifier.
+
+**Target features:**
+- Corrections capacity display (X of Y) on result cards
+- SVG download button for vector export
+- Shift+paint keyboard shortcut for quick unset
+
+</details>
 
 ## Requirements
 
@@ -86,11 +91,12 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Active
 
-**v1.5 UX & Export Enhancements:**
+- [ ] Define next milestone scope and requirements
 
-- [ ] Show corrections as "X of Y" with max capacity for QR version — v1.5
-- [ ] Download SVG button on result cards — v1.5
-- [ ] Shift+click/drag always paints "unset" regardless of selected color — v1.5
+## Next Milestone Goals
+
+- Define next milestone scope and requirements
+- Validate any newly desired UX or export enhancements
 
 ### Out of Scope
 
@@ -145,4 +151,4 @@ Based on v1.1 development, potential future work:
 
 ---
 
-_Last updated: 2026-02-17 after v1.5 milestone started_
+_Last updated: 2026-02-18 after v1.5 milestone completion_

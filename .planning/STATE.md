@@ -2,17 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-17)
+See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** v1.5 UX & Export Enhancements
+**Current focus:** Planning next milestone
 
 ## Current Position
 
 Phase: 16 (RS Capacity Display)
 Plan: 01 (complete)
-Status: Phase 16 verified and complete
-Last activity: 2026-02-18 — Phase 16 verified with human approval
+Status: v1.5 milestone complete
+Last activity: 2026-02-18 — v1.5 milestone archived
 
 Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 16/16 phases complete
 
@@ -48,7 +48,7 @@ Progress: ███████████████████████�
 - Timeline: Same day (2026-02-16)
 - Archive: `.planning/milestones/v1.4-ROADMAP.md`
 
-**Total:** 13 phases planned, 13 shipped
+**Total:** 16 phases planned, 16 shipped
 
 ## Accumulated Context
 
@@ -109,7 +109,7 @@ None.
 - **Goal:** Users can quickly paint "unset" to erase painted pixels without changing legend selection
 - **Requirements:** PAINT-01, PAINT-02
 - **Risk:** LOW (standard pointer event pattern)
-- **Status:** Complete (2026-02-17)
+- **Status:** v1.5 milestone complete
 
 ### Phase 15: SVG Export ✓
 - **Goal:** Users can download result QR codes as scalable vector graphics
@@ -117,7 +117,7 @@ None.
 - **Risk:** LOW (well-documented SVG generation)
 - **Status:** Complete (2026-02-17)
 
-### Phase 16: RS Capacity Display
+### Phase 16: RS Capacity Display ✓
 - **Goal:** Users see how close they are to QR scan failure with "X of Y" capacity display
 - **Requirements:** RSCAP-01, RSCAP-02
 - **Risk:** MEDIUM (formula complexity - divide by 2 critical)

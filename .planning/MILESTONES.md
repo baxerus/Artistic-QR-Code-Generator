@@ -100,3 +100,23 @@
 
 ---
 
+
+## v1.5 UX & Export Enhancements (Shipped: 2026-02-18)
+
+**Delivered:** Shift+paint shortcut, SVG export, and RS capacity display for result cards.
+
+**Phases completed:** 14-16 (3 plans total)
+
+**Key accomplishments:**
+- Shift+paint shortcut paints unset regardless of selection, with legend feedback while Shift is held
+- SVG export generates single-path QR with quiet zone and per-result Download SVG button
+- Result cards display corrections as X of Y with max capacity tooltip
+
+**Stats:**
+- 1 file (index.html) modified
+- 3 phases, 3 plans, 6 tasks
+- 1 day (2026-02-17 → 2026-02-18)
+
+**Git range:** `4efd815` → `8023831`
+
+---
