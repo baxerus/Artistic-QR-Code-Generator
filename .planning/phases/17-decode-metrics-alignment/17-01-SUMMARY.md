@@ -61,7 +61,7 @@ Each task was committed atomically:
 2. **Task 2: Compute and display decode corrections + pixel errors** - `95c4e84` (feat)
 3. **Task 3: Auto-run decode on expand with debounce on paint changes** - `562159c` (feat)
 
-**Plan metadata:** (docs: complete plan)
+**Plan metadata:** see git log (docs: complete plan)
 
 _Note: TDD tasks may have multiple commits (test → feat → refactor)_
 
