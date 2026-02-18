@@ -5,89 +5,54 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
-**Current focus:** Planning next milestone
+**Current focus:** Phase 17 - Decode Metrics Alignment
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-18 — Milestone v1.6 started
+Phase: 17 of 19 (Decode Metrics Alignment)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-02-18 — v1.6 roadmap created
 
-Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 16/16 phases complete
+Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 16/19 phases complete
 
-## Milestones
+## Performance Metrics
 
-**v1.0 MVP (complete):**
-- Phases: 1-4
-- Plans: 8
-- Timeline: 4 days (2026-02-06 → 2026-02-09)
-- Archive: `.planning/milestones/v1-ROADMAP.md`
+**Velocity:**
+- Total plans completed: 0
+- Average duration: -
+- Total execution time: -
 
-**v1.1 UX Overhaul & Optimization (complete):**
-- Phases: 5-9
-- Plans: 8
-- Timeline: 5 days (2026-02-10 → 2026-02-14)
-- Archive: `.planning/milestones/v1.1-ROADMAP.md`
+**By Phase:**
 
-**v1.2 Visual Consistency & Result Inspection (complete):**
-- Phases: 10
-- Plans: 3
-- Timeline: 2 days (2026-02-14 → 2026-02-15)
-- Archive: `.planning/milestones/v1.2-ROADMAP.md`
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
 
-**v1.3 Hash Capacity Optimization (complete):**
-- Phases: 11
-- Plans: 1
-- Timeline: Same day (2026-02-15)
-- Archive: `.planning/milestones/v1.3-ROADMAP.md`
-
-**v1.4 RS Error Measurement (complete):**
-- Phases: 12-13
-- Plans: 5
-- Timeline: Same day (2026-02-16)
-- Archive: `.planning/milestones/v1.4-ROADMAP.md`
-
-**Total:** 16 phases planned, 16 shipped
+**Recent Trend:**
+- Last 5 plans: -
+- Trend: -
 
 ## Accumulated Context
 
-Key decisions archived in milestone summaries. See `.planning/MILESTONES.md`.
+### Decisions
 
-### Phase 12: RS Measurement Integration ✓
-Goal: Workers extract and return Reed-Solomon correction count for each candidate QR
-Requirements: RS-01, RS-02, RS-03
-Verification: 7/7 must-haves passed (2026-02-16)
+Decisions are logged in PROJECT.md Key Decisions table.
+Recent decisions affecting current work:
 
-### Phase 14: Shift+Paint Shortcut ✓
-Goal: Shift+paint shortcut for quick unset painting with legend visual feedback
-Requirements: PAINT-01, PAINT-02
-Verification: Complete (2026-02-17)
+- None yet.
 
-### Phase 14 Decisions
+### Pending Todos
 
-- **14-01**: isShiftStroke captured at pointerdown only — mid-stroke Shift press/release ignored
-- **14-02**: Legend feedback uses same .active CSS class as normal selection, no distinct temporary style
+[From .planning/todos/pending/ — ideas captured during sessions]
 
-### Phase 13: Results Ranking & Display ✓
-Goal: Results displayed with RS metrics and ranked by QR reliability
-Requirements: RSLT-01, RSLT-02, RSLT-03, RSLT-04
-Verification: Complete (2026-02-16)
-
-### Phase 13 Decisions
-
-- **13-01**: Display format "RS: N | Pixels: M" for dual metrics; perfect-rs class for RS=0 results
-- **13-02**: RS=0 defines perfect result for auto-stop, not pixelDiff=0
-
-### Phase 12 Decisions
-
-- **12-01**: jsQR correctionCount exposed via object return pattern { bytes, correctionCount }
-- **12-02**: Worker rsCorrections field tracks correction count per candidate
-- **12-03**: Main thread mergeWorkerResults sorts by RS corrections with nullish coalescing fallback
+None yet.
 
 ### Blockers/Concerns
 
-None.
+[Issues that affect future work]
+
+None yet.
 
 ### Quick Tasks Completed
 
@@ -130,8 +95,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 16-01-PLAN.md
-Resume: None
+Stopped at: Roadmap for v1.6 created (phases 17-19)
+Resume file: None
 
 ---
 *v1.5 roadmap created: 2026-02-17*

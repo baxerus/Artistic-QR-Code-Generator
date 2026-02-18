@@ -8,6 +8,7 @@
 - ✅ **v1.3 Hash Capacity Optimization** — Phase 11 (shipped 2026-02-15) → [archive](milestones/v1.3-ROADMAP.md)
 - ✅ **v1.4 RS Error Measurement** — Phases 12-13 (shipped 2026-02-16)
 - ✅ **v1.5 UX & Export Enhancements** — Phases 14-16 (shipped 2026-02-18) → [archive](milestones/v1.5-ROADMAP.md)
+- 🚧 **v1.6 QR Code Rotation & Pattern Tools** — Phases 17-19 (in progress)
 
 ## Phases
 
@@ -68,6 +69,46 @@
 
 </details>
 
+### 🚧 v1.6 QR Code Rotation & Pattern Tools (Phases 17-19) — IN PROGRESS
+
+**Milestone Goal:** Improve pattern workflows with rotation-aware QR display and pattern repositioning tools.
+
+- [ ] **Phase 17: Decode Metrics Alignment** - Paint Pattern decode test matches result metrics and stable layout
+- [ ] **Phase 18: Move Pattern Tool** - Reposition painted pattern without altering pixel values
+- [ ] **Phase 19: QR Rotation Controls** - Rotate QR across preview, results, exports, and search
+
+## Phase Details
+
+### Phase 17: Decode Metrics Alignment
+**Goal**: Users can validate painted patterns with decode metrics consistent with result cards.
+**Depends on**: Phase 16
+**Requirements**: DECODE-01, DECODE-02, DECODE-03
+**Success Criteria** (what must be TRUE):
+  1. User sees Paint Pattern decode corrections displayed as "X of Y" using the same capacity calculation as result cards.
+  2. User sees pixel error count alongside corrections in the Paint Pattern decode test.
+  3. User can toggle decode status between Success/Fail/Neutral without any layout jump in the status row area.
+**Plans**: TBD
+
+### Phase 18: Move Pattern Tool
+**Goal**: Users can reposition the entire painted pattern without changing any painted values.
+**Depends on**: Phase 17
+**Requirements**: PATTERN-01, PATTERN-02
+**Success Criteria** (what must be TRUE):
+  1. User can select a "Move Pattern" tool from the paint tool selector alongside Black/White/Unset.
+  2. User can drag to shift the full painted pattern, and every pixel retains its original value (black/white/unset) after the move.
+**Plans**: TBD
+
+### Phase 19: QR Rotation Controls
+**Goal**: Users can rotate QR presentation and search without rotating the painted pattern.
+**Depends on**: Phase 18
+**Requirements**: ROT-01, ROT-02, ROT-03, ROT-04
+**Success Criteria** (what must be TRUE):
+  1. User can rotate the QR code and protected overlay by 90° in the Paint Pattern section while the painted pattern orientation remains fixed.
+  2. User sees result previews and hover overlays reflect the current QR rotation.
+  3. User exports PNG/SVG that match the current QR rotation while preserving the painted pattern orientation.
+  4. User can enable random rotation for Generate so searches apply 0/90/180/270 rotation to the QR only, reflected in the resulting previews.
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -81,11 +122,14 @@
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 16 | v1.5 | Complete    | 2026-02-18 | 2026-02-18 |
+| 17 | v1.6 | TBD | Not started | - |
+| 18 | v1.6 | TBD | Not started | - |
+| 19 | v1.6 | TBD | Not started | - |
 
-**Total:** 16 phases (16 shipped, 0 remaining)
+**Total:** 19 phases (16 shipped, 3 remaining)
 
-**Coverage:** 7/7 v1.5 requirements mapped ✓
+**Coverage:** 9/9 v1.6 requirements mapped ✓
 
 ---
-*Roadmap created: 2026-02-10*
-*Last updated: 2026-02-18 (phase 16 complete)*
+*Roadmap created: 2026-02-18*
+*Last updated: 2026-02-18 (v1.6 roadmap created)*

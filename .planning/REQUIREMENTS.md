@@ -46,20 +46,20 @@ Deferred to future releases:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DECODE-01 | Phase — | Pending |
-| DECODE-02 | Phase — | Pending |
-| DECODE-03 | Phase — | Pending |
-| PATTERN-01 | Phase — | Pending |
-| PATTERN-02 | Phase — | Pending |
-| ROT-01 | Phase — | Pending |
-| ROT-02 | Phase — | Pending |
-| ROT-03 | Phase — | Pending |
-| ROT-04 | Phase — | Pending |
+| DECODE-01 | Phase 17 | Pending |
+| DECODE-02 | Phase 17 | Pending |
+| DECODE-03 | Phase 17 | Pending |
+| PATTERN-01 | Phase 18 | Pending |
+| PATTERN-02 | Phase 18 | Pending |
+| ROT-01 | Phase 19 | Pending |
+| ROT-02 | Phase 19 | Pending |
+| ROT-03 | Phase 19 | Pending |
+| ROT-04 | Phase 19 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠️
+- Mapped to phases: 9
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-18*
