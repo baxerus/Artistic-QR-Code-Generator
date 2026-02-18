@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 ## Current Position
 
-Phase: 16 (RS Capacity Display)
-Plan: 01 (complete)
-Status: v1.5 milestone complete
-Last activity: 2026-02-18 — v1.5 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-18 — Milestone v1.6 started
 
 Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 16/16 phases complete
 

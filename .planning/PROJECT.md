@@ -24,6 +24,15 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 **Total:** 16 phases, 28 plans across 6 milestones
 
+## Current Milestone: v1.6 QR Code Rotation & Pattern Tools
+
+**Goal:** Improve pattern workflows with rotation-aware QR display and pattern repositioning tools.
+
+**Target features:**
+- Decode test in Paint Pattern shows corrections + pixel errors metrics
+- Move Pattern tool to reposition full painted pattern
+- QR rotation controls (manual 90deg + optional random rotation)
+
 <details>
 <summary>✅ v1.5 Milestone Context (archived)</summary>
 
@@ -91,12 +100,14 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ### Active
 
-- [ ] Define next milestone scope and requirements
+- [ ] Decode test metrics match result slots (corrections + pixel errors)
+- [ ] Move Pattern tool for repositioning painted patterns
+- [ ] QR rotation controls for preview, results, and exports
 
 ## Next Milestone Goals
 
-- Define next milestone scope and requirements
-- Validate any newly desired UX or export enhancements
+- Improve pattern workflow controls and rotation support
+- Validate rotation and repositioning behavior in exports
 
 ### Out of Scope
 
@@ -151,4 +162,4 @@ Based on v1.1 development, potential future work:
 
 ---
 
-_Last updated: 2026-02-18 after v1.5 milestone completion_
+_Last updated: 2026-02-18 after v1.6 milestone start_
