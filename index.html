@@ -12159,6 +12159,11 @@
                   ],
                 },
               ];
+              if (typeof window !== "undefined") {
+                window.__JSQR_VERSIONS__ = exports.VERSIONS;
+              } else if (typeof self !== "undefined") {
+                self.__JSQR_VERSIONS__ = exports.VERSIONS;
+              }
 
               /***/
             },
@@ -16204,6 +16209,41 @@ self.onmessage = function(e) {
         URL.revokeObjectURL(url);
       }
 
+      function getMaxCorrectionsCapacity(versionNumber) {
+        const versions =
+          typeof window !== "undefined"
+            ? window.__JSQR_VERSIONS__
+            : typeof self !== "undefined"
+              ? self.__JSQR_VERSIONS__
+              : null;
+        if (!Array.isArray(versions) || !Number.isFinite(versionNumber)) {
+          return null;
+        }
+        const version = versions[versionNumber - 1];
+        if (!version || !Array.isArray(version.errorCorrectionLevels)) {
+          return null;
+        }
+        const ecInfo = version.errorCorrectionLevels[3];
+        if (!ecInfo || !Array.isArray(ecInfo.ecBlocks)) {
+          return null;
+        }
+        const ecCodewordsPerBlock = Number(ecInfo.ecCodewordsPerBlock);
+        if (!Number.isFinite(ecCodewordsPerBlock)) {
+          return null;
+        }
+        const totalEcCodewords = ecInfo.ecBlocks.reduce((total, block) => {
+          const numBlocks = Number(block.numBlocks);
+          if (!Number.isFinite(numBlocks)) {
+            return total;
+          }
+          return total + numBlocks * ecCodewordsPerBlock;
+        }, 0);
+        if (!Number.isFinite(totalEcCodewords) || totalEcCodewords <= 0) {
+          return null;
+        }
+        return Math.floor(totalEcCodewords / 2);
+      }
+
       /**
        * Copy text to clipboard with visual feedback
        * @param {string} text - Text to copy
@@ -16369,7 +16409,7 @@ self.onmessage = function(e) {
             const correctionSpan = document.createElement("span");
             correctionSpan.className = "errors";
             correctionSpan.title =
-              "Number of Reed-Solomon error corrections the QR scanner needed. Lower is better — 0 means the QR scans perfectly without any error correction.";
+              "Number of Reed-Solomon error corrections the QR scanner needed. Lower is better — 0 means the QR scans perfectly without any error correction. The max value is the correction capacity for this QR version at level H.";
             const rsDisplay =
               result.rsCorrections === Infinity ? "-" : result.rsCorrections;
             correctionSpan.innerHTML = `Corrections: <b>${rsDisplay}</b>`;
