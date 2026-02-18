@@ -127,7 +127,7 @@ Plans:
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 16 | v1.5 | Complete    | 2026-02-18 | 2026-02-18 |
-| 17 | 3/3 | Complete   | 2026-02-18 | - |
+| 17 | 3/3 | Complete    | 2026-02-18 | - |
 | 18 | v1.6 | TBD | Not started | - |
 | 19 | v1.6 | TBD | Not started | - |
 

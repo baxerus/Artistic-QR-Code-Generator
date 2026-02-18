@@ -78,7 +78,7 @@ None yet.
 - **Goal:** Users can quickly paint "unset" to erase painted pixels without changing legend selection
 - **Requirements:** PAINT-01, PAINT-02
 - **Risk:** LOW (standard pointer event pattern)
-- **Status:** v1.5 milestone complete
+- **Status:** Milestone complete
 
 ### Phase 15: SVG Export ✓
 - **Goal:** Users can download result QR codes as scalable vector graphics
