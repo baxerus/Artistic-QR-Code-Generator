@@ -132,7 +132,7 @@ Plans:
 **Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 16-01-PLAN.md — Add RS capacity helper and update correction display
+- [x] 16-01-PLAN.md — Add RS capacity helper and update correction display
 
 ---
 
@@ -148,12 +148,12 @@ Plans:
 | 13 | v1.4 | 2/2 | Complete | 2026-02-16 |
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 1/1 | Complete | 2026-02-17 |
-| 16 | 1/1 | Complete   | 2026-02-18 | - |
+| 16 | v1.5 | 1/1 | Complete | 2026-02-18 |
 
-**Total:** 16 phases (14 shipped, 2 remaining)
+**Total:** 16 phases (16 shipped, 0 remaining)
 
 **Coverage:** 7/7 v1.5 requirements mapped ✓
 
 ---
 *Roadmap created: 2026-02-10*
-*Last updated: 2026-02-17 (v1.5 roadmap created)*
+*Last updated: 2026-02-18 (phase 16 complete)*
