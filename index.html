@@ -13519,7 +13519,7 @@
             ? result.correctionCount
             : "—";
         const pixelValue =
-          result.success && Number.isFinite(result.pixelErrors)
+          Number.isFinite(result.pixelErrors) && result.pixelErrors !== null
             ? result.pixelErrors
             : "—";
 
