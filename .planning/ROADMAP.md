@@ -87,11 +87,12 @@
   1. User sees Paint Pattern decode corrections displayed as "X of Y" using the same capacity calculation as result cards.
   2. User sees pixel error count alongside corrections in the Paint Pattern decode test.
   3. User can toggle decode status between Success/Fail/Neutral without any layout jump in the status row area.
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [ ] 17-01-PLAN.md — Align Paint Pattern decode metrics with result cards
 - [ ] 17-02-PLAN.md — Show pixel errors on decode failure
+- [ ] 17-03-PLAN.md — Split metrics lines, preserve neutral width, show max corrections on failure
 
 ### Phase 18: Move Pattern Tool
 **Goal**: Users can reposition the entire painted pattern without changing any painted values.
@@ -126,7 +127,7 @@ Plans:
 | 14 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 15 | v1.5 | 1/1 | Complete | 2026-02-17 |
 | 16 | v1.5 | Complete    | 2026-02-18 | 2026-02-18 |
-| 17 | 2/2 | Complete   | 2026-02-18 | - |
+| 17 | 3/3 | Complete   | 2026-02-18 | - |
 | 18 | v1.6 | TBD | Not started | - |
 | 19 | v1.6 | TBD | Not started | - |
 
