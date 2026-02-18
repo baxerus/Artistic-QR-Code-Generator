@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 17 of 19 (Decode Metrics Alignment)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-18 — v1.6 roadmap created
+Plan: 1 of 1
+Status: Complete
+Last activity: 2026-02-18 — 17-01 plan executed
 
-Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 16/19 phases complete
+Progress: ████████████████████████ 6 milestones shipped (v1.0-v1.5), 17/19 phases complete
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: -
+- Total plans completed: 1
+- Average duration: 25 min
+- Total execution time: 25 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 17 | 1 | 25 min | 25 min |
 
 **Recent Trend:**
-- Last 5 plans: -
+- Last 5 plans: 25 min
 - Trend: -
 
 ## Accumulated Context
@@ -40,7 +40,7 @@ Progress: ███████████████████████�
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- None yet.
+- Phase 17-01: Use visibility hidden for decode metrics line to keep status row height stable.
 
 ### Pending Todos
 
