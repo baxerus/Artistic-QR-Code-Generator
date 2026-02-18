@@ -300,6 +300,14 @@
         margin: 0 auto;
       }
 
+      .qr-canvas-container.move-active {
+        cursor: grab;
+      }
+
+      .qr-canvas-container.move-active.grabbing {
+        cursor: grabbing;
+      }
+
       .qr-canvas-container.blocked {
         cursor: not-allowed;
       }
@@ -897,6 +905,13 @@
                       style="background: transparent; border: 1px dashed #999"
                     ></span>
                     <span>Unset</span>
+                  </button>
+                  <button class="legend-btn" data-tool="move">
+                    <span
+                      class="legend-swatch"
+                      style="background: #fef3c7; border: 1px solid #f59e0b"
+                    ></span>
+                    <span>Move Pattern</span>
                   </button>
                 </div>
                 <button type="button" id="clear-btn">Clear Pattern</button>
@@ -13668,8 +13683,9 @@
       let paintCellSize = 0;
       let functionMask = null; // Cached function pattern mask for painting
 
-      // Color selection state for drag painting
+      // Color/tool selection state for drag painting
       let selectedColor = "unset"; // 'black' | 'white' | 'unset'
+      let activeTool = "paint"; // 'paint' | 'move'
       let isPainting = false;
       let lastPaintedCell = null;
       let currentPaintButton = 0; // Track which mouse button started painting
@@ -13744,17 +13760,56 @@
         selectedColor = color;
 
         // Update UI
-        const buttons = document.querySelectorAll("#paint-legend .legend-btn");
-        buttons.forEach((btn) => {
-          btn.classList.remove("active");
-          if (btn.dataset.color === color) {
-            btn.classList.add("active");
-          }
-        });
+        updateLegendSelection();
 
         // Save to localStorage
         if (save) {
           saveSelectedColor(color);
+        }
+      }
+
+      /**
+       * Set the active tool (paint or move)
+       */
+      function setActiveTool(tool) {
+        if (!["paint", "move"].includes(tool)) {
+          console.warn("Invalid tool:", tool);
+          return;
+        }
+        activeTool = tool;
+        updateLegendSelection();
+        updateMoveCursorState();
+      }
+
+      /**
+       * Update legend button active states
+       */
+      function updateLegendSelection() {
+        const buttons = document.querySelectorAll("#paint-legend .legend-btn");
+        buttons.forEach((btn) => {
+          btn.classList.remove("active");
+          if (btn.dataset.tool === "move") {
+            if (activeTool === "move") {
+              btn.classList.add("active");
+            }
+            return;
+          }
+          if (activeTool === "paint" && btn.dataset.color === selectedColor) {
+            btn.classList.add("active");
+          }
+        });
+      }
+
+      /**
+       * Update cursor feedback for Move tool
+       */
+      function updateMoveCursorState() {
+        const container = document.getElementById("qr-canvas-container");
+        if (!container) return;
+        if (activeTool === "move") {
+          container.classList.add("move-active");
+        } else {
+          container.classList.remove("move-active", "grabbing");
         }
       }
 
@@ -13769,12 +13824,19 @@
           const btn = e.target.closest(".legend-btn");
           if (!btn) return;
 
+          if (btn.dataset.tool === "move") {
+            setActiveTool("move");
+            return;
+          }
+
+          setActiveTool("paint");
           setSelectedColor(btn.dataset.color);
         });
 
         // Restore saved color selection
         const savedColor = loadSelectedColor();
         setSelectedColor(savedColor, false);
+        setActiveTool("paint");
       }
 
       /**
@@ -13784,6 +13846,7 @@
       function initShiftLegendFeedback() {
         document.addEventListener("keydown", function (e) {
           if (e.key === "Shift") {
+            if (activeTool !== "paint") return;
             const buttons = document.querySelectorAll(
               "#paint-legend .legend-btn",
             );
@@ -13799,6 +13862,7 @@
 
         document.addEventListener("keyup", function (e) {
           if (e.key === "Shift") {
+            if (activeTool !== "paint") return;
             // Restore the actual selectedColor highlight
             const buttons = document.querySelectorAll(
               "#paint-legend .legend-btn",
