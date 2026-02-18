@@ -1,27 +1,29 @@
 # Requirements: Artistic QR Code Generator
 
-**Defined:** 2026-02-17
+**Defined:** 2026-02-18
 **Core Value:** The painted pattern is sacred and never changes. The tool finds URL variants that naturally align with the art.
 
-## v1.5 Requirements
+## v1.6 Requirements
 
-Requirements for v1.5 UX & Export Enhancements. Each maps to roadmap phases.
+Requirements for v1.6 QR Code Rotation & Pattern Tools. Each maps to roadmap phases.
 
-### RS Capacity Display
+### Decode Metrics
 
-- [x] **RSCAP-01**: Result card shows correction count as "X of Y" where Y is max capacity for QR version at level H
-- [x] **RSCAP-02**: Max capacity calculated from jsQR VERSIONS table using formula: `sum(ecBlocks × ecCodewordsPerBlock) / 2`
+- [ ] **DECODE-01**: Paint Pattern decode test displays corrections as "X of Y" using the same capacity calculation as result cards
+- [ ] **DECODE-02**: Paint Pattern decode test displays pixel error count alongside corrections
+- [ ] **DECODE-03**: Decode status rows (Success/Fail/Neutral) use a fixed height with no layout jump when state changes
 
-### SVG Export
+### Pattern Tools
 
-- [x] **SVG-01**: Result card has "Download SVG" button alongside existing PNG button
-- [x] **SVG-02**: SVG contains black/white modules only (final QR, not preview colors)
-- [x] **SVG-03**: Downloaded SVG filename follows same pattern as PNG export (different extension only)
+- [ ] **PATTERN-01**: Paint tool selector includes "Move Pattern" alongside Black/White/Unset
+- [ ] **PATTERN-02**: Move Pattern drag shifts the entire painted pattern without changing any pixel values
 
-### Paint Shortcut
+### QR Rotation
 
-- [x] **PAINT-01**: Shift+click/drag (left or right button) paints "unset" regardless of selected color or button
-- [x] **PAINT-02**: Shift state captured at stroke start and held for entire drag
+- [ ] **ROT-01**: Paint Pattern section includes a "Rotate 90°" control that rotates the QR code and protected overlay only (pattern stays fixed)
+- [ ] **ROT-02**: Results QR previews and hover overlays respect the current QR rotation
+- [ ] **ROT-03**: PNG and SVG exports reflect the current QR rotation while preserving the painted pattern orientation
+- [ ] **ROT-04**: Generate control includes "Random rotation" option (0/90/180/270) applied to QR only during search
 
 ## Future Requirements
 
@@ -44,24 +46,21 @@ Deferred to future releases:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PAINT-01 | Phase 14 | Complete |
-| PAINT-02 | Phase 14 | Complete |
-| SVG-01 | Phase 15 | Complete |
-| SVG-02 | Phase 15 | Complete |
-| SVG-03 | Phase 15 | Complete |
-| RSCAP-01 | Phase 16 | Complete |
-| RSCAP-02 | Phase 16 | Complete |
+| DECODE-01 | Phase — | Pending |
+| DECODE-02 | Phase — | Pending |
+| DECODE-03 | Phase — | Pending |
+| PATTERN-01 | Phase — | Pending |
+| PATTERN-02 | Phase — | Pending |
+| ROT-01 | Phase — | Pending |
+| ROT-02 | Phase — | Pending |
+| ROT-03 | Phase — | Pending |
+| ROT-04 | Phase — | Pending |
 
 **Coverage:**
-- v1.5 requirements: 7 total
-- Mapped to phases: 7
-- Unmapped: 0 ✓
-
-**Phase Order Rationale:** Risk-ascending (research recommendation)
-- Phase 14: Shift+Paint (LOW risk) — standard pointer events
-- Phase 15: SVG Export (LOW risk) — well-documented patterns
-- Phase 16: RS Capacity (MEDIUM risk) — formula complexity
+- v1.6 requirements: 9 total
+- Mapped to phases: 0
+- Unmapped: 9 ⚠️
 
 ---
-*Requirements defined: 2026-02-17*
-*Last updated: 2026-02-17 after roadmap creation*
+*Requirements defined: 2026-02-18*
+*Last updated: 2026-02-18 after requirements definition*
