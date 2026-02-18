@@ -13692,6 +13692,12 @@
       let isShiftStroke = false; // Track if Shift was held at stroke start
       const GRID_SENSITIVITY = 0.5; // Tunable constant per locked decision
 
+      // Move tool state
+      let isMoving = false;
+      let moveStartCell = null;
+      let moveStartSnapshot = null;
+      let movePreviewOffset = { dx: 0, dy: 0 };
+
       /**
        * Toggle paint section collapsed state
        */
@@ -13898,6 +13904,80 @@
       }
 
       /**
+       * Build shifted cells with wrap-around
+       */
+      function buildShiftedCells(cells, gridSize, dx, dy) {
+        const shifted = new Array(gridSize * gridSize).fill(0);
+        const wrap = (value) => ((value % gridSize) + gridSize) % gridSize;
+
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const state = cells[row * gridSize + col];
+            if (state === 0) continue;
+            const newCol = wrap(col + dx);
+            const newRow = wrap(row + dy);
+            shifted[newRow * gridSize + newCol] = state;
+          }
+        }
+        return shifted;
+      }
+
+      /**
+       * Render a preview of shifted painted pixels
+       */
+      function renderShiftPreview(shiftedCells) {
+        const container = document.getElementById("qr-canvas-container");
+        const canvas = container ? container.querySelector("canvas") : null;
+        if (!canvas || !paintGrid) return;
+        const previewGrid = {
+          size: paintGrid.size,
+          cells: shiftedCells,
+          get(x, y) {
+            return this.cells[y * this.size + x];
+          },
+        };
+        renderQRWithOverlay(canvas, window.currentQRModel, previewGrid, functionMask);
+      }
+
+      /**
+       * Commit a shift to the paint grid
+       */
+      function commitShift(dx, dy, snapshotCells = null) {
+        if (!paintGrid || (dx === 0 && dy === 0)) return;
+        const sourceCells = snapshotCells || paintGrid.cells;
+        const shiftedCells = buildShiftedCells(
+          sourceCells,
+          paintGrid.size,
+          dx,
+          dy,
+        );
+        paintGrid.cells = shiftedCells;
+        movePreviewOffset = { dx: 0, dy: 0 };
+
+        const container = document.getElementById("qr-canvas-container");
+        const canvas = container ? container.querySelector("canvas") : null;
+        if (canvas) {
+          renderQRWithOverlay(canvas, window.currentQRModel, paintGrid, functionMask);
+        }
+
+        scheduleDecodeUpdate();
+        resetOptimizationResults();
+        checkPaintState();
+        savePattern(currentVersion, paintGrid.cells);
+      }
+
+      /**
+       * Reset move tool state
+       */
+      function resetMoveState() {
+        isMoving = false;
+        moveStartCell = null;
+        moveStartSnapshot = null;
+        movePreviewOffset = { dx: 0, dy: 0 };
+        updateMoveCursorState();
+      }
+
+      /**
        * Convert mouse event to grid coordinates
        */
       function getGridCoordinates(canvas, event) {
@@ -13976,6 +14056,22 @@
           if (e.button !== 0 && e.button !== 2) return; // Only left/right mouse
           if (searchState === "running") return; // Block during optimization
 
+          if (activeTool === "move") {
+            if (!paintGrid || !hasPattern()) return;
+            e.preventDefault();
+            isMoving = true;
+            container.classList.add("grabbing");
+            container.setPointerCapture(e.pointerId);
+
+            const canvas = container.querySelector("canvas");
+            if (canvas) {
+              moveStartCell = getGridCoordinates(canvas, e);
+              moveStartSnapshot = paintGrid.cells.slice();
+              movePreviewOffset = { dx: 0, dy: 0 };
+            }
+            return;
+          }
+
           e.preventDefault(); // Prevent text selection during drag
 
           isPainting = true;
@@ -13992,6 +14088,29 @@
         });
 
         container.addEventListener("pointermove", function (e) {
+          if (activeTool === "move") {
+            if (!isMoving || !moveStartCell || !moveStartSnapshot) return;
+            const canvas = container.querySelector("canvas");
+            if (!canvas) return;
+            const coords = getGridCoordinates(canvas, e);
+            const dx = coords.x - moveStartCell.x;
+            const dy = coords.y - moveStartCell.y;
+
+            if (dx === movePreviewOffset.dx && dy === movePreviewOffset.dy) {
+              return;
+            }
+
+            movePreviewOffset = { dx, dy };
+            const shiftedCells = buildShiftedCells(
+              moveStartSnapshot,
+              paintGrid.size,
+              dx,
+              dy,
+            );
+            renderShiftPreview(shiftedCells);
+            return;
+          }
+
           if (!isPainting) return;
 
           const canvas = container.querySelector("canvas");
@@ -14002,6 +14121,33 @@
         });
 
         container.addEventListener("pointerup", function (e) {
+          if (activeTool === "move") {
+            if (!isMoving) return;
+            isMoving = false;
+            container.classList.remove("grabbing");
+            container.releasePointerCapture(e.pointerId);
+
+            const dx = movePreviewOffset.dx;
+            const dy = movePreviewOffset.dy;
+
+            if (dx !== 0 || dy !== 0) {
+              commitShift(dx, dy, moveStartSnapshot);
+            } else {
+              const canvas = container.querySelector("canvas");
+              if (canvas) {
+                renderQRWithOverlay(
+                  canvas,
+                  window.currentQRModel,
+                  paintGrid,
+                  functionMask,
+                );
+              }
+            }
+
+            resetMoveState();
+            return;
+          }
+
           isPainting = false;
           lastPaintedCell = null;
           currentPaintButton = 0;
@@ -14010,6 +14156,21 @@
         });
 
         container.addEventListener("pointercancel", function (e) {
+          if (activeTool === "move") {
+            isMoving = false;
+            container.classList.remove("grabbing");
+            const canvas = container.querySelector("canvas");
+            if (canvas) {
+              renderQRWithOverlay(
+                canvas,
+                window.currentQRModel,
+                paintGrid,
+                functionMask,
+              );
+            }
+            resetMoveState();
+            return;
+          }
           isPainting = false;
           lastPaintedCell = null;
           currentPaintButton = 0;
@@ -14588,6 +14749,8 @@
         if (savedCells) {
           paintGrid.cells = savedCells;
         }
+
+        resetMoveState();
 
         // Show paint section
         paintSection.style.display = "block";
@@ -17255,6 +17418,7 @@ self.onmessage = function(e) {
           if (!confirm("Clear the entire paint pattern?")) return;
 
           paintGrid.clear();
+          resetMoveState();
 
           // Re-run corruption pipeline to show clean QR and update decode status
           scheduleDecodeUpdate();
