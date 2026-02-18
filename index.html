@@ -13516,14 +13516,14 @@
         }
 
         const maxCapacity = getMaxCorrectionsCapacity(currentVersion);
-        const maxDisplay =
-          result.success && Number.isFinite(maxCapacity) && maxCapacity !== null
-            ? maxCapacity
-            : "—";
-        const correctionsValue =
-          result.success && Number.isFinite(result.correctionCount)
+        const hasMaxCapacity =
+          Number.isFinite(maxCapacity) && maxCapacity !== null;
+        const maxDisplay = hasMaxCapacity ? maxCapacity : "—";
+        const correctionsValue = result.success
+          ? Number.isFinite(result.correctionCount)
             ? result.correctionCount
-            : "—";
+            : "—"
+          : maxDisplay;
         const pixelValue =
           Number.isFinite(result.pixelErrors) && result.pixelErrors !== null
             ? result.pixelErrors
