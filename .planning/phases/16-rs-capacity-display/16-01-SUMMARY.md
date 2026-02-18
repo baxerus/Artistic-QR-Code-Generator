@@ -59,7 +59,7 @@ Each task was committed atomically:
 1. **Task 1: Expose jsQR VERSIONS and compute RS capacity** - `f6fd92a` (feat)
 2. **Task 2: Update result card corrections display and tooltip** - `8023831` (feat)
 
-**Plan metadata:** `b03a33f` (docs: complete plan)
+**Plan metadata:** `ac17547` (docs: complete plan)
 
 ## Files Created/Modified
 - `index.html` - Exposes jsQR VERSIONS, computes RS capacity, and updates corrections display/tooltip.
