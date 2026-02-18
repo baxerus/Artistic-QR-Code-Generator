@@ -9,8 +9,8 @@ Requirements for v1.5 UX & Export Enhancements. Each maps to roadmap phases.
 
 ### RS Capacity Display
 
-- [ ] **RSCAP-01**: Result card shows correction count as "X of Y" where Y is max capacity for QR version at level H
-- [ ] **RSCAP-02**: Max capacity calculated from jsQR VERSIONS table using formula: `sum(ecBlocks × ecCodewordsPerBlock) / 2`
+- [x] **RSCAP-01**: Result card shows correction count as "X of Y" where Y is max capacity for QR version at level H
+- [x] **RSCAP-02**: Max capacity calculated from jsQR VERSIONS table using formula: `sum(ecBlocks × ecCodewordsPerBlock) / 2`
 
 ### SVG Export
 
@@ -49,8 +49,8 @@ Deferred to future releases:
 | SVG-01 | Phase 15 | Complete |
 | SVG-02 | Phase 15 | Complete |
 | SVG-03 | Phase 15 | Complete |
-| RSCAP-01 | Phase 16 | Pending |
-| RSCAP-02 | Phase 16 | Pending |
+| RSCAP-01 | Phase 16 | Complete |
+| RSCAP-02 | Phase 16 | Complete |
 
 **Coverage:**
 - v1.5 requirements: 7 total
