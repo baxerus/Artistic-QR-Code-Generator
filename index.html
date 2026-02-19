@@ -1008,6 +1008,15 @@
             <button type="button" id="optimize-btn" disabled>Generate</button>
           </div>
 
+          <div class="optimization-controls" id="random-rotation-row">
+            <label for="random-rotation-toggle">Random rotation</label>
+            <input
+              type="checkbox"
+              id="random-rotation-toggle"
+              aria-label="Enable random rotation per attempt"
+            />
+          </div>
+
           <!-- Hint when no pixels painted -->
           <div id="paint-hint" class="paint-hint">
             Paint a pixel pattern first
@@ -13758,6 +13767,13 @@
       let paintCellSize = 0;
       let functionMask = null; // Cached function pattern mask for painting
       let qrRotation = 0; // 0/90/180/270 rotation for preview (paint stays fixed)
+      let randomRotationEnabled = false;
+      const ROTATION_LABELS = {
+        0: "0°",
+        90: "90°",
+        180: "180°",
+        270: "270°",
+      };
 
       // Color/tool selection state for drag painting
       let selectedColor = "unset"; // 'black' | 'white' | 'unset'
@@ -13822,7 +13838,9 @@
       function updateRotationIndicator() {
         const indicator = document.getElementById("rotation-indicator");
         if (indicator) {
-          indicator.textContent = `${qrRotation}°`;
+          indicator.textContent = randomRotationEnabled
+            ? "Random"
+            : ROTATION_LABELS[qrRotation] || `${qrRotation}°`;
         }
       }
 
@@ -13836,12 +13854,34 @@
           return;
         }
         qrRotation = normalized;
+        if (randomRotationEnabled) {
+          updateRotationIndicator();
+          return;
+        }
         if (save) {
           saveRotation(qrRotation);
         }
         if (rerender) {
           runCorruptionPipeline();
         }
+      }
+
+      /**
+       * Set random rotation toggle state
+       */
+      function setRandomRotation(enabled, options = {}) {
+        const { save = true, rerender = true } = options;
+        const normalized = Boolean(enabled);
+        if (randomRotationEnabled === normalized) return;
+        randomRotationEnabled = normalized;
+        if (save) {
+          saveRandomRotation(randomRotationEnabled);
+        }
+        updateRotationIndicator();
+        if (rerender) {
+          runCorruptionPipeline();
+        }
+        resetOptimizationResults();
       }
 
       /**
@@ -14581,6 +14621,7 @@
         PATTERN: "qr-art.pattern",
         COLOR: "qr-art.color",
         ROTATION: "qr-art.rotation",
+        RANDOM_ROTATION: "qr-art.random-rotation",
       };
 
       /**
@@ -14627,6 +14668,20 @@
           localStorage.setItem(STORAGE_KEYS.ROTATION, rotation.toString());
         } catch (err) {
           console.warn("Failed to save rotation to localStorage:", err);
+        }
+      }
+
+      /**
+       * Save random rotation toggle to localStorage
+       */
+      function saveRandomRotation(enabled) {
+        try {
+          localStorage.setItem(
+            STORAGE_KEYS.RANDOM_ROTATION,
+            enabled ? "1" : "0",
+          );
+        } catch (err) {
+          console.warn("Failed to save random rotation to localStorage:", err);
         }
       }
 
@@ -14707,6 +14762,19 @@
           console.warn("Failed to load rotation from localStorage:", err);
           return 0;
         }
+      }
+
+      /**
+       * Load random rotation toggle from localStorage
+       */
+      function loadRandomRotation() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEYS.RANDOM_ROTATION);
+          return stored === "1";
+        } catch (err) {
+          console.warn("Failed to load random rotation from localStorage:", err);
+        }
+        return false;
       }
 
       /**
@@ -15073,8 +15141,15 @@
         runCorruptionPipeline();
 
         const rotateBtn = document.getElementById("rotate-btn");
+        const randomRotationToggle = document.getElementById(
+          "random-rotation-toggle",
+        );
         if (rotateBtn) {
           rotateBtn.disabled = false;
+        }
+        if (randomRotationToggle) {
+          randomRotationToggle.disabled = false;
+          randomRotationToggle.checked = randomRotationEnabled;
         }
 
 
@@ -16013,10 +16088,31 @@ let attemptCount = 0;
 let decodableCount = 0;
 let startTime = 0;
 let lastProgressTime = 0;
+let defaultRotation = 0;
+let randomRotationEnabled = false;
 
 // Random hash generator (injected from main thread)
 const HASH_CHARSET = '${HASH_CHARSET}';
 // Hash length will be set from searchConfig (dynamic per optimization run)
+
+const ROTATION_OPTIONS = [0, 90, 180, 270];
+
+function createRotationMapper(rotationDegrees, gridSize) {
+  const normalized = ((rotationDegrees % 360) + 360) % 360;
+  return function mapCoords(row, col) {
+    switch (normalized) {
+      case 90:
+        return { row: col, col: gridSize - 1 - row };
+      case 180:
+        return { row: gridSize - 1 - row, col: gridSize - 1 - col };
+      case 270:
+        return { row: gridSize - 1 - col, col: row };
+      case 0:
+      default:
+        return { row, col };
+    }
+  };
+}
 
 function generateRandomHash(length) {
   const values = new Uint8Array(length);
@@ -16041,19 +16137,25 @@ function evaluateCandidate(hash) {
     return null;
   }
   const moduleCount = qr.getModuleCount();
+  const rotationDegrees = randomRotationEnabled
+    ? ROTATION_OPTIONS[Math.floor(Math.random() * ROTATION_OPTIONS.length)]
+    : defaultRotation;
+  const rotationMapper = createRotationMapper(rotationDegrees, moduleCount);
 
   // Calculate pixel diff (compare painted pixels with QR modules)
   let pixelDiff = 0;
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
-      const idx = row * moduleCount + col;
-      const paintedState = searchConfig.paintedPixels[idx];
+      const displayIdx = row * moduleCount + col;
+      const mapped = rotationMapper(row, col);
+      const idx = mapped.row * moduleCount + mapped.col;
+      const paintedState = searchConfig.paintedPixels[displayIdx];
       const isFunctionPattern = searchConfig.functionMask[idx];
 
       // Skip unset pixels
       if (paintedState === 0) continue;
 
-      const qrDark = qr.isDark(row, col);
+      const qrDark = qr.isDark(mapped.row, mapped.col);
       const paintedDark = (paintedState === 2); // 2 = black
 
       if (qrDark !== paintedDark) {
@@ -16068,15 +16170,17 @@ function evaluateCandidate(hash) {
   const imageData = new ImageData(canvasSize, canvasSize);
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
-      const idx = row * moduleCount + col;
-      const paintedState = searchConfig.paintedPixels[idx];
+      const displayIdx = row * moduleCount + col;
+      const mapped = rotationMapper(row, col);
+      const idx = mapped.row * moduleCount + mapped.col;
+      const paintedState = searchConfig.paintedPixels[displayIdx];
       const isFunctionPattern = searchConfig.functionMask[idx];
 
       let dark;
       if (paintedState !== 0) {
         dark = (paintedState === 2);
       } else {
-        dark = qr.isDark(row, col);
+        dark = qr.isDark(mapped.row, mapped.col);
       }
 
       const color = dark ? 0 : 255;
@@ -16112,10 +16216,12 @@ function evaluateCandidate(hash) {
   const qrModuleData = new Uint8Array(moduleCount * moduleCount);
   for (let row = 0; row < moduleCount; row++) {
     for (let col = 0; col < moduleCount; col++) {
-      const idx = row * moduleCount + col;
-      const paintedState = searchConfig.paintedPixels[idx];
+      const displayIdx = row * moduleCount + col;
+      const mapped = rotationMapper(row, col);
+      const idx = mapped.row * moduleCount + mapped.col;
+      const paintedState = searchConfig.paintedPixels[displayIdx];
       const isFunctionPattern = searchConfig.functionMask[idx];
-      const qrDark = qr.isDark(row, col);
+      const qrDark = qr.isDark(mapped.row, mapped.col);
 
       qrModuleData[idx] = qrDark ? 1 : 0;
 
@@ -16126,11 +16232,11 @@ function evaluateCandidate(hash) {
         dark = qrDark;
       }
 
-      moduleData[idx] = dark ? 1 : 0;
+      moduleData[displayIdx] = dark ? 1 : 0;
     }
   }
 
-  return { hash, pixelDiff, decodable, rsCorrections, moduleData, qrModuleData, moduleCount };
+  return { hash, pixelDiff, decodable, rsCorrections, moduleData, qrModuleData, moduleCount, rotation: rotationDegrees };
 }
 
 // Update top results
@@ -16172,7 +16278,8 @@ function sendProgress() {
       rsCorrections: r.rsCorrections,
       moduleData: Array.from(r.moduleData),
       qrModuleData: Array.from(r.qrModuleData),
-      moduleCount: r.moduleCount
+      moduleCount: r.moduleCount,
+      rotation: r.rotation
     })),
     decodableCount: decodableCount
   });
@@ -16250,7 +16357,8 @@ function sendComplete() {
       rsCorrections: r.rsCorrections,
       moduleData: Array.from(r.moduleData),
       qrModuleData: Array.from(r.qrModuleData),
-      moduleCount: r.moduleCount
+      moduleCount: r.moduleCount,
+      rotation: r.rotation
     })),
     decodableCount: decodableCount
   });
@@ -16261,6 +16369,8 @@ self.onmessage = function(e) {
   if (e.data.type === 'START_OPTIMIZATION') {
     shouldStop = false;
     searchConfig = e.data;
+    defaultRotation = e.data.baseRotation || 0;
+    randomRotationEnabled = Boolean(e.data.randomRotation);
     progressInterval = e.data.progressInterval || 1000;
     topResults = e.data.existingTopResults || [];
     attemptCount = 0;
@@ -16353,8 +16463,11 @@ self.onmessage = function(e) {
         const seen = new Set();
         const unique = combined.filter((r) => {
           if (!r || !r.hash) return false;
-          if (seen.has(r.hash)) return false;
-          seen.add(r.hash);
+          const rotationKey = randomRotationEnabled
+            ? `${r.hash}:${r.rotation ?? 0}`
+            : r.hash;
+          if (seen.has(rotationKey)) return false;
+          seen.add(rotationKey);
           return true;
         });
 
@@ -16491,6 +16604,8 @@ self.onmessage = function(e) {
           progressInterval: PROGRESS_INTERVAL,
           existingTopResults: currentTopResults,
           topResultsCount: TOP_RESULTS_COUNT,
+          baseRotation: qrRotation,
+          randomRotation: randomRotationEnabled,
         };
 
         console.log(
@@ -16626,6 +16741,10 @@ self.onmessage = function(e) {
             const painted = JSON.parse(collapsedOverlay.dataset.paintedPixels);
             const ver = parseInt(collapsedOverlay.dataset.version);
             const fm = createFunctionPatternMask(ver);
+            const rotation = parseInt(
+              collapsedOverlay.dataset.rotation || "0",
+              10,
+            );
             renderErrorOverlay(
               collapsedOverlay,
               qrData,
@@ -16634,6 +16753,7 @@ self.onmessage = function(e) {
               fm,
               null,
               false,
+              rotation,
             );
           }
         });
@@ -17085,14 +17205,24 @@ self.onmessage = function(e) {
 
         topResultsContainer.style.display = "flex";
 
-        // Map existing slots by hash for incremental updates
+        // Map existing slots by hash (+ rotation in random mode) for incremental updates
         const existingSlots = new Map();
         for (const slot of topResultsContainer.children) {
-          existingSlots.set(slot.dataset.hash, slot);
+          const slotRotation = slot.dataset.rotation || "0";
+          const key = randomRotationEnabled
+            ? `${slot.dataset.hash}:${slotRotation}`
+            : slot.dataset.hash;
+          existingSlots.set(key, slot);
         }
 
         // Get new hashes for comparison
-        const newHashes = new Set(topResults.map((r) => r.hash));
+        const newHashes = new Set(
+          topResults.map((r) =>
+            randomRotationEnabled
+              ? `${r.hash}:${(r.rotation ?? qrRotation).toString()}`
+              : r.hash,
+          ),
+        );
 
         // Remove slots that are no longer in top results
         for (const [hash, slot] of existingSlots) {
@@ -17105,7 +17235,13 @@ self.onmessage = function(e) {
         // Build slots array in correct order, tracking which need animation
         const slotsInOrder = [];
         topResults.forEach((result, index) => {
-          let slot = existingSlots.get(result.hash);
+          const expectedRotation = randomRotationEnabled
+            ? (result.rotation ?? qrRotation).toString()
+            : qrRotation.toString();
+          const slotKey = randomRotationEnabled
+            ? `${result.hash}:${expectedRotation}`
+            : result.hash;
+          let slot = existingSlots.get(slotKey);
           const isNew = !slot;
 
           if (isNew) {
@@ -17113,6 +17249,7 @@ self.onmessage = function(e) {
             slot = document.createElement("div");
             slot.className = "result-slot";
             slot.dataset.hash = result.hash;
+            slot.dataset.rotation = expectedRotation;
             slot._resultData = result;
             slot._needsHighlight = true; // Mark for animation after DOM insertion
 
@@ -17132,15 +17269,9 @@ self.onmessage = function(e) {
             canvas.width = moduleCount;
             canvas.height = moduleCount;
 
-            const rotatedModuleData = buildRotatedResultModuleData(
-              result.qrModuleData,
-              result.moduleCount,
-              paintGrid.cells,
-              qrRotation,
-            );
             drawModuleDataToCanvas(
               canvas,
-              rotatedModuleData,
+              result.moduleData,
               result.moduleCount,
             );
 
@@ -17158,7 +17289,7 @@ self.onmessage = function(e) {
               functionMask,
               null, // module resolution
               false, // no borders for small view
-              qrRotation,
+              randomRotationEnabled ? result.rotation ?? qrRotation : qrRotation,
             );
 
             // Store data for re-rendering when expanded
@@ -17170,7 +17301,9 @@ self.onmessage = function(e) {
               paintGrid.cells,
             );
             overlayCanvas.dataset.version = currentVersion;
-            overlayCanvas.dataset.rotation = qrRotation.toString();
+            overlayCanvas.dataset.rotation = (
+              randomRotationEnabled ? result.rotation ?? qrRotation : qrRotation
+            ).toString();
 
             // Assemble canvas container
             canvasContainer.appendChild(canvas);
@@ -17234,7 +17367,7 @@ self.onmessage = function(e) {
                 result.qrModuleData,
                 result.moduleCount,
                 paintGrid.cells,
-                qrRotation,
+                randomRotationEnabled ? (result.rotation ?? qrRotation) : qrRotation,
               );
               const exportCanvas = renderResultToCanvas(
                 rotatedModuleData,
@@ -17265,7 +17398,7 @@ self.onmessage = function(e) {
                 result.qrModuleData,
                 result.moduleCount,
                 paintGrid.cells,
-                qrRotation,
+                randomRotationEnabled ? (result.rotation ?? qrRotation) : qrRotation,
               );
               const svgString = generateSVG(
                 rotatedModuleData,
@@ -17434,6 +17567,7 @@ self.onmessage = function(e) {
           } else {
             // Update existing slot
             slot._resultData = result;
+            slot.dataset.rotation = expectedRotation;
 
             // Update rank number if position changed
             const rankEl = slot.querySelector(".result-rank");
@@ -17583,6 +17717,9 @@ self.onmessage = function(e) {
         const clearBtn = document.getElementById("clear-btn");
         const optimizeBtn = document.getElementById("optimize-btn");
         const rotateBtn = document.getElementById("rotate-btn");
+        const randomRotationToggle = document.getElementById(
+          "random-rotation-toggle",
+        );
 
         // Initialize legend handlers for color selection
         initLegendHandlers();
@@ -17598,10 +17735,16 @@ self.onmessage = function(e) {
         const savedURL = loadURL();
         const savedVersion = loadVersion();
         const savedRotation = loadRotation();
+        const savedRandomRotation = loadRandomRotation();
         setQrRotation(savedRotation, { save: false, rerender: false });
+        setRandomRotation(savedRandomRotation, { save: false, rerender: false });
         updateRotationIndicator();
         if (rotateBtn) {
           rotateBtn.disabled = true;
+        }
+        if (randomRotationToggle) {
+          randomRotationToggle.disabled = true;
+          randomRotationToggle.checked = savedRandomRotation;
         }
 
         // Restore URL input and update UI
@@ -17693,6 +17836,12 @@ self.onmessage = function(e) {
         if (rotateBtn) {
           rotateBtn.addEventListener("click", function () {
             rotateQrPreview();
+          });
+        }
+
+        if (randomRotationToggle) {
+          randomRotationToggle.addEventListener("change", function () {
+            setRandomRotation(this.checked);
           });
         }
 
