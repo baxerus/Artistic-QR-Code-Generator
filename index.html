@@ -358,7 +358,7 @@
       }
 
       .rotate-icon {
-        font-size: 1.7rem;
+        font-size: 2rem;
         line-height: 1;
         display: block;
         transform: translate(1.5px, -3px);
@@ -406,7 +406,9 @@
         width: 24px;
         height: 24px;
         border-radius: 4px;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
       #clear-btn {
@@ -499,6 +501,7 @@
 
       .decode-metric-line {
         display: block;
+        cursor: help;
       }
 
       /* Optimization Section */
@@ -585,8 +588,8 @@
       }
 
       .random-rotation-control input {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
       }
 
       .paint-hint {
@@ -728,6 +731,7 @@
         color: #888;
         word-break: break-all;
         margin-top: 2px;
+        cursor: help;
       }
 
       .result-actions {
@@ -954,28 +958,37 @@
               <div class="paint-controls">
                 <div class="paint-legend" id="paint-legend">
                   <button class="legend-btn" data-color="black">
-                    <span class="legend-swatch" style="background: #000"></span>
+                    <span class="legend-swatch" style="background: #000"
+                      >🖌️</span
+                    >
                     <span>Black</span>
                   </button>
                   <button class="legend-btn" data-color="white">
                     <span
                       class="legend-swatch"
                       style="background: #fff; border: 1px solid #ccc"
-                    ></span>
+                      >🖌️</span
+                    >
                     <span>White</span>
                   </button>
                   <button class="legend-btn active" data-color="unset">
                     <span
                       class="legend-swatch"
                       style="background: transparent; border: 1px dashed #999"
-                    ></span>
+                      >🖌️</span
+                    >
                     <span>Unset</span>
                   </button>
                   <button class="legend-btn" data-tool="move">
                     <span
                       class="legend-swatch"
-                      style="background: #fef3c7; border: 1px solid #f59e0b"
-                    ></span>
+                      style="
+                        background: #fef3c7;
+                        border: 1px solid #f59e0b;
+                        font-weight: bold;
+                      "
+                      >✢</span
+                    >
                     <span>Move</span>
                   </button>
                 </div>
@@ -1017,9 +1030,9 @@
                 <input
                   type="number"
                   id="timeout-input"
-                  value="30"
+                  value="15"
                   min="5"
-                  max="300"
+                  max="600"
                   step="5"
                 />
                 <span class="timeout-unit">seconds</span>
@@ -17399,6 +17412,8 @@ self.onmessage = function(e) {
             // Add hash fragment
             const hashSpan = document.createElement("span");
             hashSpan.className = "result-hash";
+            hashSpan.title =
+              'The URI fragment identifier added to the URL to get different QR code pixel "noise"';
             hashSpan.textContent = `#${result.hash}`;
             label.appendChild(document.createElement("br"));
             label.appendChild(hashSpan);
