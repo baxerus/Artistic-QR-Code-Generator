@@ -15022,10 +15022,36 @@
         return false;
       }
 
+      function remapPatternToNewGrid(oldGrid, newSize) {
+        const oldSize = oldGrid.size;
+        const delta = (newSize - oldSize) / 2;
+        const newGrid = new PixelGrid(newSize);
+
+        for (let y = 0; y < oldSize; y++) {
+          for (let x = 0; x < oldSize; x++) {
+            const state = oldGrid.get(x, y);
+            if (state === 0) continue;
+            const newX = x + delta;
+            const newY = y + delta;
+            if (
+              newX >= 0 &&
+              newX < newSize &&
+              newY >= 0 &&
+              newY < newSize
+            ) {
+              newGrid.set(newX, newY, state);
+            }
+          }
+        }
+
+        return newGrid;
+      }
+
       /**
        * Initialize paint canvas for given QR version
        */
-      function initPaintCanvas(version) {
+      function initPaintCanvas(version, options = {}) {
+        const { priorGrid } = options;
         const gridSize = getModuleSize(version);
         const paintSection = document.getElementById("paint-section");
 
@@ -15038,10 +15064,20 @@
         // Create and cache function pattern mask for painting
         functionMask = createFunctionPatternMask(version);
 
-        // Try to restore saved pattern for this version
-        const savedCells = loadPattern(version);
-        if (savedCells) {
-          paintGrid.cells = savedCells;
+        const hasPriorPattern =
+          priorGrid &&
+          priorGrid.cells &&
+          priorGrid.cells.some((cell) => cell !== 0);
+
+        if (hasPriorPattern) {
+          paintGrid = remapPatternToNewGrid(priorGrid, gridSize);
+          savePattern(version, paintGrid.cells);
+        } else {
+          // Try to restore saved pattern for this version
+          const savedCells = loadPattern(version);
+          if (savedCells) {
+            paintGrid.cells = savedCells;
+          }
         }
 
         resetMoveState();
@@ -15149,6 +15185,8 @@
           return;
         }
 
+        const previousGrid = paintGrid;
+        const previousVersion = currentVersion;
         const version = parseInt(
           document.getElementById("version-select").value,
         );
@@ -15179,7 +15217,15 @@
         previousValidURL = url; // Track for reverting on cancelled version bumps
 
         // Initialize paint canvas for this version
-        initPaintCanvas(version);
+        const shouldRemapPattern =
+          previousGrid &&
+          previousVersion !== version &&
+          previousGrid.cells &&
+          previousGrid.cells.some((cell) => cell !== 0);
+        initPaintCanvas(
+          version,
+          shouldRemapPattern ? { priorGrid: previousGrid } : undefined,
+        );
 
         // Run corruption pipeline (renders QR + overlay + decode)
         runCorruptionPipeline();
