@@ -321,6 +321,7 @@
         flex-wrap: wrap;
       }
 
+
       .paint-legend {
         display: flex;
         flex-direction: row;
@@ -13452,6 +13453,30 @@
       }
 
       /**
+       * Build rotation mapping helper for 0/90/180/270 degree steps.
+       */
+      function createRotationMapper(rotationDegrees, gridSize) {
+        const normalized = ((rotationDegrees % 360) + 360) % 360;
+        if (![0, 90, 180, 270].includes(normalized)) {
+          console.warn("Invalid rotation angle:", rotationDegrees);
+        }
+
+        return function mapCoords(row, col) {
+          switch (normalized) {
+            case 90:
+              return { row: col, col: gridSize - 1 - row };
+            case 180:
+              return { row: gridSize - 1 - row, col: gridSize - 1 - col };
+            case 270:
+              return { row: gridSize - 1 - col, col: row };
+            case 0:
+            default:
+              return { row, col };
+          }
+        };
+      }
+
+      /**
        * Decode QR code from canvas using jsQR
        */
       function decodeCorruptedQR(canvas) {
@@ -13601,6 +13626,7 @@
         const decodeCtx = decodeCanvas.getContext("2d");
         const gridSize = qrModel.getModuleCount();
         const cellSize = decodeCanvas.width / gridSize;
+        const rotationMapper = createRotationMapper(qrRotation, gridSize);
 
         // Draw QR with painted pixels as actual black/white
         for (let y = 0; y < gridSize; y++) {
@@ -13616,7 +13642,8 @@
               isDark = true;
             } else {
               // Use original QR value
-              isDark = qrModel.isDark(y, x);
+              const mapped = rotationMapper(y, x);
+              isDark = qrModel.isDark(mapped.row, mapped.col);
             }
 
             decodeCtx.fillStyle = isDark ? "#000000" : "#ffffff";
@@ -13631,6 +13658,7 @@
         let pixelErrors = null;
         if (paintGrid) {
           const gridSize = paintGrid.size;
+          const rotationMapper = createRotationMapper(qrRotation, gridSize);
           let errors = 0;
           for (let row = 0; row < gridSize; row++) {
             for (let col = 0; col < gridSize; col++) {
@@ -13638,7 +13666,8 @@
               if (paintedState === 0) continue;
               hasPattern = true;
               const paintedDark = paintedState === 2;
-              const qrDark = qrModel.isDark(row, col);
+              const mapped = rotationMapper(row, col);
+              const qrDark = qrModel.isDark(mapped.row, mapped.col);
               if (paintedDark !== qrDark) {
                 errors++;
               }
@@ -13663,17 +13692,6 @@
       function updateCursorForPosition(e, wrapper, canvas) {
         if (!paintGrid || !functionMask) return;
 
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const canvasX = (e.clientX - rect.left) * scaleX;
-        const canvasY = (e.clientY - rect.top) * scaleY;
-
-        const gridSize = paintGrid.size;
-        const cellSize = canvas.width / gridSize;
-        const gridX = Math.floor(canvasX / cellSize);
-        const gridY = Math.floor(canvasY / cellSize);
-
         // Always show paintable cursor - painting is allowed everywhere
         wrapper.classList.remove("blocked");
       }
@@ -13682,6 +13700,7 @@
       let paintGrid = null;
       let paintCellSize = 0;
       let functionMask = null; // Cached function pattern mask for painting
+      let qrRotation = 0; // 0/90/180/270 rotation for preview (paint stays fixed)
 
       // Color/tool selection state for drag painting
       let selectedColor = "unset"; // 'black' | 'white' | 'unset'
@@ -13725,6 +13744,36 @@
           toggle.addEventListener("click", function () {
             togglePaintSection();
           });
+        }
+      }
+
+
+      /**
+       * Normalize rotation to 0/90/180/270.
+       */
+      function normalizeRotation(rotation) {
+        const normalized = ((rotation % 360) + 360) % 360;
+        if (normalized === 0 || normalized === 90 || normalized === 180) {
+          return normalized;
+        }
+        return normalized === 270 ? 270 : 0;
+      }
+
+      /**
+       * Set and persist QR rotation
+       */
+      function setQrRotation(rotation, options = {}) {
+        const { save = true, rerender = true } = options;
+        const normalized = normalizeRotation(rotation);
+        if (qrRotation === normalized) {
+          return;
+        }
+        qrRotation = normalized;
+        if (save) {
+          saveRotation(qrRotation);
+        }
+        if (rerender) {
+          runCorruptionPipeline();
         }
       }
 
@@ -14278,15 +14327,27 @@
       /**
        * Draw protected area outlines (border only on outer edges of protected regions)
        */
-      function drawProtectedAreaOutlines(ctx, mask, gridSize, cellSize) {
+      function drawProtectedAreaOutlines(
+        ctx,
+        mask,
+        gridSize,
+        cellSize,
+        rotationMapper = null,
+      ) {
         ctx.strokeStyle = PROTECTED_OUTLINE_COLOR;
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 2]);
 
+        const mapCoords =
+          rotationMapper || ((row, col) => ({ row, col }));
+
         for (let y = 0; y < gridSize; y++) {
           for (let x = 0; x < gridSize; x++) {
             // Skip if not protected
-            if (!isProtectedCell(x, y, gridSize, mask)) continue;
+            const mapped = mapCoords(y, x);
+            if (!isProtectedCell(mapped.col, mapped.row, gridSize, mask)) {
+              continue;
+            }
 
             // Use Math.round to avoid sub-pixel rendering artifacts
             const px = Math.round(x * cellSize);
@@ -14296,28 +14357,32 @@
 
             // Check each edge - draw border only if neighbor is not protected
             // Top edge
-            if (!isProtectedCell(x, y - 1, gridSize, mask)) {
+            const top = mapCoords(y - 1, x);
+            if (!isProtectedCell(top.col, top.row, gridSize, mask)) {
               ctx.beginPath();
               ctx.moveTo(px, py);
               ctx.lineTo(pxEnd, py);
               ctx.stroke();
             }
             // Bottom edge
-            if (!isProtectedCell(x, y + 1, gridSize, mask)) {
+            const bottom = mapCoords(y + 1, x);
+            if (!isProtectedCell(bottom.col, bottom.row, gridSize, mask)) {
               ctx.beginPath();
               ctx.moveTo(px, pyEnd);
               ctx.lineTo(pxEnd, pyEnd);
               ctx.stroke();
             }
             // Left edge
-            if (!isProtectedCell(x - 1, y, gridSize, mask)) {
+            const left = mapCoords(y, x - 1);
+            if (!isProtectedCell(left.col, left.row, gridSize, mask)) {
               ctx.beginPath();
               ctx.moveTo(px, py);
               ctx.lineTo(px, pyEnd);
               ctx.stroke();
             }
             // Right edge
-            if (!isProtectedCell(x + 1, y, gridSize, mask)) {
+            const right = mapCoords(y, x + 1);
+            if (!isProtectedCell(right.col, right.row, gridSize, mask)) {
               ctx.beginPath();
               ctx.moveTo(pxEnd, py);
               ctx.lineTo(pxEnd, pyEnd);
@@ -14343,6 +14408,7 @@
         const ctx = qrCanvas.getContext("2d");
         const gridSize = qrModel.getModuleCount();
         const cellSize = qrCanvas.width / gridSize;
+        const rotationMapper = createRotationMapper(qrRotation, gridSize);
 
         // Layer 0: Draw base QR code modules
         // Use Math.round to avoid sub-pixel gaps between adjacent cells
@@ -14353,7 +14419,8 @@
             const pw = Math.round((x + 1) * cellSize) - px;
             const ph = Math.round((y + 1) * cellSize) - py;
 
-            const isDark = qrModel.isDark(y, x);
+            const mapped = rotationMapper(y, x);
+            const isDark = qrModel.isDark(mapped.row, mapped.col);
             ctx.fillStyle = isDark ? "#000000" : "#ffffff";
             ctx.fillRect(px, py, pw, ph);
           }
@@ -14387,7 +14454,8 @@
           ctx.fillStyle = PROTECTED_OVERLAY_COLOR;
           for (let y = 0; y < gridSize; y++) {
             for (let x = 0; x < gridSize; x++) {
-              if (mask[y * gridSize + x]) {
+              const mapped = rotationMapper(y, x);
+              if (mask[mapped.row * gridSize + mapped.col]) {
                 const px = Math.round(x * cellSize);
                 const py = Math.round(y * cellSize);
                 const pw = Math.round((x + 1) * cellSize) - px;
@@ -14398,7 +14466,13 @@
           }
 
           // Draw outlines on outer edges
-          drawProtectedAreaOutlines(ctx, mask, gridSize, cellSize);
+          drawProtectedAreaOutlines(
+            ctx,
+            mask,
+            gridSize,
+            cellSize,
+            rotationMapper,
+          );
         }
       }
 
@@ -14430,6 +14504,7 @@
         VERSION: "qr-art.version",
         PATTERN: "qr-art.pattern",
         COLOR: "qr-art.color",
+        ROTATION: "qr-art.rotation",
       };
 
       /**
@@ -14465,6 +14540,17 @@
           localStorage.setItem(STORAGE_KEYS.VERSION, version.toString());
         } catch (err) {
           console.warn("Failed to save version to localStorage:", err);
+        }
+      }
+
+      /**
+       * Save QR rotation to localStorage
+       */
+      function saveRotation(rotation) {
+        try {
+          localStorage.setItem(STORAGE_KEYS.ROTATION, rotation.toString());
+        } catch (err) {
+          console.warn("Failed to save rotation to localStorage:", err);
         }
       }
 
@@ -14524,6 +14610,26 @@
         } catch (err) {
           console.warn("Failed to load version from localStorage:", err);
           return MIN_QR_VERSION;
+        }
+      }
+
+      /**
+       * Load QR rotation from localStorage
+       * Returns 0 if invalid or not found
+       */
+      function loadRotation() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEYS.ROTATION);
+          if (!stored) return 0;
+          const rotation = parseInt(stored, 10);
+          if (![0, 90, 180, 270].includes(rotation)) {
+            console.warn("Invalid stored rotation:", stored, "- using 0");
+            return 0;
+          }
+          return rotation;
+        } catch (err) {
+          console.warn("Failed to load rotation from localStorage:", err);
+          return 0;
         }
       }
 
@@ -14888,6 +14994,7 @@
 
         // Run corruption pipeline (renders QR + overlay + decode)
         runCorruptionPipeline();
+
 
         // Show optimization section
         const optimizationSection = document.getElementById(
@@ -17292,6 +17399,17 @@ self.onmessage = function(e) {
       }
 
       /**
+       * Reset rotation to 0 and persist
+       */
+      function resetRotation(reason) {
+        if (qrRotation === 0) {
+          return;
+        }
+        console.log("Resetting rotation to 0:", reason || "unspecified");
+        setQrRotation(0);
+      }
+
+      /**
        * Initialize application when DOM is ready
        */
       document.addEventListener("DOMContentLoaded", function () {
@@ -17314,6 +17432,8 @@ self.onmessage = function(e) {
         // Restore saved state on page load
         const savedURL = loadURL();
         const savedVersion = loadVersion();
+        const savedRotation = loadRotation();
+        setQrRotation(savedRotation, { save: false, rerender: false });
 
         // Restore URL input and update UI
         if (savedURL) {
@@ -17383,6 +17503,9 @@ self.onmessage = function(e) {
           }
 
           saveVersion(newVersion);
+          if (newVersion !== currentVersion) {
+            resetRotation("version change");
+          }
 
           // SAFE-02/03: If pattern exists, don't auto-generate (user must click Generate)
           if (hasPattern()) {
@@ -17393,6 +17516,7 @@ self.onmessage = function(e) {
 
           generateQR();
         });
+
 
         // Drag painting is handled in setupPaintingEvents() function
         // resetOptimizationResults() is now global (defined before DOMContentLoaded)
@@ -17419,6 +17543,7 @@ self.onmessage = function(e) {
 
           paintGrid.clear();
           resetMoveState();
+          resetRotation("clear pattern");
 
           // Re-run corruption pipeline to show clean QR and update decode status
           scheduleDecodeUpdate();
