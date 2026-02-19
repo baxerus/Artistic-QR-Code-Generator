@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 Phase: 19 of 19 (QR Rotation Controls)
 Plan: 3 of 3 in current phase
 Status: Complete
-Last activity: 2026-02-19 — Milestone v1.6 archived
+Last activity: 2026-02-19 - Completed quick task 10: Preserve painted pattern when changing QR version; keep centered and clip overflow
 
 Progress: █████████████████████████ 19/19 phases complete
 
@@ -65,6 +65,12 @@ None yet.
 [Issues that affect future work]
 
 None yet.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 10 | Preserve painted pattern when changing QR version; keep centered and clip overflow | 2026-02-19 | 397f62d | [10-preserve-painted-pattern-when-changing-q](./quick/10-preserve-painted-pattern-when-changing-q/) |
 
 ## Session Continuity
 
