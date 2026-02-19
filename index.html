@@ -16706,8 +16706,8 @@ self.onmessage = function(e) {
        * @param {number} moduleCount - QR code dimensions
        * @returns {HTMLCanvasElement} Canvas with rendered QR code
        */
-      function renderResultToCanvas(moduleData, moduleCount) {
-        const canvas = document.createElement("canvas");
+      function drawModuleDataToCanvas(canvas, moduleData, moduleCount) {
+        if (!canvas) return;
         canvas.width = moduleCount;
         canvas.height = moduleCount;
 
@@ -16725,6 +16725,42 @@ self.onmessage = function(e) {
         }
 
         ctx.putImageData(imageData, 0, 0);
+      }
+
+      function buildRotatedResultModuleData(
+        qrModuleData,
+        moduleCount,
+        paintedPixels,
+        rotationDegrees,
+      ) {
+        const rotated = new Uint8Array(moduleCount * moduleCount);
+        const rotationMapper = createRotationMapper(rotationDegrees, moduleCount);
+
+        for (let row = 0; row < moduleCount; row++) {
+          for (let col = 0; col < moduleCount; col++) {
+            const displayIdx = row * moduleCount + col;
+            const paintedState = paintedPixels ? paintedPixels[displayIdx] : 0;
+            if (paintedState === 1) {
+              rotated[displayIdx] = 0;
+              continue;
+            }
+            if (paintedState === 2) {
+              rotated[displayIdx] = 1;
+              continue;
+            }
+
+            const mapped = rotationMapper(row, col);
+            const sourceIdx = mapped.row * moduleCount + mapped.col;
+            rotated[displayIdx] = qrModuleData[sourceIdx] === 1 ? 1 : 0;
+          }
+        }
+
+        return rotated;
+      }
+
+      function renderResultToCanvas(moduleData, moduleCount) {
+        const canvas = document.createElement("canvas");
+        drawModuleDataToCanvas(canvas, moduleData, moduleCount);
         return canvas;
       }
 
@@ -17080,17 +17116,17 @@ self.onmessage = function(e) {
             canvas.width = moduleCount;
             canvas.height = moduleCount;
 
-            // Draw module data to canvas
-            const ctx = canvas.getContext("2d");
-            const imageData = ctx.createImageData(moduleCount, moduleCount);
-            for (let i = 0; i < result.moduleData.length; i++) {
-              const color = result.moduleData[i] === 1 ? 0 : 255;
-              imageData.data[i * 4] = color;
-              imageData.data[i * 4 + 1] = color;
-              imageData.data[i * 4 + 2] = color;
-              imageData.data[i * 4 + 3] = 255;
-            }
-            ctx.putImageData(imageData, 0, 0);
+            const rotatedModuleData = buildRotatedResultModuleData(
+              result.qrModuleData,
+              result.moduleCount,
+              paintGrid.cells,
+              qrRotation,
+            );
+            drawModuleDataToCanvas(
+              canvas,
+              rotatedModuleData,
+              result.moduleCount,
+            );
 
             // Create overlay canvas (rendered at module resolution, CSS scales with pixelated)
             const overlayCanvas = document.createElement("canvas");
