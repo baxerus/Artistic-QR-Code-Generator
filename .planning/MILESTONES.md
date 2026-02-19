@@ -120,3 +120,24 @@
 **Git range:** `4efd815` → `8023831`
 
 ---
+
+## v1.6 QR Code Rotation & Pattern Tools (Shipped: 2026-02-19)
+
+**Delivered:** Rotation-aware QR previews/exports, Move Pattern workflow controls, and aligned decode metrics in Paint Pattern.
+
+**Phases completed:** 17-19 (7 plans total)
+
+**Key accomplishments:**
+- Paint Pattern decode metrics now mirror result cards with stable layout and pixel error visibility.
+- Move Pattern tool supports drag-to-move with wrap-around and arrow-key nudges while preserving painted values.
+- QR rotation controls align previews, overlays, and PNG/SVG exports while keeping painted pixels fixed.
+- Random rotation during Generate applies per-attempt rotations with per-result preview alignment.
+
+**Stats:**
+- 1 file (index.html) modified, 17,746 lines of HTML/CSS/JS
+- 3 phases, 7 plans, 19 tasks
+- 2 days (2026-02-18 → 2026-02-19)
+
+**Git range:** `9a62461` → `f7cff80`
+
+---

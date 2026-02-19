@@ -10,9 +10,9 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ## Current State
 
-**Shipped:** v1.5 UX & Export Enhancements (2026-02-18)
+**Shipped:** v1.6 QR Code Rotation & Pattern Tools (2026-02-19)
 
-**Codebase:** ~16,500 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (modified to expose RS corrections), multi-worker optimization via Blob URLs.
+**Codebase:** ~17,700 lines of HTML/CSS/JS in a single file. Tech stack: vanilla HTML5/CSS3/ES6, qrcodejs (inlined), jsQR (modified to expose RS corrections), multi-worker optimization via Blob URLs.
 
 **Milestones Complete:**
 
@@ -21,8 +21,20 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - v1.2 Visual Consistency — 1 phase, 3 plans (2026-02-15)
 - v1.3 Hash Capacity — 1 phase, 1 plan (2026-02-15)
 - v1.4 RS Error Measurement — 2 phases, 5 plans (2026-02-16)
+- v1.5 UX & Export Enhancements — 3 phases, 3 plans (2026-02-18)
+- v1.6 QR Code Rotation & Pattern Tools — 3 phases, 7 plans (2026-02-19)
 
-**Total:** 16 phases, 28 plans across 6 milestones
+**Total:** 19 phases, 35 plans across 7 milestones
+
+## Current Milestone: (planning next)
+
+**Goal:** Define the next milestone scope and requirements.
+
+**Target features:**
+- TBD
+
+<details>
+<summary>✅ v1.6 Milestone Context (archived)</summary>
 
 ## Current Milestone: v1.6 QR Code Rotation & Pattern Tools
 
@@ -32,18 +44,6 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - Decode test in Paint Pattern shows corrections + pixel errors metrics
 - Move Pattern tool to reposition full painted pattern
 - QR rotation controls (manual 90deg + optional random rotation)
-
-<details>
-<summary>✅ v1.5 Milestone Context (archived)</summary>
-
-## Current Milestone: v1.5 UX & Export Enhancements
-
-**Goal:** Improve result card context with correction capacity display, add SVG export, and streamline painting workflow with keyboard modifier.
-
-**Target features:**
-- Corrections capacity display (X of Y) on result cards
-- SVG download button for vector export
-- Shift+paint keyboard shortcut for quick unset
 
 </details>
 
@@ -98,16 +98,25 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 - ✓ Sort results by RS corrections (primary), pixel diff (secondary) — v1.4
 - ✓ Redefine "perfect result" as RS=0 — v1.4
 
+**v1.5 UX & Export Enhancements:**
+
+- ✓ Shift+paint shortcut paints unset regardless of selection — v1.5
+- ✓ SVG export generates single-path QR with quiet zone and per-result download — v1.5
+- ✓ Result cards display corrections as X of Y with max capacity tooltip — v1.5
+
+**v1.6 QR Code Rotation & Pattern Tools:**
+
+- ✓ Decode test metrics match result slots (corrections + pixel errors) — v1.6
+- ✓ Move Pattern tool for repositioning painted patterns — v1.6
+- ✓ QR rotation controls for preview, results, and exports — v1.6
+
 ### Active
 
-- [ ] Decode test metrics match result slots (corrections + pixel errors)
-- [ ] Move Pattern tool for repositioning painted patterns
-- [ ] QR rotation controls for preview, results, and exports
+- [ ] TBD (define with next milestone)
 
 ## Next Milestone Goals
 
-- Improve pattern workflow controls and rotation support
-- Validate rotation and repositioning behavior in exports
+- Define next milestone scope and requirements
 
 ### Out of Scope
 
@@ -146,6 +155,8 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 | Auto-stop on 5 perfect results         | Saves time when ideal found             | ✓ Good — v1.1 |
 | Pattern-aware version changes          | Prevents accidental pattern loss        | ✓ Good — v1.1 |
 | Hash fragment URL rejection            | Prevents silent failures                | ✓ Good — v1.1 |
+| Rotate preview only; painted pixels fixed | Preserve artwork orientation while adjusting QR view | ✓ Good — v1.6 |
+| Rotation-mapped modules for results/exports | Keep previews/exports aligned to rotation | ✓ Good — v1.6 |
 
 ## Future Considerations
 
@@ -162,4 +173,4 @@ Based on v1.1 development, potential future work:
 
 ---
 
-_Last updated: 2026-02-18 after v1.6 milestone start_
+_Last updated: 2026-02-19 after v1.6 milestone completion_
