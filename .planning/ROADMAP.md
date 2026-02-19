@@ -115,7 +115,12 @@ Plans:
   2. User sees result previews and hover overlays reflect the current QR rotation.
   3. User exports PNG/SVG that match the current QR rotation while preserving the painted pattern orientation.
   4. User can enable random rotation for Generate so searches apply 0/90/180/270 rotation to the QR only, reflected in the resulting previews.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 19-01-PLAN.md — Add rotation control, persistence, and paint-preview rotation
+- [ ] 19-02-PLAN.md — Rotate result previews/overlays and align PNG/SVG exports
+- [ ] 19-03-PLAN.md — Add random rotation for Generate and worker integration
 
 ## Progress
 
