@@ -17229,8 +17229,14 @@ self.onmessage = function(e) {
             downloadBtn.textContent = "Download PNG";
             downloadBtn.disabled = isRunning;
             downloadBtn.onclick = () => {
+              const rotatedModuleData = buildRotatedResultModuleData(
+                result.qrModuleData,
+                result.moduleCount,
+                paintGrid.cells,
+                qrRotation,
+              );
               const exportCanvas = renderResultToCanvas(
-                result.moduleData,
+                rotatedModuleData,
                 result.moduleCount,
               );
               // Sanitize URL for filename (safe for Windows, macOS, Linux)
@@ -17254,8 +17260,14 @@ self.onmessage = function(e) {
                 .replace(/[<>:"/\\|?*]/g, "_")
                 .replace(/_{2,}/g, "_")
                 .slice(0, 200);
+              const rotatedModuleData = buildRotatedResultModuleData(
+                result.qrModuleData,
+                result.moduleCount,
+                paintGrid.cells,
+                qrRotation,
+              );
               const svgString = generateSVG(
-                result.moduleData,
+                rotatedModuleData,
                 result.moduleCount,
                 fullUrl,
               );
