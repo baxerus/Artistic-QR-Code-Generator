@@ -929,7 +929,8 @@
               <option value="" disabled selected>Enter URL first</option>
             </select>
             <div class="version-warning" id="version-warning">
-              The painted pattern will not be copied to the new QR version.
+              The painted pattern will be preserved, re-centered in the new
+              version, and clipped if it exceeds the grid.
             </div>
           </div>
 
@@ -15111,7 +15112,7 @@
             const confirmed = confirm(
               "This URL requires a larger QR version (" +
                 minVersion +
-                ") and will clear your painted pattern. Continue?",
+                "). Your painted pattern will be preserved, re-centered in the new version, and clipped if it exceeds the grid. Continue?",
             );
 
             if (!confirmed) {
