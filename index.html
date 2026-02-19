@@ -17269,9 +17269,17 @@ self.onmessage = function(e) {
             canvas.width = moduleCount;
             canvas.height = moduleCount;
 
+            const previewModuleData = randomRotationEnabled
+              ? result.moduleData
+              : buildRotatedResultModuleData(
+                  result.qrModuleData,
+                  result.moduleCount,
+                  paintGrid.cells,
+                  qrRotation,
+                );
             drawModuleDataToCanvas(
               canvas,
-              result.moduleData,
+              previewModuleData,
               result.moduleCount,
             );
 
