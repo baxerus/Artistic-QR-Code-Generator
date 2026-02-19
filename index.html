@@ -45,8 +45,8 @@
 
       header {
         text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
         border-bottom: 1px solid #e0e0e0;
       }
 
@@ -61,14 +61,14 @@
       }
 
       .input-group {
-        margin-bottom: 24px;
+        margin-bottom: 15px;
       }
 
       .input-group label {
         display: block;
         font-size: 0.875rem;
         color: #666;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
       }
 
       .input-wrapper {
@@ -79,7 +79,7 @@
       input[type="text"],
       select {
         width: 100%;
-        padding: 12px 40px 12px 12px;
+        padding: 10px;
         font-size: 1rem;
         border: 2px solid #ddd;
         border-radius: 6px;
@@ -155,13 +155,9 @@
         color: #9ca3af;
       }
 
-      .action-row {
-        margin-top: 30px;
-      }
-
       button {
         width: 100%;
-        padding: 14px;
+        padding: 12px;
         font-size: 1rem;
         font-weight: 500;
         color: #fff;
@@ -190,7 +186,7 @@
 
       .paint-section {
         display: none;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         padding: 20px;
         background-color: #fafafa;
         border-radius: 8px;
@@ -218,7 +214,7 @@
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        padding: 12px 16px;
+        padding: 10px 12px;
         background: #f8fafc;
         border: none;
         border-bottom: 2px solid #e0e0e0;
@@ -453,12 +449,11 @@
       }
 
       .decode-result {
-        margin-top: 20px;
         padding: 15px;
         border-radius: 6px;
         border: 2px solid #e0e0e0;
         background-color: #fafafa;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -929,8 +924,8 @@
               <option value="" disabled selected>Enter URL first</option>
             </select>
             <div class="version-warning" id="version-warning">
-              The painted pattern will be preserved, re-centered in the new
-              version, and clipped if it exceeds the grid.
+              The painted pattern will be preserved. But if it exceeds the grid
+              it will get clipped!
             </div>
           </div>
 
@@ -15034,12 +15029,7 @@
             if (state === 0) continue;
             const newX = x + delta;
             const newY = y + delta;
-            if (
-              newX >= 0 &&
-              newX < newSize &&
-              newY >= 0 &&
-              newY < newSize
-            ) {
+            if (newX >= 0 && newX < newSize && newY >= 0 && newY < newSize) {
               newGrid.set(newX, newY, state);
             }
           }
@@ -15112,7 +15102,7 @@
             const confirmed = confirm(
               "This URL requires a larger QR version (" +
                 minVersion +
-                "). Your painted pattern will be preserved, re-centered in the new version, and clipped if it exceeds the grid. Continue?",
+                "). The painted pattern will be preserved. Continue?",
             );
 
             if (!confirmed) {
