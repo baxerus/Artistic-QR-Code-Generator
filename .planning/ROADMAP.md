@@ -118,8 +118,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — Add rotation control, persistence, and paint-preview rotation
-- [ ] 19-02-PLAN.md — Rotate result previews/overlays and align PNG/SVG exports
+- [x] 19-01-PLAN.md — Add rotation control, persistence, and paint-preview rotation
+- [x] 19-02-PLAN.md — Rotate result previews/overlays and align PNG/SVG exports
 - [ ] 19-03-PLAN.md — Add random rotation for Generate and worker integration
 
 ## Progress
@@ -137,7 +137,7 @@ Plans:
 | 16 | v1.5 | Complete    | 2026-02-18 | 2026-02-18 |
 | 17 | 3/3 | Complete    | 2026-02-18 | - |
 | 18 | v1.6 | Complete    | 2026-02-18 | - |
-| 19 | v1.6 | TBD | Not started | - |
+| 19 | v1.6 | 2/3 | In Progress | - |
 
 **Total:** 19 phases (16 shipped, 3 remaining)
 
@@ -145,4 +145,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-02-18*
-*Last updated: 2026-02-18 (v1.6 roadmap created)*
+*Last updated: 2026-02-19 (plan progress update)*
