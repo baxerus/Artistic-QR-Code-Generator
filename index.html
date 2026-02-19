@@ -16780,6 +16780,7 @@ self.onmessage = function(e) {
         functionMask,
         displaySize,
         includeBorders,
+        rotationDegrees = 0,
       ) {
         // Render at specified display resolution
         const cellSize = displaySize
@@ -16794,6 +16795,24 @@ self.onmessage = function(e) {
         const ctx = overlayCanvas.getContext("2d");
         ctx.clearRect(0, 0, canvasSize, canvasSize);
 
+        const rotationMapper = createRotationMapper(rotationDegrees, moduleCount);
+        const getMappedIndex = (row, col) => {
+          if (
+            row < 0 ||
+            col < 0 ||
+            row >= moduleCount ||
+            col >= moduleCount
+          ) {
+            return null;
+          }
+          const mapped = rotationMapper(row, col);
+          return mapped.row * moduleCount + mapped.col;
+        };
+        const isFunctionAt = (row, col) => {
+          const mappedIndex = getMappedIndex(row, col);
+          return mappedIndex === null ? false : functionMask[mappedIndex];
+        };
+
         // Iterate through all modules - draw colored fills
         for (let row = 0; row < moduleCount; row++) {
           for (let col = 0; col < moduleCount; col++) {
@@ -16801,14 +16820,17 @@ self.onmessage = function(e) {
             const x = col * cellSize;
             const y = row * cellSize;
 
-            if (functionMask[idx]) {
+            const mappedIndex = getMappedIndex(row, col);
+            if (mappedIndex === null) continue;
+
+            if (functionMask[mappedIndex]) {
               // Function pattern pixels (finders, timing, alignment) - blue
               ctx.fillStyle = "rgba(0, 100, 255, 0.35)";
               ctx.fillRect(x, y, cellSize, cellSize);
             } else if (paintedPixels[idx] !== 0) {
               // Locked painted pixel - compare against original QR data
               const paintedIsDark = paintedPixels[idx] === 2;
-              const qrIsDark = qrModuleData[idx] === 1;
+              const qrIsDark = qrModuleData[mappedIndex] === 1;
 
               if (paintedIsDark === qrIsDark) {
                 // Match - green
@@ -16832,41 +16854,34 @@ self.onmessage = function(e) {
 
           for (let y = 0; y < moduleCount; y++) {
             for (let x = 0; x < moduleCount; x++) {
-              const idx = y * moduleCount + x;
-              if (!functionMask[idx]) continue;
+              if (!isFunctionAt(y, x)) continue;
 
               const px = x * cellSize;
               const py = y * cellSize;
 
               // Top edge
-              if (y === 0 || !functionMask[(y - 1) * moduleCount + x]) {
+              if (y === 0 || !isFunctionAt(y - 1, x)) {
                 ctx.beginPath();
                 ctx.moveTo(px, py);
                 ctx.lineTo(px + cellSize, py);
                 ctx.stroke();
               }
               // Bottom edge
-              if (
-                y === moduleCount - 1 ||
-                !functionMask[(y + 1) * moduleCount + x]
-              ) {
+              if (y === moduleCount - 1 || !isFunctionAt(y + 1, x)) {
                 ctx.beginPath();
                 ctx.moveTo(px, py + cellSize);
                 ctx.lineTo(px + cellSize, py + cellSize);
                 ctx.stroke();
               }
               // Left edge
-              if (x === 0 || !functionMask[y * moduleCount + (x - 1)]) {
+              if (x === 0 || !isFunctionAt(y, x - 1)) {
                 ctx.beginPath();
                 ctx.moveTo(px, py);
                 ctx.lineTo(px, py + cellSize);
                 ctx.stroke();
               }
               // Right edge
-              if (
-                x === moduleCount - 1 ||
-                !functionMask[y * moduleCount + (x + 1)]
-              ) {
+              if (x === moduleCount - 1 || !isFunctionAt(y, x + 1)) {
                 ctx.beginPath();
                 ctx.moveTo(px + cellSize, py);
                 ctx.lineTo(px + cellSize, py + cellSize);
@@ -17142,6 +17157,7 @@ self.onmessage = function(e) {
               functionMask,
               null, // module resolution
               false, // no borders for small view
+              qrRotation,
             );
 
             // Store data for re-rendering when expanded
@@ -17153,6 +17169,7 @@ self.onmessage = function(e) {
               paintGrid.cells,
             );
             overlayCanvas.dataset.version = currentVersion;
+            overlayCanvas.dataset.rotation = qrRotation.toString();
 
             // Assemble canvas container
             canvasContainer.appendChild(canvas);
@@ -17277,6 +17294,10 @@ self.onmessage = function(e) {
                   );
                   const ver = parseInt(collapsedOverlay.dataset.version);
                   const fm = createFunctionPatternMask(ver);
+                  const rotation = parseInt(
+                    collapsedOverlay.dataset.rotation || "0",
+                    10,
+                  );
                   renderErrorOverlay(
                     collapsedOverlay,
                     qrData,
@@ -17285,6 +17306,7 @@ self.onmessage = function(e) {
                     fm,
                     null,
                     false,
+                    rotation,
                   );
                 }
               }
@@ -17301,6 +17323,10 @@ self.onmessage = function(e) {
                 const painted = JSON.parse(overlay.dataset.paintedPixels);
                 const ver = parseInt(overlay.dataset.version);
                 const fm = createFunctionPatternMask(ver);
+                const rotation = parseInt(
+                  overlay.dataset.rotation || "0",
+                  10,
+                );
 
                 if (willExpand) {
                   // Expanded: render at same size as paint canvas with borders
@@ -17312,6 +17338,7 @@ self.onmessage = function(e) {
                     fm,
                     CANVAS_DISPLAY_SIZE,
                     true,
+                    rotation,
                   );
                 } else {
                   // Collapsed: render at module resolution, no borders
@@ -17323,6 +17350,7 @@ self.onmessage = function(e) {
                     fm,
                     null,
                     false,
+                    rotation,
                   );
                 }
               }
@@ -17366,6 +17394,10 @@ self.onmessage = function(e) {
                 const painted = JSON.parse(overlay.dataset.paintedPixels);
                 const ver = parseInt(overlay.dataset.version);
                 const fm = createFunctionPatternMask(ver);
+                const rotation = parseInt(
+                  overlay.dataset.rotation || "0",
+                  10,
+                );
                 renderErrorOverlay(
                   overlay,
                   qrData,
@@ -17374,6 +17406,7 @@ self.onmessage = function(e) {
                   fm,
                   null,
                   false,
+                  rotation,
                 );
               }
             });
