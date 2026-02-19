@@ -331,6 +331,9 @@
         width: 40px;
         height: 40px;
         padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border: 2px solid #e0e0e0;
         border-radius: 6px;
         background: #fff;
@@ -355,18 +358,18 @@
       }
 
       .rotate-icon {
-        font-size: 1.1rem;
+        font-size: 1.7rem;
         line-height: 1;
-        display: inline-block;
+        display: block;
+        transform: translate(1.5px, -3px);
       }
 
       .rotation-indicator {
-        font-size: 0.85rem;
+        font-size: 1rem;
         color: #666;
-        min-width: 36px;
+        min-width: 44px;
         text-align: left;
       }
-
 
       .paint-legend {
         display: flex;
@@ -507,7 +510,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 20px;
+        gap: 16px;
+        flex-wrap: wrap;
         margin-bottom: 12px;
       }
 
@@ -546,12 +550,12 @@
 
       .timeout-unit {
         font-size: 0.875rem;
-        color: #999;
+        color: #666;
       }
 
       #optimize-btn {
-        min-width: 140px;
-        padding: 10px 20px;
+        min-width: 110px;
+        padding: 10px 16px;
         font-size: 1rem;
         font-weight: 500;
         color: #fff;
@@ -569,6 +573,20 @@
       #optimize-btn:disabled {
         background-color: #cbd5e1;
         cursor: not-allowed;
+      }
+
+      .random-rotation-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: #666;
+        white-space: nowrap;
+      }
+
+      .random-rotation-control input {
+        width: 16px;
+        height: 16px;
       }
 
       .paint-hint {
@@ -970,7 +988,9 @@
                   >
                     <span class="rotate-icon" aria-hidden="true">⟳</span>
                   </button>
-                  <span id="rotation-indicator" class="rotation-indicator">0°</span>
+                  <span id="rotation-indicator" class="rotation-indicator"
+                    >0°</span
+                  >
                 </div>
                 <button type="button" id="clear-btn">Clear Pattern</button>
               </div>
@@ -1005,16 +1025,15 @@
                 <span class="timeout-unit">seconds</span>
               </div>
             </div>
+            <div class="random-rotation-control">
+              <label for="random-rotation-toggle">Random rotation</label>
+              <input
+                type="checkbox"
+                id="random-rotation-toggle"
+                aria-label="Enable random rotation per attempt"
+              />
+            </div>
             <button type="button" id="optimize-btn" disabled>Generate</button>
-          </div>
-
-          <div class="optimization-controls" id="random-rotation-row">
-            <label for="random-rotation-toggle">Random rotation</label>
-            <input
-              type="checkbox"
-              id="random-rotation-toggle"
-              aria-label="Enable random rotation per attempt"
-            />
           </div>
 
           <!-- Hint when no pixels painted -->
@@ -13530,11 +13549,11 @@
         return function mapCoords(row, col) {
           switch (normalized) {
             case 90:
-              return { row: col, col: gridSize - 1 - row };
+              return { row: gridSize - 1 - col, col: row };
             case 180:
               return { row: gridSize - 1 - row, col: gridSize - 1 - col };
             case 270:
-              return { row: gridSize - 1 - col, col: row };
+              return { row: col, col: gridSize - 1 - row };
             case 0:
             default:
               return { row, col };
@@ -13820,7 +13839,6 @@
         }
       }
 
-
       /**
        * Normalize rotation to 0/90/180/270.
        */
@@ -13838,9 +13856,8 @@
       function updateRotationIndicator() {
         const indicator = document.getElementById("rotation-indicator");
         if (indicator) {
-          indicator.textContent = randomRotationEnabled
-            ? "Random"
-            : ROTATION_LABELS[qrRotation] || `${qrRotation}°`;
+          indicator.textContent =
+            ROTATION_LABELS[qrRotation] || `${qrRotation}°`;
         }
       }
 
@@ -13848,21 +13865,25 @@
        * Set and persist QR rotation
        */
       function setQrRotation(rotation, options = {}) {
-        const { save = true, rerender = true } = options;
+        const { save = true, rerender = true, resetResults } = options;
         const normalized = normalizeRotation(rotation);
         if (qrRotation === normalized) {
           return;
         }
         qrRotation = normalized;
-        if (randomRotationEnabled) {
-          updateRotationIndicator();
-          return;
-        }
         if (save) {
           saveRotation(qrRotation);
         }
+        updateRotationIndicator();
         if (rerender) {
           runCorruptionPipeline();
+        }
+        const shouldReset =
+          typeof resetResults === "boolean"
+            ? resetResults
+            : !randomRotationEnabled;
+        if (shouldReset) {
+          resetOptimizationResults();
         }
       }
 
@@ -13881,7 +13902,6 @@
         if (rerender) {
           runCorruptionPipeline();
         }
-        resetOptimizationResults();
       }
 
       /**
@@ -13890,7 +13910,6 @@
       function rotateQrPreview() {
         const nextRotation = (qrRotation + 90) % 360;
         setQrRotation(nextRotation);
-        updateRotationIndicator();
       }
 
       /**
@@ -14101,7 +14120,12 @@
             return this.cells[y * this.size + x];
           },
         };
-        renderQRWithOverlay(canvas, window.currentQRModel, previewGrid, functionMask);
+        renderQRWithOverlay(
+          canvas,
+          window.currentQRModel,
+          previewGrid,
+          functionMask,
+        );
       }
 
       /**
@@ -14122,7 +14146,12 @@
         const container = document.getElementById("qr-canvas-container");
         const canvas = container ? container.querySelector("canvas") : null;
         if (canvas) {
-          renderQRWithOverlay(canvas, window.currentQRModel, paintGrid, functionMask);
+          renderQRWithOverlay(
+            canvas,
+            window.currentQRModel,
+            paintGrid,
+            functionMask,
+          );
         }
 
         scheduleDecodeUpdate();
@@ -14454,8 +14483,7 @@
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 2]);
 
-        const mapCoords =
-          rotationMapper || ((row, col) => ({ row, col }));
+        const mapCoords = rotationMapper || ((row, col) => ({ row, col }));
 
         for (let y = 0; y < gridSize; y++) {
           for (let x = 0; x < gridSize; x++) {
@@ -14772,7 +14800,10 @@
           const stored = localStorage.getItem(STORAGE_KEYS.RANDOM_ROTATION);
           return stored === "1";
         } catch (err) {
-          console.warn("Failed to load random rotation from localStorage:", err);
+          console.warn(
+            "Failed to load random rotation from localStorage:",
+            err,
+          );
         }
         return false;
       }
@@ -15151,7 +15182,6 @@
           randomRotationToggle.disabled = false;
           randomRotationToggle.checked = randomRotationEnabled;
         }
-
 
         // Show optimization section
         const optimizationSection = document.getElementById(
@@ -16102,11 +16132,11 @@ function createRotationMapper(rotationDegrees, gridSize) {
   return function mapCoords(row, col) {
     switch (normalized) {
       case 90:
-        return { row: col, col: gridSize - 1 - row };
+        return { row: gridSize - 1 - col, col: row };
       case 180:
         return { row: gridSize - 1 - row, col: gridSize - 1 - col };
       case 270:
-        return { row: gridSize - 1 - col, col: row };
+        return { row: col, col: gridSize - 1 - row };
       case 0:
       default:
         return { row, col };
@@ -16854,7 +16884,10 @@ self.onmessage = function(e) {
         rotationDegrees,
       ) {
         const rotated = new Uint8Array(moduleCount * moduleCount);
-        const rotationMapper = createRotationMapper(rotationDegrees, moduleCount);
+        const rotationMapper = createRotationMapper(
+          rotationDegrees,
+          moduleCount,
+        );
 
         for (let row = 0; row < moduleCount; row++) {
           for (let col = 0; col < moduleCount; col++) {
@@ -16862,7 +16895,7 @@ self.onmessage = function(e) {
             const mapped = rotationMapper(row, col);
             const sourceIdx = mapped.row * moduleCount + mapped.col;
 
-            const paintedState = paintedPixels ? paintedPixels[sourceIdx] : 0;
+            const paintedState = paintedPixels ? paintedPixels[displayIdx] : 0;
             if (paintedState === 1) {
               rotated[displayIdx] = 0;
               continue;
@@ -16877,6 +16910,18 @@ self.onmessage = function(e) {
         }
 
         return rotated;
+      }
+
+      function getResultModuleData(result) {
+        if (randomRotationEnabled) {
+          return result.moduleData;
+        }
+        return buildRotatedResultModuleData(
+          result.qrModuleData,
+          result.moduleCount,
+          paintGrid.cells,
+          qrRotation,
+        );
       }
 
       function renderResultToCanvas(moduleData, moduleCount) {
@@ -16916,14 +16961,12 @@ self.onmessage = function(e) {
         const ctx = overlayCanvas.getContext("2d");
         ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-        const rotationMapper = createRotationMapper(rotationDegrees, moduleCount);
+        const rotationMapper = createRotationMapper(
+          rotationDegrees,
+          moduleCount,
+        );
         const getMappedIndex = (row, col) => {
-          if (
-            row < 0 ||
-            col < 0 ||
-            row >= moduleCount ||
-            col >= moduleCount
-          ) {
+          if (row < 0 || col < 0 || row >= moduleCount || col >= moduleCount) {
             return null;
           }
           const mapped = rotationMapper(row, col);
@@ -17271,12 +17314,7 @@ self.onmessage = function(e) {
 
             const previewModuleData = randomRotationEnabled
               ? result.moduleData
-              : buildRotatedResultModuleData(
-                  result.qrModuleData,
-                  result.moduleCount,
-                  paintGrid.cells,
-                  qrRotation,
-                );
+              : getResultModuleData(result);
             drawModuleDataToCanvas(
               canvas,
               previewModuleData,
@@ -17297,7 +17335,9 @@ self.onmessage = function(e) {
               functionMask,
               null, // module resolution
               false, // no borders for small view
-              randomRotationEnabled ? result.rotation ?? qrRotation : qrRotation,
+              randomRotationEnabled
+                ? (result.rotation ?? qrRotation)
+                : qrRotation,
             );
 
             // Store data for re-rendering when expanded
@@ -17310,7 +17350,9 @@ self.onmessage = function(e) {
             );
             overlayCanvas.dataset.version = currentVersion;
             overlayCanvas.dataset.rotation = (
-              randomRotationEnabled ? result.rotation ?? qrRotation : qrRotation
+              randomRotationEnabled
+                ? (result.rotation ?? qrRotation)
+                : qrRotation
             ).toString();
 
             // Assemble canvas container
@@ -17371,12 +17413,7 @@ self.onmessage = function(e) {
             downloadBtn.textContent = "Download PNG";
             downloadBtn.disabled = isRunning;
             downloadBtn.onclick = () => {
-              const rotatedModuleData = buildRotatedResultModuleData(
-                result.qrModuleData,
-                result.moduleCount,
-                paintGrid.cells,
-                randomRotationEnabled ? (result.rotation ?? qrRotation) : qrRotation,
-              );
+              const rotatedModuleData = getResultModuleData(result);
               const exportCanvas = renderResultToCanvas(
                 rotatedModuleData,
                 result.moduleCount,
@@ -17402,12 +17439,7 @@ self.onmessage = function(e) {
                 .replace(/[<>:"/\\|?*]/g, "_")
                 .replace(/_{2,}/g, "_")
                 .slice(0, 200);
-              const rotatedModuleData = buildRotatedResultModuleData(
-                result.qrModuleData,
-                result.moduleCount,
-                paintGrid.cells,
-                randomRotationEnabled ? (result.rotation ?? qrRotation) : qrRotation,
-              );
+              const rotatedModuleData = getResultModuleData(result);
               const svgString = generateSVG(
                 rotatedModuleData,
                 result.moduleCount,
@@ -17477,10 +17509,7 @@ self.onmessage = function(e) {
                 const painted = JSON.parse(overlay.dataset.paintedPixels);
                 const ver = parseInt(overlay.dataset.version);
                 const fm = createFunctionPatternMask(ver);
-                const rotation = parseInt(
-                  overlay.dataset.rotation || "0",
-                  10,
-                );
+                const rotation = parseInt(overlay.dataset.rotation || "0", 10);
 
                 if (willExpand) {
                   // Expanded: render at same size as paint canvas with borders
@@ -17548,10 +17577,7 @@ self.onmessage = function(e) {
                 const painted = JSON.parse(overlay.dataset.paintedPixels);
                 const ver = parseInt(overlay.dataset.version);
                 const fm = createFunctionPatternMask(ver);
-                const rotation = parseInt(
-                  overlay.dataset.rotation || "0",
-                  10,
-                );
+                const rotation = parseInt(overlay.dataset.rotation || "0", 10);
                 renderErrorOverlay(
                   overlay,
                   qrData,
@@ -17745,7 +17771,10 @@ self.onmessage = function(e) {
         const savedRotation = loadRotation();
         const savedRandomRotation = loadRandomRotation();
         setQrRotation(savedRotation, { save: false, rerender: false });
-        setRandomRotation(savedRandomRotation, { save: false, rerender: false });
+        setRandomRotation(savedRandomRotation, {
+          save: false,
+          rerender: false,
+        });
         updateRotationIndicator();
         if (rotateBtn) {
           rotateBtn.disabled = true;
@@ -17852,7 +17881,6 @@ self.onmessage = function(e) {
             setRandomRotation(this.checked);
           });
         }
-
 
         // Drag painting is handled in setupPaintingEvents() function
         // resetOptimizationResults() is now global (defined before DOMContentLoaded)
