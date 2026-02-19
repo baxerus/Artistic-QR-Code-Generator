@@ -16739,7 +16739,10 @@ self.onmessage = function(e) {
         for (let row = 0; row < moduleCount; row++) {
           for (let col = 0; col < moduleCount; col++) {
             const displayIdx = row * moduleCount + col;
-            const paintedState = paintedPixels ? paintedPixels[displayIdx] : 0;
+            const mapped = rotationMapper(row, col);
+            const sourceIdx = mapped.row * moduleCount + mapped.col;
+
+            const paintedState = paintedPixels ? paintedPixels[sourceIdx] : 0;
             if (paintedState === 1) {
               rotated[displayIdx] = 0;
               continue;
@@ -16749,8 +16752,6 @@ self.onmessage = function(e) {
               continue;
             }
 
-            const mapped = rotationMapper(row, col);
-            const sourceIdx = mapped.row * moduleCount + mapped.col;
             rotated[displayIdx] = qrModuleData[sourceIdx] === 1 ? 1 : 0;
           }
         }
