@@ -75,7 +75,7 @@
 
 - [x] **Phase 17: Decode Metrics Alignment** - Paint Pattern decode test matches result metrics and stable layout (completed 2026-02-18)
 - [x] **Phase 18: Move Pattern Tool** - Reposition painted pattern without altering pixel values (completed 2026-02-18)
-- [ ] **Phase 19: QR Rotation Controls** - Rotate QR across preview, results, exports, and search
+- [x] **Phase 19: QR Rotation Controls** - Rotate QR across preview, results, exports, and search (completed 2026-02-19)
 
 ## Phase Details
 
@@ -137,7 +137,7 @@ Plans:
 | 16 | v1.5 | Complete    | 2026-02-18 | 2026-02-18 |
 | 17 | 3/3 | Complete    | 2026-02-18 | - |
 | 18 | v1.6 | Complete    | 2026-02-18 | - |
-| 19 | v1.6 | 2/3 | In Progress | - |
+| 19 | v1.6 | Complete    | 2026-02-19 | - |
 
 **Total:** 19 phases (16 shipped, 3 remaining)
 
