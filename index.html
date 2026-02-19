@@ -321,6 +321,52 @@
         flex-wrap: wrap;
       }
 
+      .rotation-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #rotate-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          transform 0.1s ease;
+      }
+
+      #rotate-btn:hover {
+        border-color: #3b82f6;
+      }
+
+      #rotate-btn:active {
+        transform: translateY(1px);
+      }
+
+      #rotate-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .rotate-icon {
+        font-size: 1.1rem;
+        line-height: 1;
+        display: inline-block;
+      }
+
+      .rotation-indicator {
+        font-size: 0.85rem;
+        color: #666;
+        min-width: 36px;
+        text-align: left;
+      }
+
 
       .paint-legend {
         display: flex;
@@ -914,6 +960,17 @@
                     ></span>
                     <span>Move</span>
                   </button>
+                </div>
+                <div class="rotation-control">
+                  <button
+                    type="button"
+                    id="rotate-btn"
+                    aria-label="Rotate QR preview 90 degrees"
+                    title="Rotate QR preview 90 degrees"
+                  >
+                    <span class="rotate-icon" aria-hidden="true">⟳</span>
+                  </button>
+                  <span id="rotation-indicator" class="rotation-indicator">0°</span>
                 </div>
                 <button type="button" id="clear-btn">Clear Pattern</button>
               </div>
@@ -13760,6 +13817,16 @@
       }
 
       /**
+       * Update rotation UI indicator
+       */
+      function updateRotationIndicator() {
+        const indicator = document.getElementById("rotation-indicator");
+        if (indicator) {
+          indicator.textContent = `${qrRotation}°`;
+        }
+      }
+
+      /**
        * Set and persist QR rotation
        */
       function setQrRotation(rotation, options = {}) {
@@ -13775,6 +13842,15 @@
         if (rerender) {
           runCorruptionPipeline();
         }
+      }
+
+      /**
+       * Advance rotation by 90 degrees
+       */
+      function rotateQrPreview() {
+        const nextRotation = (qrRotation + 90) % 360;
+        setQrRotation(nextRotation);
+        updateRotationIndicator();
       }
 
       /**
@@ -14857,6 +14933,7 @@
         }
 
         resetMoveState();
+        updateRotationIndicator();
 
         // Show paint section
         paintSection.style.display = "block";
@@ -14994,6 +15071,11 @@
 
         // Run corruption pipeline (renders QR + overlay + decode)
         runCorruptionPipeline();
+
+        const rotateBtn = document.getElementById("rotate-btn");
+        if (rotateBtn) {
+          rotateBtn.disabled = false;
+        }
 
 
         // Show optimization section
@@ -17418,6 +17500,7 @@ self.onmessage = function(e) {
         const generateBtn = document.getElementById("generate-btn");
         const clearBtn = document.getElementById("clear-btn");
         const optimizeBtn = document.getElementById("optimize-btn");
+        const rotateBtn = document.getElementById("rotate-btn");
 
         // Initialize legend handlers for color selection
         initLegendHandlers();
@@ -17434,6 +17517,10 @@ self.onmessage = function(e) {
         const savedVersion = loadVersion();
         const savedRotation = loadRotation();
         setQrRotation(savedRotation, { save: false, rerender: false });
+        updateRotationIndicator();
+        if (rotateBtn) {
+          rotateBtn.disabled = true;
+        }
 
         // Restore URL input and update UI
         if (savedURL) {
@@ -17459,6 +17546,9 @@ self.onmessage = function(e) {
           // Auto-generate QR if saved URL is valid
           if (isValidURL(savedURL) && !generateBtn.disabled) {
             generateQR();
+            if (rotateBtn) {
+              rotateBtn.disabled = false;
+            }
           }
         }
 
@@ -17505,6 +17595,7 @@ self.onmessage = function(e) {
           saveVersion(newVersion);
           if (newVersion !== currentVersion) {
             resetRotation("version change");
+            updateRotationIndicator();
           }
 
           // SAFE-02/03: If pattern exists, don't auto-generate (user must click Generate)
@@ -17516,6 +17607,12 @@ self.onmessage = function(e) {
 
           generateQR();
         });
+
+        if (rotateBtn) {
+          rotateBtn.addEventListener("click", function () {
+            rotateQrPreview();
+          });
+        }
 
 
         // Drag painting is handled in setupPaintingEvents() function
@@ -17544,6 +17641,7 @@ self.onmessage = function(e) {
           paintGrid.clear();
           resetMoveState();
           resetRotation("clear pattern");
+          updateRotationIndicator();
 
           // Re-run corruption pipeline to show clean QR and update decode status
           scheduleDecodeUpdate();
