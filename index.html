@@ -16152,11 +16152,11 @@ function evaluateCandidate(hash) {
       const paintedState = searchConfig.paintedPixels[displayIdx];
       const isFunctionPattern = searchConfig.functionMask[idx];
 
-      // Skip unset pixels
+      if (isFunctionPattern) continue;
       if (paintedState === 0) continue;
 
       const qrDark = qr.isDark(mapped.row, mapped.col);
-      const paintedDark = (paintedState === 2); // 2 = black
+      const paintedDark = paintedState === 2; // 2 = black
 
       if (qrDark !== paintedDark) {
         pixelDiff++;
@@ -16177,8 +16177,8 @@ function evaluateCandidate(hash) {
       const isFunctionPattern = searchConfig.functionMask[idx];
 
       let dark;
-      if (paintedState !== 0) {
-        dark = (paintedState === 2);
+      if (!isFunctionPattern && paintedState !== 0) {
+        dark = paintedState === 2;
       } else {
         dark = qr.isDark(mapped.row, mapped.col);
       }
@@ -16226,8 +16226,8 @@ function evaluateCandidate(hash) {
       qrModuleData[idx] = qrDark ? 1 : 0;
 
       let dark;
-      if (paintedState !== 0) {
-        dark = (paintedState === 2);
+      if (!isFunctionPattern && paintedState !== 0) {
+        dark = paintedState === 2;
       } else {
         dark = qrDark;
       }
