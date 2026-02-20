@@ -49,6 +49,7 @@
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 1px solid #e0e0e0;
+        z-index: 5;
       }
 
       .app-header h1 {
@@ -60,6 +61,7 @@
         right: 0;
         top: 50%;
         transform: translateY(-50%);
+        z-index: 6;
       }
 
       .settings-button {
@@ -105,7 +107,7 @@
         min-width: 210px;
         padding: 6px;
         display: none;
-        z-index: 20;
+        z-index: 100;
       }
 
       .settings-menu.open .settings-dropdown {
@@ -1000,10 +1002,9 @@
               stroke-linejoin="round"
               aria-hidden="true"
             >
-              <path d="M4 5a2 2 0 0 1 2-2h10l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
-              <path d="M14 3v4h4"></path>
-              <path d="M8 13h8"></path>
-              <path d="M8 17h8"></path>
+              <line x1="4" y1="6" x2="20" y2="6"></line>
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
             </svg>
           </button>
           <div
@@ -14942,10 +14943,30 @@
       }
 
       /**
+       * Load selected color from localStorage
+       */
+      function loadSelectedColor() {
+        try {
+          return localStorage.getItem(STORAGE_KEYS.COLOR) || "unset";
+        } catch (err) {
+          console.warn("Failed to load color from localStorage:", err);
+          return "unset";
+        }
+      }
+
+      /**
        * Load paint pattern from localStorage
        * Returns null if not found, corrupt, or version mismatch
        */
       function loadPattern(expectedVersion) {
+        return loadPatternData(expectedVersion)?.cells || null;
+      }
+
+      /**
+       * Load paint pattern from localStorage with metadata
+       * Returns null if not found, corrupt, or version mismatch
+       */
+      function loadPatternData(expectedVersion) {
         try {
           const stored = localStorage.getItem(STORAGE_KEYS.PATTERN);
           if (!stored) return null;
@@ -14987,7 +15008,11 @@
             return null;
           }
 
-          return data.cells;
+          return {
+            version: data.version,
+            size: expectedSize,
+            cells: data.cells,
+          };
         } catch (err) {
           console.warn("Failed to load pattern from localStorage:", err);
           return null;
@@ -17596,11 +17621,7 @@ self.onmessage = function(e) {
               );
               // Sanitize URL for filename (safe for Windows, macOS, Linux)
               const fullUrl = `${currentURL}#${result.hash}`;
-              const sanitizedUrl = fullUrl
-                .replace(/^https?:\/\//, "") // Remove protocol
-                .replace(/[<>:"/\\|?*]/g, "_") // Replace invalid chars
-                .replace(/_{2,}/g, "_") // Collapse multiple underscores
-                .slice(0, 200); // Limit length
+              const sanitizedUrl = buildSanitizedUrlFilename(fullUrl);
               downloadCanvasAsPNG(exportCanvas, sanitizedUrl);
             };
 
@@ -17610,11 +17631,7 @@ self.onmessage = function(e) {
             svgBtn.disabled = isRunning;
             svgBtn.onclick = () => {
               const fullUrl = `${currentURL}#${result.hash}`;
-              const sanitizedUrl = fullUrl
-                .replace(/^https?:\/\//, "")
-                .replace(/[<>:"/\\|?*]/g, "_")
-                .replace(/_{2,}/g, "_")
-                .slice(0, 200);
+              const sanitizedUrl = buildSanitizedUrlFilename(fullUrl);
               const rotatedModuleData = getResultModuleData(result);
               const svgString = generateSVG(
                 rotatedModuleData,
@@ -17959,17 +17976,24 @@ self.onmessage = function(e) {
       }
 
       function exportSettingsToJson() {
+        const storedUrl = loadURL() || "";
+        const storedVersion = loadVersion();
+        const storedRotation = loadRotation();
+        const storedRandomRotation = loadRandomRotation();
+        const storedColor = loadSelectedColor();
+        const storedPattern = loadPatternData(storedVersion);
+        const sanitizedUrl = buildSanitizedUrlFilename(storedUrl);
         const snapshot = {
-          url: currentURL || "",
-          version: currentVersion || MIN_QR_VERSION,
-          rotation: qrRotation,
-          randomRotation: Boolean(randomRotationEnabled),
-          selectedColor: selectedColor,
-          pattern: paintGrid
+          url: storedUrl,
+          version: storedVersion,
+          rotation: storedRotation,
+          randomRotation: Boolean(storedRandomRotation),
+          selectedColor: storedColor,
+          pattern: storedPattern
             ? {
-                version: currentVersion || MIN_QR_VERSION,
-                size: paintGrid.size,
-                cells: Array.from(paintGrid.cells),
+                version: storedPattern.version,
+                size: storedPattern.size,
+                cells: Array.from(storedPattern.cells),
               }
             : null,
         };
@@ -17979,11 +18003,21 @@ self.onmessage = function(e) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "qr-art-settings.json";
+        link.download = `${sanitizedUrl}.settings.json`;
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
+      }
+
+      function buildSanitizedUrlFilename(urlValue) {
+        const base = (urlValue || "").trim();
+        const sanitized = base
+          .replace(/^https?:\/\//, "")
+          .replace(/[<>:"/\\|?*]/g, "_")
+          .replace(/_{2,}/g, "_")
+          .slice(0, 200);
+        return sanitized || "qr-art";
       }
 
       function applyUrlSetting(urlValue) {
@@ -18072,6 +18106,10 @@ self.onmessage = function(e) {
         fileInput.addEventListener("change", function () {
           const file = fileInput.files && fileInput.files[0];
           if (!file) return;
+          const confirmed = confirm(
+            "Load settings from file? This will replace your current settings and painted pattern.",
+          );
+          if (!confirmed) return;
           const reader = new FileReader();
           reader.onload = function () {
             let parsed;
@@ -18108,9 +18146,7 @@ self.onmessage = function(e) {
 
       function resetSettingsWithConfirm() {
         if (searchState === "running") return;
-        const confirmed = confirm(
-          "Reset settings and clear stored pattern?",
-        );
+        const confirmed = confirm("Reset settings and clear stored pattern?");
         if (!confirmed) return;
 
         try {
@@ -18128,6 +18164,7 @@ self.onmessage = function(e) {
         const versionSelect = document.getElementById("version-select");
         const generateBtn = document.getElementById("generate-btn");
         const rotateBtn = document.getElementById("rotate-btn");
+        const versionWarning = document.getElementById("version-warning");
         const randomRotationToggle = document.getElementById(
           "random-rotation-toggle",
         );
@@ -18148,6 +18185,9 @@ self.onmessage = function(e) {
         if (rotateBtn) {
           rotateBtn.disabled = true;
         }
+        if (versionWarning) {
+          versionWarning.style.display = "none";
+        }
         if (randomRotationToggle) {
           randomRotationToggle.disabled = true;
           randomRotationToggle.checked = false;
@@ -18164,10 +18204,14 @@ self.onmessage = function(e) {
 
         initPaintCanvas(MIN_QR_VERSION);
         savePattern(MIN_QR_VERSION, paintGrid.cells);
+        checkPaintState();
+        const paintSection = document.getElementById("paint-section");
+        if (paintSection) {
+          paintSection.style.display = "none";
+        }
         if (qrModel) {
           runCorruptionPipeline();
         }
-        checkPaintState();
         resetOptimizationResults();
 
         const optimizationSection = document.getElementById(
@@ -18205,6 +18249,7 @@ self.onmessage = function(e) {
         const clearBtn = document.getElementById("clear-btn");
         const optimizeBtn = document.getElementById("optimize-btn");
         const rotateBtn = document.getElementById("rotate-btn");
+        const versionWarning = document.getElementById("version-warning");
         const settingsButton = document.getElementById("settings-button");
         const settingsSave = document.getElementById("settings-save");
         const settingsLoad = document.getElementById("settings-load");
@@ -18321,10 +18366,14 @@ self.onmessage = function(e) {
         });
 
         // Generate button click
-        generateBtn.addEventListener("click", function () {
-          versionWarning.style.display = "none";
-          generateQR();
-        });
+        if (generateBtn) {
+          generateBtn.addEventListener("click", function () {
+            if (versionWarning) {
+              versionWarning.style.display = "none";
+            }
+            generateQR();
+          });
+        }
 
         // Enter key triggers generation
         urlInput.addEventListener("keypress", function (e) {
@@ -18334,34 +18383,42 @@ self.onmessage = function(e) {
         });
 
         // Version change - regenerate QR if URL is valid (guarded by pattern check)
-        const versionWarning = document.getElementById("version-warning");
+        if (versionSelect) {
+          versionSelect.addEventListener("change", function () {
+            const newVersion = parseInt(this.value, 10);
+            const url = urlInput.value.trim();
 
-        versionSelect.addEventListener("change", function () {
-          const newVersion = parseInt(this.value, 10);
-          const url = urlInput.value.trim();
+            const storedPattern = loadPattern(currentVersion);
+            const patternExists =
+              hasPattern() ||
+              (Array.isArray(storedPattern) &&
+                storedPattern.some((cell) => cell !== 0));
 
-          // SAFE-05: Show warning when pattern exists and version changes
-          if (hasPattern() && newVersion !== currentVersion) {
-            versionWarning.style.display = "block";
-          } else {
-            versionWarning.style.display = "none";
-          }
+            // SAFE-05: Show warning when pattern exists and version changes
+            if (versionWarning) {
+              if (patternExists && newVersion !== currentVersion) {
+                versionWarning.style.display = "block";
+              } else {
+                versionWarning.style.display = "none";
+              }
+            }
 
-          saveVersion(newVersion);
-          if (newVersion !== currentVersion) {
-            resetRotation("version change");
-            updateRotationIndicator();
-          }
+            saveVersion(newVersion);
+            if (newVersion !== currentVersion) {
+              resetRotation("version change");
+              updateRotationIndicator();
+            }
 
-          // SAFE-02/03: If pattern exists, don't auto-generate (user must click Generate)
-          if (hasPattern()) {
-            return;
-          }
+            // SAFE-02/03: If pattern exists, don't auto-generate (user must click Generate)
+            if (hasPattern()) {
+              return;
+            }
 
-          if (!isValidURL(url) || generateBtn.disabled) return;
+            if (!isValidURL(url) || generateBtn.disabled) return;
 
-          generateQR();
-        });
+            generateQR();
+          });
+        }
 
         if (rotateBtn) {
           rotateBtn.addEventListener("click", function () {
