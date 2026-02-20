@@ -18106,6 +18106,95 @@ self.onmessage = function(e) {
         fileInput.click();
       }
 
+      function resetSettingsWithConfirm() {
+        if (searchState === "running") return;
+        const confirmed = confirm(
+          "Reset settings and clear stored pattern?",
+        );
+        if (!confirmed) return;
+
+        try {
+          localStorage.removeItem(STORAGE_KEYS.URL);
+          localStorage.removeItem(STORAGE_KEYS.VERSION);
+          localStorage.removeItem(STORAGE_KEYS.ROTATION);
+          localStorage.removeItem(STORAGE_KEYS.RANDOM_ROTATION);
+          localStorage.removeItem(STORAGE_KEYS.COLOR);
+          localStorage.removeItem(STORAGE_KEYS.PATTERN);
+        } catch (err) {
+          console.warn("Failed to clear localStorage settings:", err);
+        }
+
+        const urlInput = document.getElementById("url-input");
+        const versionSelect = document.getElementById("version-select");
+        const generateBtn = document.getElementById("generate-btn");
+        const rotateBtn = document.getElementById("rotate-btn");
+        const randomRotationToggle = document.getElementById(
+          "random-rotation-toggle",
+        );
+
+        if (urlInput) {
+          urlInput.value = "";
+        }
+        updateValidationUI("");
+
+        if (versionSelect) {
+          versionSelect.innerHTML =
+            '<option value="" disabled selected>Enter URL first</option>';
+          versionSelect.disabled = true;
+        }
+        if (generateBtn) {
+          generateBtn.disabled = true;
+        }
+        if (rotateBtn) {
+          rotateBtn.disabled = true;
+        }
+        if (randomRotationToggle) {
+          randomRotationToggle.disabled = true;
+          randomRotationToggle.checked = false;
+        }
+
+        previousValidURL = "";
+        currentURL = "";
+        currentVersion = MIN_QR_VERSION;
+
+        setQrRotation(0, { save: false, rerender: false, resetResults: false });
+        setRandomRotation(false, { save: false, rerender: false });
+        updateRotationIndicator();
+        setSelectedColor("unset", false);
+
+        initPaintCanvas(MIN_QR_VERSION);
+        savePattern(MIN_QR_VERSION, paintGrid.cells);
+        if (qrModel) {
+          runCorruptionPipeline();
+        }
+        checkPaintState();
+        resetOptimizationResults();
+
+        const optimizationSection = document.getElementById(
+          "optimization-section",
+        );
+        if (optimizationSection) {
+          optimizationSection.style.display = "none";
+        }
+        const searchProgress = document.getElementById("search-progress");
+        if (searchProgress) {
+          searchProgress.style.display = "none";
+        }
+        const searchSummary = document.getElementById("search-summary");
+        if (searchSummary) {
+          searchSummary.style.display = "none";
+        }
+        const topResults = document.getElementById("top-results");
+        if (topResults) {
+          topResults.style.display = "none";
+          topResults.innerHTML = "";
+        }
+        const decodeResult = document.getElementById("decode-result");
+        if (decodeResult) {
+          decodeResult.style.display = "none";
+        }
+      }
+
       /**
        * Initialize application when DOM is ready
        */
@@ -18119,6 +18208,7 @@ self.onmessage = function(e) {
         const settingsButton = document.getElementById("settings-button");
         const settingsSave = document.getElementById("settings-save");
         const settingsLoad = document.getElementById("settings-load");
+        const settingsReset = document.getElementById("settings-reset");
         const randomRotationToggle = document.getElementById(
           "random-rotation-toggle",
         );
@@ -18141,6 +18231,13 @@ self.onmessage = function(e) {
           settingsLoad.addEventListener("click", function () {
             closeSettingsMenu();
             importSettingsFromJson();
+          });
+        }
+
+        if (settingsReset) {
+          settingsReset.addEventListener("click", function () {
+            closeSettingsMenu();
+            resetSettingsWithConfirm();
           });
         }
 
