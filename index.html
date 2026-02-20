@@ -43,11 +43,92 @@
         padding: 30px;
       }
 
-      header {
+      .app-header {
+        position: relative;
         text-align: center;
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 1px solid #e0e0e0;
+      }
+
+      .app-header h1 {
+        margin: 0;
+      }
+
+      .settings-menu {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .settings-button {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        background: #fff;
+        color: #555;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          background-color 0.2s ease,
+          transform 0.1s ease;
+      }
+
+      .settings-button:hover {
+        border-color: #3b82f6;
+        background: #f8fafc;
+      }
+
+      .settings-button:active {
+        transform: translateY(1px);
+      }
+
+      .settings-button:focus-visible {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      .settings-dropdown {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 8px);
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+        min-width: 210px;
+        padding: 6px;
+        display: none;
+        z-index: 20;
+      }
+
+      .settings-menu.open .settings-dropdown {
+        display: block;
+      }
+
+      .settings-item {
+        width: 100%;
+        padding: 8px 12px;
+        background: transparent;
+        border: none;
+        text-align: left;
+        font-size: 0.9rem;
+        color: #333;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .settings-item:hover,
+      .settings-item:focus-visible {
+        background: #f1f5f9;
+        outline: none;
       }
 
       h1 {
@@ -897,8 +978,51 @@
   </head>
   <body>
     <div class="container">
-      <header>
+      <header class="app-header">
         <h1>Artistic QR Code Generator</h1>
+        <div class="settings-menu" id="settings-menu">
+          <button
+            type="button"
+            class="settings-button"
+            id="settings-button"
+            aria-label="Settings menu"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4 5a2 2 0 0 1 2-2h10l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>
+              <path d="M14 3v4h4"></path>
+              <path d="M8 13h8"></path>
+              <path d="M8 17h8"></path>
+            </svg>
+          </button>
+          <div
+            class="settings-dropdown"
+            id="settings-dropdown"
+            role="menu"
+            aria-hidden="true"
+          >
+            <button type="button" class="settings-item" id="settings-save">
+              Save settings to file
+            </button>
+            <button type="button" class="settings-item" id="settings-load">
+              Load settings from file
+            </button>
+            <button type="button" class="settings-item" id="settings-reset">
+              Reset settings
+            </button>
+          </div>
+        </div>
       </header>
 
       <main>
@@ -17793,6 +17917,47 @@ self.onmessage = function(e) {
         setQrRotation(0);
       }
 
+      function closeSettingsMenu({ focusButton = false } = {}) {
+        const menu = document.getElementById("settings-menu");
+        const button = document.getElementById("settings-button");
+        const dropdown = document.getElementById("settings-dropdown");
+        if (menu) {
+          menu.classList.remove("open");
+        }
+        if (button) {
+          button.setAttribute("aria-expanded", "false");
+        }
+        if (dropdown) {
+          dropdown.setAttribute("aria-hidden", "true");
+        }
+        if (focusButton && button) {
+          button.focus();
+        }
+      }
+
+      function toggleSettingsMenu() {
+        const menu = document.getElementById("settings-menu");
+        const button = document.getElementById("settings-button");
+        const dropdown = document.getElementById("settings-dropdown");
+        if (!menu || !button || !dropdown) return;
+        const isOpen = menu.classList.contains("open");
+        if (isOpen) {
+          closeSettingsMenu();
+        } else {
+          menu.classList.add("open");
+          button.setAttribute("aria-expanded", "true");
+          dropdown.setAttribute("aria-hidden", "false");
+        }
+      }
+
+      function handleOutsideSettingsClick(event) {
+        const menu = document.getElementById("settings-menu");
+        if (!menu) return;
+        if (!menu.contains(event.target)) {
+          closeSettingsMenu();
+        }
+      }
+
       /**
        * Initialize application when DOM is ready
        */
@@ -17803,9 +17968,24 @@ self.onmessage = function(e) {
         const clearBtn = document.getElementById("clear-btn");
         const optimizeBtn = document.getElementById("optimize-btn");
         const rotateBtn = document.getElementById("rotate-btn");
+        const settingsButton = document.getElementById("settings-button");
         const randomRotationToggle = document.getElementById(
           "random-rotation-toggle",
         );
+
+        if (settingsButton) {
+          settingsButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            toggleSettingsMenu();
+          });
+        }
+
+        document.addEventListener("click", handleOutsideSettingsClick);
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+            closeSettingsMenu({ focusButton: true });
+          }
+        });
 
         // Initialize legend handlers for color selection
         initLegendHandlers();
