@@ -10,6 +10,7 @@
       "GSD_VERSION": "latest"
     }
   },
+  "postStartCommand": "npm install --no-package-lock --no-optional --no-audit --no-fund --loglevel=error",
   "runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW"],
   "customizations": {
     "vscode": {
@@ -47,6 +48,8 @@
     "source=opencode-config-${devcontainerId},target=/home/node/.opencode,type=volume"
   ],
   "containerEnv": {
+    "LANG": "C.utf8",
+    "LC_ALL": "C.utf8",
     "NODE_OPTIONS": "--max-old-space-size=4096",
     "OPENCODE_CONFIG_DIR": "/home/node/.opencode",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
