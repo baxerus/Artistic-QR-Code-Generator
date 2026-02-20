@@ -31,6 +31,7 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 **Goal:** Define the next milestone scope and requirements.
 
 **Target features:**
+
 - TBD
 
 <details>
@@ -41,6 +42,7 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 **Goal:** Improve pattern workflows with rotation-aware QR display and pattern repositioning tools.
 
 **Target features:**
+
 - Decode test in Paint Pattern shows corrections + pixel errors metrics
 - Move Pattern tool to reposition full painted pattern
 - QR rotation controls (manual 90deg + optional random rotation)
@@ -139,24 +141,24 @@ The painted pattern is sacred and never changes. The tool finds URL variants tha
 
 ## Key Decisions
 
-| Decision                               | Rationale                               | Outcome       |
-| -------------------------------------- | --------------------------------------- | ------------- |
-| Hash fragments for URL variants        | Clean, doesn't affect destination URL   | ✓ Good        |
-| Three-state pixels (white/black/unset) | Pattern locked, others free for QR      | ✓ Good        |
-| Top 5 results instead of single best   | Aesthetic choice matters                | ✓ Good        |
-| Error correction level H               | Maximum error tolerance for art         | ✓ Good        |
-| Everything in single HTML file         | Simplicity, portability                 | ✓ Good        |
-| RS corrections as primary metric       | True scan reliability, jsQR modified    | ✓ Good — v1.4 |
-| Web Workers via Blob URL               | Non-blocking search in single-file      | ✓ Good        |
-| MAX_QR_VERSION as constant             | Easy to expand version range            | ✓ Good — v1.1 |
-| Legend-based painting                  | Natural UI for drag painting            | ✓ Good — v1.1 |
-| Right-click opposite color             | Fast workflow without legend switching  | ✓ Good — v1.1 |
-| Multi-worker optimization              | 2-8x throughput improvement             | ✓ Good — v1.1 |
-| Auto-stop on 5 perfect results         | Saves time when ideal found             | ✓ Good — v1.1 |
-| Pattern-aware version changes          | Prevents accidental pattern loss        | ✓ Good — v1.1 |
-| Hash fragment URL rejection            | Prevents silent failures                | ✓ Good — v1.1 |
-| Rotate preview only; painted pixels fixed | Preserve artwork orientation while adjusting QR view | ✓ Good — v1.6 |
-| Rotation-mapped modules for results/exports | Keep previews/exports aligned to rotation | ✓ Good — v1.6 |
+| Decision                                    | Rationale                                            | Outcome       |
+| ------------------------------------------- | ---------------------------------------------------- | ------------- |
+| Hash fragments for URL variants             | Clean, doesn't affect destination URL                | ✓ Good        |
+| Three-state pixels (white/black/unset)      | Pattern locked, others free for QR                   | ✓ Good        |
+| Top 5 results instead of single best        | Aesthetic choice matters                             | ✓ Good        |
+| Error correction level H                    | Maximum error tolerance for art                      | ✓ Good        |
+| Everything in single HTML file              | Simplicity, portability                              | ✓ Good        |
+| RS corrections as primary metric            | True scan reliability, jsQR modified                 | ✓ Good — v1.4 |
+| Web Workers via Blob URL                    | Non-blocking search in single-file                   | ✓ Good        |
+| MAX_QR_VERSION as constant                  | Easy to expand version range                         | ✓ Good — v1.1 |
+| Legend-based painting                       | Natural UI for drag painting                         | ✓ Good — v1.1 |
+| Right-click opposite color                  | Fast workflow without legend switching               | ✓ Good — v1.1 |
+| Multi-worker optimization                   | 2-8x throughput improvement                          | ✓ Good — v1.1 |
+| Auto-stop on 5 perfect results              | Saves time when ideal found                          | ✓ Good — v1.1 |
+| Pattern-aware version changes               | Prevents accidental pattern loss                     | ✓ Good — v1.1 |
+| Hash fragment URL rejection                 | Prevents silent failures                             | ✓ Good — v1.1 |
+| Rotate preview only; painted pixels fixed   | Preserve artwork orientation while adjusting QR view | ✓ Good — v1.6 |
+| Rotation-mapped modules for results/exports | Keep previews/exports aligned to rotation            | ✓ Good — v1.6 |
 
 ## Future Considerations
 
@@ -164,12 +166,7 @@ Based on v1.1 development, potential future work:
 
 **UX Enhancements:**
 
-- Save/load patterns to/from file (JSON export)
 - Mobile/touch support
-
-**Output Enhancements:**
-
-- (SVG export moved to v1.5)
 
 ---
 
