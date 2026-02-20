@@ -17958,6 +17958,154 @@ self.onmessage = function(e) {
         }
       }
 
+      function exportSettingsToJson() {
+        const snapshot = {
+          url: currentURL || "",
+          version: currentVersion || MIN_QR_VERSION,
+          rotation: qrRotation,
+          randomRotation: Boolean(randomRotationEnabled),
+          selectedColor: selectedColor,
+          pattern: paintGrid
+            ? {
+                version: currentVersion || MIN_QR_VERSION,
+                size: paintGrid.size,
+                cells: Array.from(paintGrid.cells),
+              }
+            : null,
+        };
+
+        const json = JSON.stringify(snapshot, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "qr-art-settings.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function applyUrlSetting(urlValue) {
+        if (typeof urlValue !== "string") return;
+        const trimmed = urlValue.trim();
+        if (!trimmed) return;
+        const urlInput = document.getElementById("url-input");
+        if (!urlInput) return;
+        urlInput.value = trimmed;
+        const accepted = updateValidationUI(trimmed);
+        if (accepted) {
+          saveURL(trimmed);
+        }
+      }
+
+      function applyVersionSetting(versionValue) {
+        if (versionValue === undefined || versionValue === null) return;
+        const version = parseInt(versionValue, 10);
+        if (Number.isNaN(version)) return;
+        if (version < MIN_QR_VERSION || version > MAX_QR_VERSION) return;
+        const dropdown = document.getElementById("version-select");
+        if (!dropdown) return;
+        const option = dropdown.querySelector(`option[value="${version}"]`);
+        if (!option) return;
+        dropdown.value = version;
+        saveVersion(version);
+        if (currentVersion && version !== currentVersion) {
+          resetRotation("settings import version change");
+          updateRotationIndicator();
+        }
+      }
+
+      function ensureQrGeneratedForImport() {
+        const urlInput = document.getElementById("url-input");
+        const versionSelect = document.getElementById("version-select");
+        if (!urlInput || !versionSelect) return false;
+        const url = urlInput.value.trim();
+        if (!isValidURL(url)) return false;
+        if (!versionSelect.value) return false;
+        generateQR();
+        return true;
+      }
+
+      function applyRotationSetting(rotationValue, randomRotationValue) {
+        if (rotationValue !== undefined) {
+          setQrRotation(rotationValue, {
+            save: true,
+            rerender: false,
+            resetResults: false,
+          });
+        }
+        if (randomRotationValue !== undefined) {
+          setRandomRotation(Boolean(randomRotationValue), {
+            save: true,
+            rerender: false,
+          });
+          const toggle = document.getElementById("random-rotation-toggle");
+          if (toggle) {
+            toggle.checked = Boolean(randomRotationValue);
+          }
+        }
+      }
+
+      function applySelectedColorSetting(colorValue) {
+        if (!colorValue) return;
+        setSelectedColor(colorValue, true);
+      }
+
+      function applyPatternSetting(patternValue, expectedVersion) {
+        if (!patternValue || typeof patternValue !== "object") return;
+        if (!paintGrid) return;
+        const size = parseInt(patternValue.size, 10);
+        const version = parseInt(patternValue.version, 10);
+        if (!Array.isArray(patternValue.cells)) return;
+        const expectedSize = getModuleSize(expectedVersion);
+        if (size !== expectedSize || version !== expectedVersion) return;
+        if (patternValue.cells.length !== expectedSize * expectedSize) return;
+        paintGrid.cells = Array.from(patternValue.cells);
+        savePattern(expectedVersion, paintGrid.cells);
+      }
+
+      function importSettingsFromJson() {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "application/json,.json";
+        fileInput.addEventListener("change", function () {
+          const file = fileInput.files && fileInput.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function () {
+            let parsed;
+            try {
+              parsed = JSON.parse(reader.result);
+            } catch (err) {
+              alert("Invalid settings file. Please select a valid JSON file.");
+              return;
+            }
+            if (!parsed || typeof parsed !== "object") {
+              alert("Invalid settings file. Please select a valid JSON file.");
+              return;
+            }
+
+            applyUrlSetting(parsed.url);
+            applyVersionSetting(parsed.version);
+            ensureQrGeneratedForImport();
+            applyRotationSetting(parsed.rotation, parsed.randomRotation);
+            applySelectedColorSetting(parsed.selectedColor);
+            if (paintGrid) {
+              applyPatternSetting(
+                parsed.pattern,
+                currentVersion || MIN_QR_VERSION,
+              );
+            }
+
+            runCorruptionPipeline();
+            resetOptimizationResults();
+          };
+          reader.readAsText(file);
+        });
+        fileInput.click();
+      }
+
       /**
        * Initialize application when DOM is ready
        */
@@ -17969,6 +18117,8 @@ self.onmessage = function(e) {
         const optimizeBtn = document.getElementById("optimize-btn");
         const rotateBtn = document.getElementById("rotate-btn");
         const settingsButton = document.getElementById("settings-button");
+        const settingsSave = document.getElementById("settings-save");
+        const settingsLoad = document.getElementById("settings-load");
         const randomRotationToggle = document.getElementById(
           "random-rotation-toggle",
         );
@@ -17977,6 +18127,20 @@ self.onmessage = function(e) {
           settingsButton.addEventListener("click", function (event) {
             event.stopPropagation();
             toggleSettingsMenu();
+          });
+        }
+
+        if (settingsSave) {
+          settingsSave.addEventListener("click", function () {
+            closeSettingsMenu();
+            exportSettingsToJson();
+          });
+        }
+
+        if (settingsLoad) {
+          settingsLoad.addEventListener("click", function () {
+            closeSettingsMenu();
+            importSettingsFromJson();
           });
         }
 
