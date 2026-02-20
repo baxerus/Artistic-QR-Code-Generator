@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 Phase: 19 of 19 (QR Rotation Controls)
 Plan: 3 of 3 in current phase
 Status: Complete
-Last activity: 2026-02-20 - Completed quick task 12: Implement settings save/load/reset menu
+Last activity: 2026-02-20 - Completed quick task 12: Implement settings save/load/reset menu with file-based JSON export/import
 
 Progress: █████████████████████████ 19/19 phases complete
 
@@ -74,7 +74,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 10 | Preserve painted pattern when changing QR version; keep centered and clip overflow | 2026-02-19 | 397f62d | [10-preserve-painted-pattern-when-changing-q](./quick/10-preserve-painted-pattern-when-changing-q/) |
 | 11 | Propose settings save/load/reset menu with file-based JSON export/import and confirm reset | 2026-02-20 | 15094f5 | [11-propose-settings-save-load-reset-menu-wi](./quick/11-propose-settings-save-load-reset-menu-wi/) |
-| 12 | Implement settings save/load/reset menu | 2026-02-20 | 4c58265 | [12-implement-settings-save-load-reset-menu-](./quick/12-implement-settings-save-load-reset-menu-/) |
+| 12 | Implement settings save/load/reset menu with file-based JSON export/import | 2026-02-20 | 4c58265 | [12-implement-settings-save-load-reset-menu-](./quick/12-implement-settings-save-load-reset-menu-/) |
 
 ## Session Continuity
 
