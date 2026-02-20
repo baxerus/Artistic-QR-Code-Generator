@@ -14943,18 +14943,6 @@
       }
 
       /**
-       * Load selected color from localStorage
-       */
-      function loadSelectedColor() {
-        try {
-          return localStorage.getItem(STORAGE_KEYS.COLOR) || "unset";
-        } catch (err) {
-          console.warn("Failed to load color from localStorage:", err);
-          return "unset";
-        }
-      }
-
-      /**
        * Load paint pattern from localStorage
        * Returns null if not found, corrupt, or version mismatch
        */
