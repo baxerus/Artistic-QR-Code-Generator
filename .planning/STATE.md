@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 Phase: 19 of 19 (QR Rotation Controls)
 Plan: 3 of 3 in current phase
 Status: Complete
-Last activity: 2026-02-20 - Completed quick task 12: Implement settings save/load/reset menu with file-based JSON export/import
+Last activity: 2026-02-20 - Follow-up fixes for settings menu export naming, warnings, and reset visibility
 
 Progress: █████████████████████████ 19/19 phases complete
 
@@ -79,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Quick task 12 complete (settings save/load/reset menu)
+Stopped at: Follow-up fixes committed (settings export naming, warning visibility)
 Resume file: None
