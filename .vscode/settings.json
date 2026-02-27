@@ -16,6 +16,7 @@
     "glog",
     "greyscale",
     "horz",
+    "inlines",
     "JSQR",
     "paintable",
     "qrcodejs",

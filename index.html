@@ -115,6 +115,7 @@
       }
 
       .settings-item {
+        display: block;
         width: 100%;
         padding: 8px 12px;
         background: transparent;
@@ -125,6 +126,7 @@
         border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.2s ease;
+        text-decoration: none;
       }
 
       .settings-item:hover,
@@ -1013,15 +1015,39 @@
             role="menu"
             aria-hidden="true"
           >
-            <button type="button" class="settings-item" id="settings-save">
+            <button
+              type="button"
+              class="settings-item"
+              role="menuitem"
+              id="settings-save"
+            >
               Save settings to file
             </button>
-            <button type="button" class="settings-item" id="settings-load">
+            <button
+              type="button"
+              class="settings-item"
+              role="menuitem"
+              id="settings-load"
+            >
               Load settings from file
             </button>
-            <button type="button" class="settings-item" id="settings-reset">
+            <button
+              type="button"
+              class="settings-item"
+              role="menuitem"
+              id="settings-reset"
+            >
               Reset settings
             </button>
+            <a
+              href="https://github.com/baxerus/Artistic-QR-Code-Generator"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="settings-item"
+              role="menuitem"
+            >
+              View on GitHub
+            </a>
           </div>
         </div>
       </header>
