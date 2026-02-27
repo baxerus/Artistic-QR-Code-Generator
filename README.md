@@ -32,3 +32,11 @@ No server, build step, or command-line installation is required.
 2. **Paint your design:** Lock specific modules as black or white to draw your artwork.
 3. **Generate:** The app generates and evaluates variants, previewing the top 5 results live based on RS metrics and pixel diffs.
 4. **Export:** Inspect your favorite result and download it instantly.
+
+## Disclaimer
+
+This project was mainly created to try out a developing workflow using AI (at first Claude Code, later OpenCode with all sorts of models) and to gather learnings from it. I made learnings and I would start over completly different now 😉. So the project was successful from this side.  
+But IMHO it was also successful as a tool itself. I built something that I wanted to try out for a long time already. And it is working. I actually spend way to much time to make it even nicely usable. That's why I put it on GitHub. The use case is IMHO very niche, but if you need it, it is there.  
+So that said, there are tradeoffs with such a test ballon. E.g. when against better knowledge, this thing is only very briefly tested. Neither bay hand or automatic. I did not test multiple browsers on multiple OS. There are no automatic test or anything (BTW one of the things I really want to do different with my next AI test project, fingers crossed 🤞, that I will really do 😉). I assume using this website **on a mobile/touch** device will be **next to impossible**. But hey, the use case is so niche, people who need _this_ will be sitting in front of a (probably fancy) Mac with a big screen anyway, isn't it...  
+So long story short, use this tool and make some nice QR codes. But be aware, that maybe not all edge cases work perfectly 👍  
+(still if you really use it and find something, create an issue! I'm curious what to come)
